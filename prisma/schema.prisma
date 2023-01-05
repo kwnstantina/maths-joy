@@ -16,5 +16,16 @@ model User {
   password    String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  role  Role     @default(USER)
+  profile Profile
+}
 
+enum Role {
+  USER
+  ADMIN
+}
+
+type Profile {
+  firstName String
+  lastName String
 }

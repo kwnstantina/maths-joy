@@ -8,7 +8,6 @@ const Navbar = () => {
   const [nav, setNav] = useState(false);
   const handleClick = () => setNav(!nav);
 
-  const handleClose = () => setNav(!nav);
   const activeStyle = {
     textDecoration: "underline",
   };
@@ -74,7 +73,7 @@ const Navbar = () => {
             to="exercises"
             className="hover:bg-blue-400 text-white block px-3 py-2 rounded-md text-base font-medium"
             style={({ isActive }) => (isActive ? activeStyle : undefined)}
-            onClick={handleClose}
+            onClick={handleClick}
           >
             Ασκήσεις
           </NavLink>
@@ -84,7 +83,7 @@ const Navbar = () => {
             to="tutorials"
             className="hover:bg-blue-400 text-white block px-3 py-2 rounded-md text-base font-medium"
             style={({ isActive }) => (isActive ? activeStyle : undefined)}
-            onClick={handleClose}
+            onClick={handleClick}
           >
             Διδακτικό υλικό
           </NavLink>
@@ -94,7 +93,7 @@ const Navbar = () => {
             to="books"
             className="hover:bg-blue-300 text-white block px-3 py-2 rounded-md text-base font-medium"
             style={({ isActive }) => (isActive ? activeStyle : undefined)}
-            onClick={handleClose}
+            onClick={handleClick}
           >
             Βιβλία
           </NavLink>
@@ -104,7 +103,7 @@ const Navbar = () => {
             to="aboutUs"
             className="hover:bg-blue-400 text-white block px-3 py-2 rounded-md text-base font-medium"
             style={({ isActive }) => (isActive ? activeStyle : undefined)}
-            onClick={handleClose}
+            onClick={handleClick}
           >
             Σχετικά με εμάς
           </NavLink>

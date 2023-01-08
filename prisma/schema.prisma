@@ -29,3 +29,15 @@ type Profile {
   firstName String
   lastName String
 }
+
+
+model Exersice {
+  id String   @id @default(auto()) @map("_id") @db.ObjectId
+  title String
+  category String
+  fileContentType String
+  fileName String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  tags String
+}

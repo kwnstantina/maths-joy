@@ -1,3 +1,12 @@
+import List from "components/lists/lists";
+
+const categories = [
+  { name: 'Ολοκληρώματα' },
+  { name: 'Παράγωγοι'},
+  { name: 'Μιγαδικά' },
+  { name: 'Γεωμετρία' },
+  { name: 'Τριγωνομετρία' },
+]
 const SearchInput=()=> {
   return (
     <form className="ml-10">
@@ -39,6 +48,7 @@ const SearchInput=()=> {
           Αναζήτηση
         </button>
       </div>
+      <List categories={categories} onCallbackFunction={(selected: any)=>console.log('ee',selected)}/>
     </form>
   );
 }

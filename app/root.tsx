@@ -50,10 +50,10 @@ function Document({ children }: any) {
 
 export function Layout({ children }: any) {
   return (
-    <>
+    <div className="h-screen min-h-screen flex flex-col justify-start">
       <NavList />
       {children}
       <Footer />
-    </>
+    </div>
   );
 }

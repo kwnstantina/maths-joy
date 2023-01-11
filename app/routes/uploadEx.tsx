@@ -1,21 +1,33 @@
 import React, { useCallback, useState } from "react";
 import { Form, useActionData,useSubmit } from "@remix-run/react";
-import { ActionFunction } from '@remix-run/node';
+import { ActionFunction, json } from '@remix-run/node';
 import { createExersice } from "~/utils/exersices.prisma";
 import Alerts from "components/alerts/alerts";
 import InternalFunctions from "services/internal/internalFuntions";
 import List from "components/lists/lists";
 import {TAGS} from '../../services/models/models';
-
+import {validateFile} from "~/utils/validators.server";
 export const action: ActionFunction = async ({ request }) => {
   const form = await request.formData();
   const title = form.get('title') as string;
   const category = form.get('category') as string;
-  const file=form.get('file') as File;
+  const file=form.get('file') as File | any;
   const tags=form.get('tags') as string;
   const fileContentType=form.get('fileContentType') as string;
-  // add validations for pdf
+  const errors = {
+      file:validateFile(file['_name']),  
+  };
+    if (Object.values(errors).some(Boolean))
+      return json(
+        {
+          errors,
+          fields: { file, },
+          form: action,
+        },
+        { status: 400 }
+      );
   return await createExersice({ title, category,file,fileContentType,tags});
+ 
 };
 
 export default function UploadExcercise(): JSX.Element {
@@ -78,7 +90,7 @@ export default function UploadExcercise(): JSX.Element {
               htmlFor="title"
               className="block text-sm font-medium text-gray-700"
             >
-              Title
+              Τίτλος
             </label>
             <div className="mt-1">
               <input
@@ -134,6 +146,7 @@ export default function UploadExcercise(): JSX.Element {
                 type="file"
                 name="file"
                 required
+                accept=".pdf"
                 onChange={(event) => fileUploadHandler(event)}
               />
               {actionData?.errors?.file && (

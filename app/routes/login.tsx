@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import { Form, Link, useActionData, useSearchParams } from "@remix-run/react";
 import {
   validateEmail,
-  validateName,
   validatePassword,
 } from "~/utils/validators.server";
 import {
@@ -11,13 +10,13 @@ import {
   LoaderFunction,
   redirect,
 } from "@remix-run/node";
-import { login, register, getUser } from "~/utils/auth.prisma";
+import { login } from "~/utils/auth.prisma";
 import Alerts from "components/alerts/alerts";
 
-export const loader: LoaderFunction = async ({ request }) => {
-  // If there's already a user in the session, redirect to the home page
-  return (await getUser(request)) ? redirect("/") : null;
-};
+// export const loader: LoaderFunction = async ({ request }) => {
+//   // If there's already a user in the session, redirect to the home page
+//   return (await getUser(request)) ? redirect("/") : null;
+// };
 
 export const action: ActionFunction = async ({ request }) => {
   const form = await request.formData();

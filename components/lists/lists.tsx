@@ -11,7 +11,7 @@ type Props={
 
 const List=(props:Props):JSX.Element=> {
   const {categories,onCallbackFunction,isMultiple=false,name}=props;
-  const [selected, setSelected] = useState(isMultiple?[categories[0]]:categories[0]);
+  const [selected, setSelected] = useState(isMultiple?[categories[1]]:categories[1]);
   useEffect(()=>{
     onCallbackFunction(selected)
   },[onCallbackFunction,selected])

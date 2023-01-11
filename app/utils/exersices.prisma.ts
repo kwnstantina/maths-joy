@@ -1,6 +1,7 @@
 import { prisma } from "./prisma.server";
+import { UploadExersiceForm } from "./types.server";
 
-export const createExersice = async (exer: any) => {
+export const createExersice = async (exer: UploadExersiceForm) => {
   const newExercise = await prisma.exersice.create({
     data: {
       title: exer.title,

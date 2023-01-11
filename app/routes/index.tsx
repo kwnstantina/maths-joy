@@ -2,7 +2,7 @@ import plot from "../assets/plot.png";
 
 export default function Index() {
   return (
-    <div className="flex justify-center">
+    <div className="flex justify-center" style={{height:'inherit'}}>
       <img
         src={plot}
         alt="gregsPlot"

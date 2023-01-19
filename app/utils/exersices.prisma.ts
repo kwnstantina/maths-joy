@@ -13,3 +13,9 @@ export const createExersice = async (exer: UploadExersiceForm) => {
   });
   return { id: newExercise.id };
 };
+
+
+export const getAllExcersices = async()=>{
+const exersices =await prisma.exersice.findMany();
+  return exersices;
+}

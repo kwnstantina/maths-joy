@@ -1,4 +1,4 @@
-import { MailIcon, DeviceMobileIcon } from "@heroicons/react/outline";
+import { MailIcon } from "@heroicons/react/outline";
 
 const SocialIcons = () => {
   return (

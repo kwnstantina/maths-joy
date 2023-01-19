@@ -8,7 +8,7 @@ import {
   ActionFunction,
   json,
   LoaderFunction,
-  redirect,
+
 } from "@remix-run/node";
 import { login } from "~/utils/auth.prisma";
 import Alerts from "components/alerts/alerts";

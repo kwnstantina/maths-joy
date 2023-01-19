@@ -1,18 +1,17 @@
 import { Menu, Transition } from '@headlessui/react';
 import { Fragment } from 'react';
 import { ChevronDownIcon,ViewListIcon,UserIcon,LoginIcon,LogoutIcon,InboxIcon } from '@heroicons/react/solid';
-import { useNavigate } from "react-router-dom";
 import { Link } from "@remix-run/react";
+
 const  UserSettings=()=> {
-  const navigate = useNavigate();
   return (
-    <div className=" w-56 text-right">
-      <Menu as="div" className="relative inline-block text-left">
+    <div>
+      <Menu as="div" className="ml-2 relative inline-block text-left">
         <div>
-          <Menu.Button className="inline-flex w-full justify-center rounded-md bg-black bg-opacity-20 px-4 py-2 text-sm font-medium text-white hover:bg-opacity-30 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75">
+          <Menu.Button className="inline-flex justify-center rounded-md bg-orange-600  px-4 py-2 text-sm font-medium text-white hover:bg-opacity-30 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75">
             <ViewListIcon className="h-5 w-5" />
             <ChevronDownIcon
-              className="ml-2 -mr-1 h-5 w-5 text-violet-200 hover:text-violet-100"
+              className="ml-2 -mr-1 h-5 w-5 text-orange-200 hover:text-orange-300"
               aria-hidden="true"
             />
           </Menu.Button>
@@ -32,7 +31,7 @@ const  UserSettings=()=> {
                 {({ active }) => (
                   <button
                     className={`${
-                      active ? 'bg-violet-500 text-white' : 'text-gray-900'
+                      active ? 'bg-orange-500 text-white' : 'text-gray-900'
                     } group flex w-full items-center rounded-md px-2 py-2 text-sm`}
                   >
                     {active ? (
@@ -54,7 +53,7 @@ const  UserSettings=()=> {
                 {({ active }) => (
                   <button
                     className={`${
-                      active ? 'bg-violet-500 text-white' : 'text-gray-900'
+                      active ? 'bg-orange-500 text-white' : 'text-gray-900'
                     } group flex w-full items-center rounded-md px-2 py-2 text-sm`}
                   >
                     {active ? (
@@ -77,19 +76,17 @@ const  UserSettings=()=> {
               <Menu.Item>
                 {({ active }) => (
                   <Link
-                    className={`${active ? 'bg-violet-500 text-white' : 'text-gray-900'} group flex w-full items-center rounded-md px-2 py-2 text-sm`} 
+                    className={`${active ? 'bg-orange-500 text-white' : 'text-gray-900'} group flex w-full items-center rounded-md px-2 py-2 text-sm`} 
                     to={'login'}                  >
                     {active ? (
                       <LoginIcon
                         className="mr-2 h-5 w-5"
                         aria-hidden="true"
-                        //onClick={()=> navigate('/login', { replace: false })}
                       />
                     ) : (
                       <LoginIcon
                         className="mr-2 h-5 w-5"
-                        aria-hidden="true"
-                        //onClick={()=> navigate('/login', { replace: false })}
+                        aria-hidden="true"                 
                       />
                     )}
                     Log in
@@ -100,7 +97,7 @@ const  UserSettings=()=> {
                 {({ active }) => (
                   <button
                     className={`${
-                      active ? 'bg-violet-500 text-white' : 'text-gray-900'
+                      active ? 'bg-orange-500 text-white' : 'text-gray-900'
                     } group flex w-full items-center rounded-md px-2 py-2 text-sm`}
                   >
                     {active ? (

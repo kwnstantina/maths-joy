@@ -12,7 +12,13 @@ import NavList from "components/navs/navList";
 import styles from "./styles/app.css";
 
 export function links() {
-  return [{ rel: "stylesheet", href: styles }];
+  return [{ rel: "stylesheet", href: styles },
+  // {
+  //   rel:'',
+  //   href:''
+  // }
+
+];
 }
 
 export const meta: MetaFunction = () => ({

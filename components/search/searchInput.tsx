@@ -52,7 +52,9 @@ const SearchInput = () => {
   return (
     <>
       <div className="relative w-2/5 mt-5 ml-16">
-        <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+        <div 
+        className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none"
+        >
           <svg
             aria-hidden="true"
             className="w-5 h-5 text-gray-500 dark:text-gray-400"
@@ -78,16 +80,19 @@ const SearchInput = () => {
         />
         <button
           type="submit"
-          className="text-white absolute right-2.5 bottom-2.5 bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+          className="text-white absolute right-2.5 bottom-2.5 bg-orange-600 hover:bg-orange-800 focus:ring-4 focus:outline-none  font-medium rounded-lg text-sm px-4 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
         >
           Αναζήτηση
         </button>
       </div>
 
-      <div className="flex items-center justify-start mt-4 pl-16 gap-96">
+      <div 
+      className="px-2 flex justify-start items-center w-full  items-center md:gap-96  md:mt-4 md:pl-16  "
+     // className="flex items-center justify-start mt-4 pl-16 gap-96"
+      >
         <p className="font-medium"> Φίλτρα</p>
 
-        <button className="ml-9 px pr-11 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-800 text-sm font-medium rounded-md">
+        <button className="ml-9 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-800 text-sm font-medium rounded-md">
           Reset Filter
         </button>
       </div>

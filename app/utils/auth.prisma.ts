@@ -11,7 +11,7 @@ if (!sessionSecret) {
 
 const storage = createCookieSessionStorage({
   cookie: {
-    name: "kudos-session",
+    name: "gregMaths",
     secure: process.env.NODE_ENV === "production",
     secrets: [sessionSecret],
     sameSite: "lax",
@@ -98,7 +98,7 @@ export async function getUser(request: Request) {
   try {
     const user = await prisma.user.findUnique({
       where: { id: userId },
-      select: { id: true, email: true, profile: true },
+      select: { id: true, email: true, profile: true, role: true },
     });
     return user;
   } catch {
@@ -111,6 +111,7 @@ export async function logout(request: Request) {
   return redirect("/login", {
     headers: {
       "Set-Cookie": await storage.destroySession(session),
+      "cookie":''
     },
   });
 }

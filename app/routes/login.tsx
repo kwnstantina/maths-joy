@@ -156,11 +156,7 @@ export default function LoginPage(): JSX.Element {
               Don't have an account?{" "}
               <Link
                 className="text-blue-500 underline"
-                to={{
-                  pathname: "/signup",
-                  search: searchParams.toString(),
-                }}
-              >
+                to="/signup">
                 Sign up
               </Link>
             </div>

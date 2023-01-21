@@ -11,12 +11,8 @@ import {
   LoaderFunction,
   redirect,
 } from "@remix-run/node";
-import { register, getUser } from "~/utils/auth.prisma";
+import { register } from "~/utils/auth.prisma";
 import Alerts from "components/alerts/alerts";
-export const loader: LoaderFunction = async ({ request }) => {
-  // If there's already a user in the session, redirect to the home page
-  return (await getUser(request)) ? redirect("/") : null;
-};
 
 export const action: ActionFunction = async ({ request }) => {
   const form = await request.formData();
@@ -73,7 +69,6 @@ export default function LoginPage(): JSX.Element {
       [evt.target.name]: evt.target.value,
     }));
   };
-  console.log("actionData", actionData);
   return (
     <div className="mt-5 flex min-h-full flex-col justify-center">
       <div className="mx-auto w-full max-w-md px-8">

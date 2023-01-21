@@ -1,12 +1,20 @@
 import React, { useCallback, useState } from "react";
-import { Form, useActionData,useSubmit } from "@remix-run/react";
-import { ActionFunction, json } from '@remix-run/node';
+import { Form, useActionData,useSubmit,useLoaderData } from "@remix-run/react";
+import { ActionFunction, json,LoaderFunction ,redirect} from '@remix-run/node';
 import { createExersice } from "~/utils/exersices.prisma";
 import Alerts from "components/alerts/alerts";
 import InternalFunctions from "services/internal/internalFuntions";
 import List from "components/lists/lists";
 import {TAGS} from '../../services/models/models';
 import {validateFile} from "~/utils/validators.server";
+import {getUser} from '~/utils/auth.prisma';
+
+export const loader: LoaderFunction = async ({ request }) => {
+  // If there's already a user in the session, redirect to the home page
+  let user = await getUser(request)
+  return user && user['role']==='ADMIN' ?json(user): redirect('/progress');
+};
+
 export const action: ActionFunction = async ({ request }) => {
   const form = await request.formData();
   const title = form.get('title') as string;
@@ -32,6 +40,7 @@ export const action: ActionFunction = async ({ request }) => {
 
 export default function UploadExcercise(): JSX.Element {
   const actionData = useActionData();
+  const user = useLoaderData<typeof loader>();
   const submit = useSubmit();
   const [uploadData, setUploadData] = useState({
     title: "",
@@ -82,8 +91,8 @@ export default function UploadExcercise(): JSX.Element {
   }
 
   return (
-    <div style={{ height: "inherit" }}>
-      <div className="mx-auto w-full max-w-md px-8 min-h-full mt-5">
+    <div>
+      <div className="mx-auto w-full max-w-md px-8 min-h-full mt-5 mb-4">
         <Form  onSubmit={handleSubmit} className="space-y-6">
           <div>
             <label
@@ -181,7 +190,7 @@ export default function UploadExcercise(): JSX.Element {
             value="upload"
             name="_uploadExercise"
             type="submit"
-            className="w-full rounded bg-blue-500  py-2 px-4 text-white hover:bg-blue-600 focus:bg-blue-400"
+            className="w-full mb-4 rounded bg-orange-500  py-2 px-4 text-white hover:bg-orange-600 focus:bg-orange-400"
           >
             Δημιούργια Ασκησης
           </button>

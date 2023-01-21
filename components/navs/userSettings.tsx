@@ -1,9 +1,9 @@
 import { Menu, Transition } from '@headlessui/react';
 import { Fragment } from 'react';
 import { ChevronDownIcon,ViewListIcon,UserIcon,LoginIcon,LogoutIcon,InboxIcon } from '@heroicons/react/solid';
-import { Link } from "@remix-run/react";
+import {Link} from "@remix-run/react";
 
-const  UserSettings=()=> {
+const  UserSettings=()=> {  
   return (
     <div>
       <Menu as="div" className="ml-2 relative inline-block text-left">
@@ -29,7 +29,8 @@ const  UserSettings=()=> {
             <div className="px-1 py-1 ">
               <Menu.Item>
                 {({ active }) => (
-                  <button
+                  <Link
+                  to='uploadEx'
                     className={`${
                       active ? 'bg-orange-500 text-white' : 'text-gray-900'
                     } group flex w-full items-center rounded-md px-2 py-2 text-sm`}
@@ -46,7 +47,7 @@ const  UserSettings=()=> {
                       />
                     )}
                     Χρήστης
-                  </button>
+                  </Link>
                 )}
               </Menu.Item>
               <Menu.Item>
@@ -95,24 +96,22 @@ const  UserSettings=()=> {
               </Menu.Item>
               <Menu.Item>
                 {({ active }) => (
-                  <button
-                    className={`${
-                      active ? 'bg-orange-500 text-white' : 'text-gray-900'
-                    } group flex w-full items-center rounded-md px-2 py-2 text-sm`}
-                  >
-                    {active ? (
-                      <LogoutIcon
-                        className="mr-2 h-5 w-5"
-                        aria-hidden="true"
-                      />
-                    ) : (
-                      <LogoutIcon
-                        className="mr-2 h-5 w-5"
-                        aria-hidden="true"
-                      />
-                    )}
-                    Log out
-                  </button>
+                  <Link
+                  className={`${active ? 'bg-orange-500 text-white' : 'text-gray-900'} group flex w-full items-center rounded-md px-2 py-2 text-sm`} 
+                  to={'logout'}                  >
+                  {active ? (
+                    <LogoutIcon
+                      className="mr-2 h-5 w-5"
+                      aria-hidden="true"
+                    />
+                  ) : (
+                    <LogoutIcon
+                      className="mr-2 h-5 w-5"
+                      aria-hidden="true"                 
+                    />
+                  )}
+                  Log out
+                </Link>
                 )}
               </Menu.Item>
             </div>

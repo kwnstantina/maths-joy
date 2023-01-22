@@ -13,7 +13,7 @@ export default function Index() {
           Ασκήσεις και θέματα μαθηματικών.
         </h1>
         <p className="max-w-sm mx-auto mb-10 text-sm md:max-w-xl md:text-lg">
-          Στο GregMaths  θα βρεις  ασκήσεις, θέματα, βιβλία και διδακτικό υλικό,
+          Στο GregKyrMaths  θα βρεις  ασκήσεις, θέματα, βιβλία και διδακτικό υλικό,
           για μαθητές όλων των εκπαιδευτικών βαθμίδων.
         </p>
         <a href="#" className="inline-flex items-center px-3 py-3 text-sm font-medium text-center text-white bg-orange-600 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">

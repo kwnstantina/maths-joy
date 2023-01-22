@@ -1,21 +1,11 @@
 import List from "components/lists/lists";
-import { TAGS } from "services/models/models";
+import {TAGS,Category,Type} from '../../services/models/models';
 
-const CATEGORIES = [
-  { name: "Κατηγορίες" },
-  { name: "Ολοκληρώματα" },
-  { name: "Παράγωγοι" },
-  { name: "Μιγαδικά" },
-  { name: "Γεωμετρία" },
-  { name: "Τριγωνομετρία" },
-];
 const SearchInput = () => {
   return (
     <>
       <div className="relative w-2/5 mt-5 ml-16">
-        <div 
-        className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none"
-        >
+        <div  className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none" >
           <svg
             aria-hidden="true"
             className="w-5 h-5 text-gray-500 dark:text-gray-400"
@@ -41,7 +31,7 @@ const SearchInput = () => {
         />
         <button
           type="submit"
-          className="text-white absolute right-2.5 bottom-2.5 bg-orange-600 hover:bg-orange-800 focus:ring-4 focus:outline-none  font-medium rounded-lg text-sm px-4 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+          className="block md:hidden lg:block text-white absolute right-2.5 bottom-2.5 bg-orange-600 hover:bg-orange-800 focus:ring-4 focus:outline-none  font-medium rounded-lg text-sm px-4 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
         >
           Αναζήτηση
         </button>
@@ -57,14 +47,28 @@ const SearchInput = () => {
 
       <div>
         <div className="flex items-center justify-start mt-4 pl-16 gap-4">
+          <span> 
+            <strong>Κατηγορία</strong>
           <List
-            categories={CATEGORIES}
+            categories={Category}
             onCallbackFunction={(selected: any) => console.log("hello", selected)}
           />
+          </span>
+          <span>
+            <strong>Τάξη</strong>
           <List
             categories={TAGS}
             onCallbackFunction={(selected: any) => console.log("hello again", selected)}
           />
+          </span>
+          <span>
+            <strong>Είδος ασκήσεων</strong>
+          <List
+            categories={Type}
+            onCallbackFunction={(selected: any) => console.log("hello again", selected)}
+          />
+          </span>
+          
         </div>
       </div>
     </>

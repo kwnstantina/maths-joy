@@ -1,11 +1,11 @@
 import React, { useCallback, useState } from "react";
-import { Form, useActionData,useSubmit,useLoaderData } from "@remix-run/react";
+import { Form, useActionData,useSubmit,useNavigate} from "@remix-run/react";
 import { ActionFunction, json,LoaderFunction ,redirect} from '@remix-run/node';
 import { createExersice } from "~/utils/exersices.prisma";
 import Alerts from "components/alerts/alerts";
 import InternalFunctions from "services/internal/internalFuntions";
 import List from "components/lists/lists";
-import {TAGS} from '../../services/models/models';
+import {TAGS,Category,Type} from '../../services/models/models';
 import {validateFile} from "~/utils/validators.server";
 import {getUser} from '~/utils/auth.prisma';
 
@@ -14,6 +14,19 @@ export const loader: LoaderFunction = async ({ request }) => {
   let user = await getUser(request)
   return user && user['role']==='ADMIN' ?json(user): redirect('/progress');
 };
+export function ErrorBoundary({ error }:any) {
+  const navigate = useNavigate();
+  
+  return (
+    <div className="w-3/4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative h-screen mb-40" role="alert">
+    <strong className="font-bold">Σφάλμα,</strong>
+    <span className="block sm:inline">είτε το αρχείο ήταν πολύ μεγάλο, είτε υπάρχει πρόβλημα σύνδεσης. Παρακαλώ ξαναπροσπαθήστε.</span>
+    <span className="absolute top-0 bottom-0 right-0 px-4 py-3">
+      <svg className="fill-current h-6 w-6 text-red-500" onClick={()=>navigate(-1)} role="button" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><title>x</title><path d="M14.348 14.849a1.2 1.2 0 0 1-1.697 0L10 11.819l-2.651 3.029a1.2 1.2 0 1 1-1.697-1.697l2.758-3.15-2.759-3.152a1.2 1.2 0 1 1 1.697-1.697L10 8.183l2.651-3.031a1.2 1.2 0 1 1 1.697 1.697l-2.758 3.152 2.758 3.15a1.2 1.2 0 0 1 0 1.698z"/></svg>
+    </span>
+  </div>
+  );
+}
 
 export const action: ActionFunction = async ({ request }) => {
   const form = await request.formData();
@@ -40,27 +53,21 @@ export const action: ActionFunction = async ({ request }) => {
 
 export default function UploadExcercise(): JSX.Element {
   const actionData = useActionData();
-  const user = useLoaderData<typeof loader>();
   const submit = useSubmit();
+  const transition =useNavigate()  as any;
   const [uploadData, setUploadData] = useState({
-    title: "",
-    file: {},
-    tags:[]
+    title: '',
+    file: '',
+    tags:'',
+    category:''
   } as any);
-
-  const handleTags=useCallback((data: any)=>{
-      setUploadData((form: any) => ({
-        ...form,
-       tags: data,
-      }));
-    },[])
-
-  const onChangeHandler = (evt: React.ChangeEvent<HTMLInputElement>) => {
+  
+  const onChangeHandler = useCallback((evt:any) => {
     setUploadData((form: any) => ({
       ...form,
-      [evt.target?.name]: evt.target?.value,
+      [evt?.title]: evt?.name,
     }));
-  };
+  },[]);
 
   const fileUploadHandler=async (event: React.ChangeEvent<HTMLInputElement>)=>{
    const file:any= event?.target?.files;
@@ -81,7 +88,9 @@ export default function UploadExcercise(): JSX.Element {
     event.preventDefault();
     let $form = event.currentTarget;
     let formData = new FormData($form);
-    formData.set("tags",uploadData.tags.map((item:{name:string})=>item.name).join() as any);
+    formData.set("tags",uploadData.tags);
+    formData.set("category",uploadData.category);
+    formData.set("title",uploadData.title);
     formData.set("fileContentType", uploadData.file['fileContentType'] as any);
     submit(formData, {
       method:'post',
@@ -92,29 +101,23 @@ export default function UploadExcercise(): JSX.Element {
 
   return (
     <div>
-      <div className="mx-auto w-full max-w-md px-8 min-h-full mt-5 mb-4">
+      <div className="mx-auto w-full max-w-md p-5 h-94 mt-5 mb-4 bg-gray-100 mb-20 rounded py-94">
         <Form  onSubmit={handleSubmit} className="space-y-6">
-          <div>
+          <div>   
             <label
               htmlFor="title"
               className="block text-sm font-medium text-gray-700"
             >
-              Τίτλος
+              Τάξεις
             </label>
-            <div className="mt-1">
-              <input
-                value={uploadData.title}
-                id="title"
-                required
-                autoFocus={true}
-                name="title"
-                type="text"
-                aria-invalid={actionData?.errors?.title ? true : undefined}
-                className="w-full rounded border border-gray-500 px-2 py-1 text-lg"
-                onChange={(evt) => onChangeHandler(evt)}
+            <div className="mt-1 mb-2">
+              <List            
+                categories={TAGS}
+                onCallbackFunction={onChangeHandler}
+                name='title'
               />
-              {actionData?.error?.title && (
-                <div className="pt-1 text-red-700" id="email-error">
+              {actionData?.errors?.title && (
+                <div className="pt-1 text-red-700" id="password-error">
                   {actionData.errors.title}
                 </div>
               )}
@@ -127,19 +130,24 @@ export default function UploadExcercise(): JSX.Element {
             >
               Επιλογή Κατηγορίας
             </label>
-            <select
-              required
-              onChange={(evt) => onChangeHandler(evt as any)}
-              id="category"
-              name="category"
-              className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+            <List            
+                categories={Category}
+                onCallbackFunction={onChangeHandler}
+                name='category'
+              />
+          </div>
+          <div>
+            <label
+              htmlFor="tags"
+              className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
             >
-              <option value=''>Επιλογή Κατηγορίας</option>
-              <option value="ολοκληρώματα">Ολοκληρώματα</option>
-              <option value="παράγωγοι">Παράγωγοι</option>
-              <option value="μιγαδικοί">Μιγαδικοί</option>
-              <option value="γεωμετρία">Γεωμετρία</option>
-            </select>
+             Τύπος άσκησης
+            </label>
+            <List            
+                categories={Type}
+                onCallbackFunction={onChangeHandler}
+                name='tags'
+              />
           </div>
           <div>
             <label
@@ -165,27 +173,6 @@ export default function UploadExcercise(): JSX.Element {
               )}
             </div>
           </div>
-          <div>
-            <label
-              htmlFor="tags"
-              className="block text-sm font-medium text-gray-700"
-            >
-              Τάξεις
-            </label>
-            <div className="mt-1">
-              <List            
-                categories={TAGS}
-                onCallbackFunction={handleTags}
-                name='tags'
-                isMultiple={true}
-              />
-              {actionData?.errors?.tags && (
-                <div className="pt-1 text-red-700" id="password-error">
-                  {actionData.errors.tags}
-                </div>
-              )}
-            </div>
-          </div>
           <button
             value="upload"
             name="_uploadExercise"
@@ -194,6 +181,7 @@ export default function UploadExcercise(): JSX.Element {
           >
             Δημιούργια Ασκησης
           </button>
+      
         </Form>
         {actionData?.error && <Alerts.ErrorAlert error={actionData.error} />}
       </div>

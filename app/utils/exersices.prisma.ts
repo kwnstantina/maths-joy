@@ -16,6 +16,21 @@ export const createExersice = async (exer: UploadExersiceForm) => {
 
 
 export const getAllExcersices = async()=>{
-const exersices =await prisma.exersice.findMany();
+  const exersices =await prisma.exersice.findMany(  {select: {
+    id:true,
+    title: true,
+    category:true,
+    createdAt:true,
+    tags:true,
+  }})
   return exersices;
+}
+
+
+export const getExersiceById= async(id:string | undefined)=>{
+  const exersice =await prisma.exersice.findFirst({select: {
+    fileContentType:true,
+    title: true,
+  },where: {id}});
+  return exersice;
 }

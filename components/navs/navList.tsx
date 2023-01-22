@@ -53,11 +53,11 @@ const Navbar = () => {
               </li>
               <li>
                 <NavLink
-                  to="aboutUs"
+                  to="testYourself"
                   className="hover:bg-orange-600 text-black block px-3 py-2 rounded-md text-base font-medium"
                   style={({ isActive }) => (isActive ? activeStyle : undefined)}
                 >
-                  Σχετικά με εμάς
+                 Εξάσκηση 
                 </NavLink>
               </li>
               <li>
@@ -104,12 +104,12 @@ const Navbar = () => {
         </li>
         <li className="border-b-2 border-orange-300 w-full">
           <NavLink
-            to="aboutUs"
+            to="testYourself"
             className="hover:bg-orange-400 text-white block px-3 py-2 rounded-md text-base font-medium"
             style={({ isActive }) => (isActive ? activeStyle : undefined)}
             onClick={handleClick}
           >
-            Σχετικά με εμάς
+            Εξάσκηση
           </NavLink>
         </li>
         <li>

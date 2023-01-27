@@ -34,3 +34,14 @@ export const getExersiceById= async(id:string | undefined)=>{
   },where: {id}});
   return exersice;
 }
+
+export const getExersiceBySearch = async(filters:any) =>{
+  const exersice =await prisma.exersice.findMany({select: {
+    id:true,
+    title: true,
+    category:true,
+    createdAt:true,
+    tags:true,
+  },where: {...filters}});
+  return exersice;
+}

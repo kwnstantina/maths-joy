@@ -1,7 +1,52 @@
-import plot from "../assets/plot.png";
+import excersises from "../assets/excersises.png";
 import greg from "../assets/greg.jpg";
+import progress from "../assets/progress.png";
+import {useRef,useEffect,useState} from 'react';
+import { ViewBoardsIcon, BookOpenIcon} from "@heroicons/react/outline";
 
 export default function Index() {
+  const getFadeLeftStyles = (isfadeLeftInViewPort:any) => ({
+    transition: 'all 1s ease-in',
+    opacity: isfadeLeftInViewPort ? '1' : '0',
+    transform: isfadeLeftInViewPort ? '' : 'translateX(-100%)'
+});
+
+const getFadeRightStyles = (isfadeRightInViewPort:any) => ({
+    transition: 'all 1s ease-in',
+    opacity: isfadeRightInViewPort ? '1' : '0',
+    transform: isfadeRightInViewPort ? 'translateX(100px)': 'translateX(-100%)'
+});
+const [animatedView, setAnimatedView] = useState({
+  itemOne: false,
+  itemTwo: false,
+  itemThree: false
+});
+const ourRef = useRef(null),
+anotherRef = useRef(null),
+refThree = useRef(null);
+
+
+useEffect(() => {
+  const topPos = (element:any) => element?.getBoundingClientRect()?.top;
+  const div1Pos = topPos(ourRef.current),
+    div2Pos = topPos(anotherRef.current),
+    div3Pos = topPos(refThree.current);
+
+  const onScroll = () => {
+    const scrollPos = window.scrollY + window.innerHeight;
+    if (div1Pos < scrollPos) {
+      setAnimatedView(state => ({ ...state, itemOne: true }));
+    } else if (div2Pos < scrollPos) {
+      setAnimatedView(state => ({ ...state, itemTwo: true }));
+    } else if (div3Pos < scrollPos) {
+      setAnimatedView(state => ({ ...state, itemThree: true }));
+    }
+  };
+
+  window.addEventListener("scroll", onScroll);
+  return () => window.removeEventListener("scroll", onScroll);
+}, []);
+
   return (
     <>
     <section>
@@ -16,14 +61,58 @@ export default function Index() {
           Στο GregKyrMaths  θα βρεις  ασκήσεις, θέματα, βιβλία και διδακτικό υλικό,
           για μαθητές όλων των εκπαιδευτικών βαθμίδων.
         </p>
-        <a href="#" className="inline-flex items-center px-3 py-3 text-sm font-medium text-center text-white bg-orange-600 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+        <a href="#" className="inline-flex items-center px-3 py-3 text-sm font-medium text-center text-white bg-orange-600 rounded-lg hover:bg-orange-800 focus:ring-4 focus:outline-none focus:ring-orange-300 dark:bg-blue-600 dark:hover:bg-orange-700 dark:focus:ring-orange-800">
              Ας ξεκινήσουμε
             <svg aria-hidden="true" className="w-4 h-4 ml-2 -mr-1" fill="currentColor" viewBox="0 0 20 20"
              xmlns="http://www.w3.org/2000/svg"><path fillRule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z"></path></svg>
          </a>
       </div>
     </section>
+     <section className="bg-gray-50 dark:bg-darkBlue1">
+      <div className="container mx-auto px-6 pb-32" ref={refThree} style={getFadeLeftStyles(animatedView.itemThree)}>
+        <div className="flex flex-col space-y-24 text-center md:flex-row md:space-y-0"> 
+          <div className="flex flex-col items-center space-y-2 md:w-1/2">
+            <div className="flex items-center justify-center mb-6">
+              <img src={excersises} className='w-60 h-60 rounded rounded-3xl shadow-md' alt="Ασκήσεις Μαθηματικών" />
+            </div>
+            <h3 className="text-xl font-bold">Ασκήσεις Μαθηματικών</h3>
+            <p className="max-w-md">
+              Άλυτες και λυμένες ασκήσεις και πολλαπλής επιλογής για τάξεις γυμνασίου, λυκείου και πανεπιστήμιου.
+            </p>
+          </div>
+      
+          <div className="flex flex-col items-center space-y-2 md:w-1/2">
+            <div className="flex items-center justify-center h-24 mb-6">
+              <ViewBoardsIcon className='w-24' />
+            </div>
+            <h3 className="text-xl font-bold">Διδακτικό υλικό</h3>
+            <p className="max-w-md">
+              Οπτικό ακουστικό υλικό με καθοδήγηση και επεξήγηση μαθηματικών.
+            </p>
+          </div>
+        </div>
+        <div className="flex flex-col space-y-24 mt-28 text-center md:flex-row md:space-y-0">
+          <div className="flex flex-col items-center space-y-2 md:w-1/2">
+            <div className="flex items-center justify-center h-24 mb-6">
+              <BookOpenIcon className='w-36' />
+            </div>
+            <h3 className="text-xl font-bold">Βιβλία</h3>
+            <p className="max-w-md">
+              Βιβλία μαθηματικών με πολύπλοκες ασκήσεις.
+            </p>
+          </div>
+          <div className="flex flex-col items-center space-y-2 md:w-1/2">
+            <div className="flex items-center justify-center h-24 mb-6">
+              <img src={progress}  className='w-24' alt="Λύσε ασκήσεις" />
+            </div>
+            <h3 className="text-xl font-bold">Εξάσκηση</h3>
+            <p className="max-w-md">
+             Ασκήσεις εμπέδωσης και αξιολόγησης.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
     </>
-    
   );
 }

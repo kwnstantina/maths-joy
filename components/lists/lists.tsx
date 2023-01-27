@@ -14,7 +14,7 @@ const List=(props:Props):JSX.Element=> {
   const [selected, setSelected] = useState(isMultiple?[categories[1]]:categories[1]);
   useEffect(()=>{
     onCallbackFunction(selected)
-  },[onCallbackFunction,selected])
+  },[selected])
 
   return (
     <div className='mt-2'>
@@ -48,6 +48,7 @@ const List=(props:Props):JSX.Element=> {
                     }`
                   }
                   value={category}
+                  disabled={category.unavailable}
                 >
                   {({ selected }) => (
                     <>

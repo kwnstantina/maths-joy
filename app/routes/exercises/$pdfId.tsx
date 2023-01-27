@@ -48,8 +48,8 @@ export default function PdfContainer() {
   }) 
 
   return (
-    <div className="container mx-auto px-6 text-center pb-52" >   
-      <h2><strong>{data.title}</strong> </h2>
+    <div className="container mx-auto px-6 text-center pb-52 mt-10" >   
+      <h2 className="text-center pb-10"><strong>{data.title}</strong> </h2>
       <Worker workerUrl="https://unpkg.com/pdfjs-dist@2.16.105/build/pdf.worker.min.js">
       <div style={{height:'90rem'}}>
       <Viewer 
@@ -59,8 +59,6 @@ export default function PdfContainer() {
       />
        </div>
     </Worker>
-   
-          
   </div>
   )
 }

@@ -1,7 +1,13 @@
 import List from "components/lists/lists";
 import {TAGS,Category,Type} from '../../services/models/models';
-
-const SearchInput = () => {
+type Props={
+  setFiltersHandler:Function;
+  clearFilters:Function | any;
+  filters:any
+  handleCategorySearch:any
+}
+const SearchInput = (props:Props) => {
+  const {setFiltersHandler,clearFilters,filters,handleCategorySearch} = props;
   return (
     <>
       <div className="relative w-2/5 mt-5 ml-16">
@@ -28,20 +34,30 @@ const SearchInput = () => {
           className="block w-full p-4 pl-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
           placeholder="Παράγωγοι, ολοκληρώματα..."
           required
+          name="input"
+          onChange={(evt)=>{
+            let input={
+              title:evt.target.name,
+              name:evt.target.value
+            }
+            setFiltersHandler(input)
+          }}
+          value={filters?.input || ''}
         />
         <button
           type="submit"
+          onClick={handleCategorySearch}
           className="block md:hidden lg:block text-white absolute right-2.5 bottom-2.5 bg-orange-600 hover:bg-orange-800 focus:ring-4 focus:outline-none  font-medium rounded-lg text-sm px-4 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
         >
           Αναζήτηση
         </button>
       </div>
 
-      <div  className="px-2 flex justify-start items-center w-full  items-center md:gap-96  md:mt-4 md:pl-16">
+      <div  className="px-2 flex justify-start items-center w-full  items-center md:gap-[23rem]  md:mt-4 md:pl-16">
         <p className="font-medium"> Φίλτρα</p>
 
-        <button className="ml-9 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-800 text-sm font-medium rounded-md">
-          Reset Filter
+        <button className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-800 text-sm font-medium rounded-md" onClick={clearFilters}>
+          Καθαρισμός φίλτρων
         </button>
       </div>
 
@@ -51,21 +67,21 @@ const SearchInput = () => {
             <strong>Κατηγορία</strong>
           <List
             categories={Category}
-            onCallbackFunction={(selected: any) => console.log("hello", selected)}
+            onCallbackFunction={setFiltersHandler}
           />
           </span>
           <span>
             <strong>Τάξη</strong>
           <List
             categories={TAGS}
-            onCallbackFunction={(selected: any) => console.log("hello again", selected)}
+            onCallbackFunction={setFiltersHandler}
           />
           </span>
           <span>
             <strong>Είδος ασκήσεων</strong>
           <List
             categories={Type}
-            onCallbackFunction={(selected: any) => console.log("hello again", selected)}
+            onCallbackFunction={setFiltersHandler}
           />
           </span>
           

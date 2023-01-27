@@ -44,8 +44,7 @@ function Document({ children }: any) {
         <Meta />
         <Links />
       </head>
-      <body>
-       
+      <body>      
         {children}
         <ScrollRestoration />
         <Scripts />

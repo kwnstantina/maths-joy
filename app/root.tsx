@@ -44,7 +44,7 @@ function Document({ children }: any) {
         <Meta />
         <Links />
       </head>
-      <body>      
+      <body className='font-mono'>      
         {children}
         <ScrollRestoration />
         <Scripts />
@@ -56,7 +56,7 @@ function Document({ children }: any) {
 
 export function Layout({ children }: any) {
   return (
-    <div className="h-screen min-h-screen flex flex-col justify-start">
+    <div className="h-screen min-h-screen flex flex-col justify-start ">
       <NavList />
       {children}
       <Footer />

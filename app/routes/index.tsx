@@ -2,9 +2,11 @@ import excersises from "../assets/excersises.png";
 import greg from "../assets/greg.jpg";
 import progress from "../assets/progress.png";
 import {useRef,useEffect,useState} from 'react';
-import { ViewBoardsIcon, BookOpenIcon} from "@heroicons/react/outline";
+import { ViewBoardsIcon, BookOpenIcon,ChatIcon} from "@heroicons/react/outline";
+import chat from '../assets/chat.png';
 
 export default function Index() {
+
   const getFadeLeftStyles = (isfadeLeftInViewPort:any) => ({
     transition: 'all 1s ease-in',
     opacity: isfadeLeftInViewPort ? '1' : '0',
@@ -14,12 +16,12 @@ export default function Index() {
 const getFadeRightStyles = (isfadeRightInViewPort:any) => ({
     transition: 'all 1s ease-in',
     opacity: isfadeRightInViewPort ? '1' : '0',
-    transform: isfadeRightInViewPort ? 'translateX(100px)': 'translateX(-100%)'
+   // transform: isfadeRightInViewPort ? 'translateXY(50%)': 'translateXY(-100%)'
 });
 const [animatedView, setAnimatedView] = useState({
-  itemOne: false,
-  itemTwo: false,
-  itemThree: false
+  section1: false,
+  section2: false,
+  section3: false,
 });
 const ourRef = useRef(null),
 anotherRef = useRef(null),
@@ -35,17 +37,19 @@ useEffect(() => {
   const onScroll = () => {
     const scrollPos = window.scrollY + window.innerHeight;
     if (div1Pos < scrollPos) {
-      setAnimatedView(state => ({ ...state, itemOne: true }));
-    } else if (div2Pos < scrollPos) {
-      setAnimatedView(state => ({ ...state, itemTwo: true }));
+      setAnimatedView(state => ({ ...state, section1: true }));
+    }
+     else if (div2Pos < scrollPos) {
+      setAnimatedView(state => ({ ...state, section2: true }));
     } else if (div3Pos < scrollPos) {
-      setAnimatedView(state => ({ ...state, itemThree: true }));
+      setAnimatedView(state => ({ ...state, section3: true }));
     }
   };
 
   window.addEventListener("scroll", onScroll);
   return () => window.removeEventListener("scroll", onScroll);
 }, []);
+
 
   return (
     <>
@@ -69,7 +73,7 @@ useEffect(() => {
       </div>
     </section>
      <section className="bg-gray-50 dark:bg-darkBlue1">
-      <div className="container mx-auto px-6 pb-32" ref={refThree} style={getFadeLeftStyles(animatedView.itemThree)}>
+      <div className="container mx-auto px-6 pb-32" ref={refThree} style={getFadeLeftStyles(animatedView.section3)}>
         <div className="flex flex-col space-y-24 text-center md:flex-row md:space-y-0"> 
           <div className="flex flex-col items-center space-y-2 md:w-1/2">
             <div className="flex items-center justify-center mb-6">
@@ -112,6 +116,12 @@ useEffect(() => {
           </div>
         </div>
       </div>
+    </section>
+    <section className="w-10/12 mx-auto px-6 pb-32  bg-gray-100 rounded-t-md mb-6">
+    <div  ref={anotherRef} style={getFadeRightStyles(animatedView.section2)} className='flex flex-row justify-end items-center flex-wrap'>
+      <h1 className="text-xl font-bold">Online chatting για απορίες και συζήτηση</h1>
+      <ChatIcon className='w-72 animate-[wiggle_3s_ease-in-out_infinite]' stroke="rgba(217, 119, 6)"/>
+   </div>
     </section>
     </>
   );

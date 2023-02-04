@@ -112,3 +112,76 @@ export const Type = [
     unavailable: false
   },
 ];
+
+export const ExerciseNavList=[
+  {
+    id:1,
+    title:'Γ-Λυκείου',
+    subTitles:[{
+      id:11,
+      title:'Πολλαπλής επιλογής',
+      link:'?searchParam=g1',
+    },{
+      id:12,
+      title:'Λυμένες ασκήσεις',
+      link:'?searchParam=g2',
+    }
+  ]
+  },
+  {
+    id:2,
+    title:'Β-Λυκείου',
+    subTitles:[{
+      id:21,
+      title:'Πολλαπλής επιλογής',
+      link:'?searchParam=b1',
+    },{
+      id:22,
+      title:'Λυμένες ασκήσεις',
+      link:'?searchParam=b2',
+    }
+  ]
+  }, 
+   {
+    id:3,
+    title:'A-Λυκείου',
+    subTitles:[{
+      id:31,
+      title:'Πολλαπλής επιλογής',
+      link:'?searchParam=a1',
+    },{
+      id:32,
+      title:'Λυμένες ασκήσεις',
+      link:'?searchParam=a2',
+    }
+  ]
+  }, 
+   {
+    id:4,
+    title:'Γυμνάσιο',
+    subTitles:[{
+      id:41,
+      title:'Πολλαπλής επιλογής',
+      link:'?searchParam=s1',
+    },{
+      id:42,
+      title:'Λυμένες ασκήσεις',
+      link:'?searchParam=s2',
+    }
+  ]
+  },
+  {
+    id:5,
+    title:'Πανεπιστήμιο',
+    subTitles:[{
+      id:51,
+      title:'Πολλαπλής επιλογής',
+      link:'?searchParam=p1',
+    },{
+      id:52,
+      title:'Λυμένες ασκήσεις',
+      link:'?searchParam=p2',
+    }
+  ]
+  },
+]

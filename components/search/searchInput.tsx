@@ -1,5 +1,6 @@
 import List from "components/lists/lists";
 import {TAGS,Category,Type} from '../../services/models/models';
+
 type Props={
   setFiltersHandler:Function;
   clearFilters:Function | any;
@@ -8,6 +9,7 @@ type Props={
 }
 const SearchInput = (props:Props) => {
   const {setFiltersHandler,clearFilters,filters,handleCategorySearch} = props;
+
   return (
     <>
       <div className="relative w-2/5 mt-5 ml-16">

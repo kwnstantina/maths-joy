@@ -9,7 +9,7 @@ if (!sessionSecret) {
   throw new Error("SESSION_SECRET must be set");
 }
 
-const storage = createCookieSessionStorage({
+export const storage = createCookieSessionStorage({
   cookie: {
     name: "gregMaths",
     secure: process.env.NODE_ENV === "production",
@@ -78,8 +78,8 @@ export async function requireUserId(
   return userId;
 }
 
-function getUserSession(request: Request) {
-  return storage.getSession(request.headers.get("Cookie"));
+export async function getUserSession(request: Request) {
+  return  await storage.getSession(request.headers.get("Cookie"));
 }
 
 async function getUserId(request: Request) {
@@ -108,10 +108,11 @@ export async function getUser(request: Request) {
 
 export async function logout(request: Request) {
   const session = await getUserSession(request);
-  return redirect("/login", {
+  console.log('session',session)
+  return redirect("/", {
     headers: {
       "Set-Cookie": await storage.destroySession(session),
-      "cookie":''
+      "cookie": await storage.destroySession(session),
     },
   });
 }

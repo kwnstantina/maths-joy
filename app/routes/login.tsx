@@ -7,12 +7,10 @@ import {
 import {
   ActionFunction,
   json,
-  LoaderFunction,
-
 } from "@remix-run/node";
 import { login } from "~/utils/auth.prisma";
 import Alerts from "components/alerts/alerts";
-
+//Space Mono,monospace
 // export const loader: LoaderFunction = async ({ request }) => {
 //   // If there's already a user in the session, redirect to the home page
 //   return (await getUser(request)) ? redirect("/") : null;

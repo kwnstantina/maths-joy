@@ -2,14 +2,19 @@ import {
   ActionFunction,
   LoaderFunction,
   redirect,
-
 } from "@remix-run/node";
-import { logout } from "~/utils/auth.prisma";
+import { logout,storage, getUserSession} from "~/utils/auth.prisma";
 
-export let action: ActionFunction = async ({ request }) => {
+export const action: ActionFunction = async ({ request }) => {
   return logout(request);
 };
 
-export let loader: LoaderFunction = async () => {
-  return redirect("/");
+export const loader: LoaderFunction = async ({ request }) => {
+  const session = await getUserSession(request);
+ return redirect("/",{
+ headers: {
+  "Set-Cookie": await storage.destroySession(session),
+  "Cookie": await storage.destroySession(session),
+  "cookie": await storage.destroySession(session),
+}});
 };

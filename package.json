@@ -18,9 +18,11 @@
     "@remix-run/node": "^1.9.0",
     "@remix-run/react": "^1.9.0",
     "@remix-run/vercel": "^1.9.0",
+    "@supabase/supabase-js": "^2.7.1",
     "@vercel/node": "^2.6.2",
     "bcryptjs": "^2.4.3",
     "better-react-mathjax": "^2.0.2",
+    "dotenv": "^16.0.3",
     "i18next": "^22.4.6",
     "i18next-browser-languagedetector": "^7.0.1",
     "i18next-fs-backend": "^2.1.1",
@@ -32,6 +34,7 @@
     "react-cmdk": "^1.3.8",
     "react-dom": "^18.2.0",
     "react-i18next": "^12.1.1",
+    "remix-auth-google": "^1.2.0",
     "remix-i18next": "^5.0.0",
     "tw-elements": "^1.0.0-alpha13"
   },
@@ -48,6 +51,7 @@
     "eslint": "^8.27.0",
     "postcss": "^8.4.20",
     "prisma": "^4.8.1",
+    "supabase": "^1.37.1",
     "tailwindcss": "^3.2.4",
     "typescript": "^4.8.4"
   },

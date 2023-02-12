@@ -3,6 +3,8 @@ import { prisma } from "./prisma.server";
 import { createUser } from "./user.server";
 import bcrypt from "bcryptjs";
 import type { RegisterForm ,LoginForm} from "./types.server";
+import { GoogleStrategy } from "remix-auth-google";
+import { Authenticator } from "remix-auth";
 
 const sessionSecret = process.env.SESSION_SECRET;
 if (!sessionSecret) {
@@ -20,6 +22,33 @@ export const storage = createCookieSessionStorage({
     httpOnly: true,
   },
 });
+let googleStrategy = new GoogleStrategy(
+  {
+     clientID:process.env.GOOGLE_CLIENT_ID,   
+     clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+    callbackURL: "http://localhost:3000/auth/callback"
+  } as any,
+  async ({accessToken, refreshToken, extraParams, profile}) => {
+    // Get the user data from your DB or API using the tokens and profile
+    const user = await prisma.user.findUnique({
+      where: { email:  profile.emails[0].value },
+    });
+  
+    if(!user){
+      const newUser={
+        email: profile.emails[0].value,        
+        password:'',
+        firstName:profile.displayName,
+        lastName:profile.name.givenName,
+      }
+      let userId= await createUser(newUser);
+       return createUserSession(userId.id, "/");
+    }
+    return createUserSession(user.id, "/");
+  }
+);
+export const authenticator = new Authenticator(storage).use(googleStrategy);
+
 
 export async function register(user: RegisterForm) {
   const exists = await prisma.user.count({ where: { email: user.email } });
@@ -108,11 +137,14 @@ export async function getUser(request: Request) {
 
 export async function logout(request: Request) {
   const session = await getUserSession(request);
-  console.log('session',session)
+  let user = await authenticator.isAuthenticated(request);
+  if (user) {
+  await authenticator.logout(request, { redirectTo: "/login" });
   return redirect("/", {
     headers: {
       "Set-Cookie": await storage.destroySession(session),
       "cookie": await storage.destroySession(session),
     },
   });
+}
 }

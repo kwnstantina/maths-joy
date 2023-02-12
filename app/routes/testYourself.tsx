@@ -4,11 +4,18 @@ import { ChevronUpIcon} from "@heroicons/react/solid";
 import Input from "components/input/input";
 import { ExerciseNavList } from "../../services/models/models";
 import {useState,useCallback} from 'react';
+import "react-cmdk/dist/cmdk.css";
+import Modal from "components/modal/modal";
+import Kbar from "components/kbar/kbar";
+
 
 
 const TestYourself = () => {
   const [links] = useState(ExerciseNavList);
   const [searchValue,setSearchValue] = useState('initial');
+  const [page, setPage] = useState<"root" | "projects">("root");
+  const [open, setOpen] = useState<boolean>(true);
+  const [search, setSearch] = useState("");
 
   const searchHandler=useCallback((evt:any)=>{
     if(!evt.target.value){
@@ -20,6 +27,8 @@ const TestYourself = () => {
   },[])
  
   return (
+    <>
+    <Kbar/>
     <div className="flex">
       <div className="flex flex-col h-screen p-3 bg-white shadow-2xl ring-2 ring-gray-200 w-60">
         <div className="space-y-3">
@@ -76,11 +85,12 @@ const TestYourself = () => {
           </div>
         </div>
       </div>
-      
+    
       <main id="content" className="flex-1 p-6 lg:px-8">
         <Outlet />
       </main>
     </div>
+  </>
   );
 };
 

@@ -2,9 +2,9 @@ import "react-cmdk/dist/cmdk.css";
 import CommandPalette, { filterItems, getItemIndex } from "react-cmdk";
 import { useState } from "react";
 
-const Example = () => {
-  const [page, setPage] = useState<"root" | "projects">("root");
-  const [open, setOpen] = useState<boolean>(true);
+const Kbar = () => {
+  const [page, setPage] = useState<"root" | "projects">("projects");
+  const [open, setOpen] = useState<boolean>(false);
   const [search, setSearch] = useState("");
 
   const filteredItems = filterItems(
@@ -73,8 +73,9 @@ const Example = () => {
       search={search}
       isOpen={open}
       page={page}
+  
     >
-      <CommandPalette.Page id="root">
+      <CommandPalette.Page id="projects">
         {filteredItems.length ? (
           filteredItems.map((list) => (
             <CommandPalette.List key={list.id} heading={list.heading}>
@@ -99,4 +100,4 @@ const Example = () => {
   );
 };
 
-export default Example;
+export default Kbar;

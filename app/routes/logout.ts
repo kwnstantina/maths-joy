@@ -3,8 +3,7 @@ import {
   LoaderFunction,
   redirect,
 } from "@remix-run/node";
-import { json } from "react-router";
-import { logout,storage, getUserSession, authenticator} from "~/utils/auth.prisma";
+import {storage, getUserSession, authenticator} from "~/utils/auth.prisma";
 
 export const action: ActionFunction = async ({ request }) => { 
  await authenticator.logout(request, { redirectTo: "/login" });

@@ -2,9 +2,10 @@ import { redirect, json, createCookieSessionStorage } from "@remix-run/node";
 import { prisma } from "./prisma.server";
 import { createUser } from "./user.server";
 import bcrypt from "bcryptjs";
-import type { RegisterForm ,LoginForm} from "./types.server";
+import type { RegisterForm, LoginForm } from "./types.server";
 import { GoogleStrategy } from "remix-auth-google";
 import { Authenticator } from "remix-auth";
+import supabase from "../../utils/supabase";
 
 const sessionSecret = process.env.SESSION_SECRET;
 if (!sessionSecret) {
@@ -24,31 +25,35 @@ export const storage = createCookieSessionStorage({
 });
 let googleStrategy = new GoogleStrategy(
   {
-     clientID:process.env.GOOGLE_CLIENT_ID,   
-     clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-    callbackURL: "http://localhost:3000/auth/callback"
+    clientID: process.env.GOOGLE_CLIENT_ID,
+    clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+    callbackURL: "http://localhost:3000/auth/callback",
   } as any,
-  async ({accessToken, refreshToken, extraParams, profile}) => {
+  async ({ accessToken, refreshToken, extraParams, profile }) => {
     // Get the user data from your DB or API using the tokens and profile
     const user = await prisma.user.findUnique({
-      where: { email:  profile.emails[0].value },
+      where: { email: profile.emails[0].value },
     });
-  
-    if(!user){
-      const newUser={
-        email: profile.emails[0].value,        
-        password:'',
-        firstName:profile.displayName,
-        lastName:profile.name.givenName,
-      }
-      let userId= await createUser(newUser);
-       return createUserSession(userId.id, "/");
+
+    if (!user) {
+      const newUser = {
+        email: profile.emails[0].value,
+        password: "",
+        firstName: profile.displayName,
+        lastName: profile.name.givenName,
+      };
+      let userId = await createUser(newUser);
+      const session = await storage.getSession();
+      createUserSession(userId.id, "/");
+      session.set("userId", userId);
+      return newUser;
     }
-    return createUserSession(user.id, "/");
+    const session = await storage.getSession();
+    createUserSession(user.id, "/");
+    session.set("userId", user.id);
+    return user;
   }
 );
-export const authenticator = new Authenticator(storage).use(googleStrategy);
-
 
 export async function register(user: RegisterForm) {
   const exists = await prisma.user.count({ where: { email: user.email } });
@@ -87,6 +92,7 @@ export async function login({ email, password }: LoginForm) {
 export async function createUserSession(userId: string, redirectTo: string) {
   const session = await storage.getSession();
   session.set("userId", userId);
+
   return redirect(redirectTo, {
     headers: {
       "Set-Cookie": await storage.commitSession(session),
@@ -108,14 +114,20 @@ export async function requireUserId(
 }
 
 export async function getUserSession(request: Request) {
-  return  await storage.getSession(request.headers.get("Cookie"));
+  return await storage.getSession(request.headers.get("Cookie"));
 }
 
-async function getUserId(request: Request) {
+export async function getUserId(request: Request) {
   const session = await getUserSession(request);
   const userId = session.get("userId");
   if (!userId || typeof userId !== "string") return null;
   return userId;
+}
+
+export async function getUserByGoogleAuth(request: Request) {
+  const session = await getUserSession(request);
+  session.set("userId", session?.data?.user?.id);
+  return session.data.user;
 }
 
 export async function getUser(request: Request) {
@@ -139,12 +151,37 @@ export async function logout(request: Request) {
   const session = await getUserSession(request);
   let user = await authenticator.isAuthenticated(request);
   if (user) {
-  await authenticator.logout(request, { redirectTo: "/login" });
-  return redirect("/", {
-    headers: {
-      "Set-Cookie": await storage.destroySession(session),
-      "cookie": await storage.destroySession(session),
-    },
-  });
+    await authenticator.logout(request, { redirectTo: "/login" });
+    return redirect("/", {
+      headers: {
+        "Set-Cookie": await storage.destroySession(session),
+        cookie: await storage.destroySession(session),
+      },
+    });
+  }
 }
+
+export async function chatAuthorization(request: Request) {
+  let userByExternalAuth = await getUserByGoogleAuth(request);
+  let userByStorage = await getUser(request);
+  let checkIfUserExists = await supabase
+    .from("users")
+    .select()
+    .eq("email", userByExternalAuth?.email);
+  
+  if (userByExternalAuth && checkIfUserExists.data?.length===0) {
+    await supabase.from("users").insert({
+      provider_id: userByExternalAuth.id,
+      email: userByExternalAuth.email,
+      password: userByExternalAuth.password,
+      createdAt: userByExternalAuth.createdAt,
+      updatedAt: userByExternalAuth.updatedAt,
+      role: userByExternalAuth.role,
+      firstName: userByExternalAuth.profile.firstName,
+      lastName: userByExternalAuth.profile.lastName,
+      isActive: true,
+    });
+  }
+  return userByExternalAuth || userByStorage;
 }
+export const authenticator = new Authenticator(storage).use(googleStrategy);

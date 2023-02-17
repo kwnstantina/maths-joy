@@ -3,7 +3,6 @@ import greg from "../assets/greg.jpg";
 import progress from "../assets/progress.png";
 import {useRef,useEffect,useState} from 'react';
 import { ViewBoardsIcon, BookOpenIcon,ChatIcon} from "@heroicons/react/outline";
-import chat from '../assets/chat.png';
 
 export default function Index() {
 

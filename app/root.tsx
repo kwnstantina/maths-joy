@@ -29,11 +29,14 @@ export const meta: MetaFunction = () => ({
 
 export default function App() {
   return (
-    <Document>
+    // <Document>
       <Layout>
-        <Outlet />
+        {/* <Outlet /> */}
+        <div>
+          <p>hello</p>
+        </div>
       </Layout>
-    </Document>
+    // </Document>
   );
 }
 
@@ -45,7 +48,7 @@ function Document({ children }: any) {
         <Links />
       </head>
       <body className='font-mono'>      
-        {children}
+        {/* {children} */}
         <ScrollRestoration />
         <Scripts />
         {process.env.NODE_ENV === "development" && <LiveReload />}
@@ -57,9 +60,9 @@ function Document({ children }: any) {
 export function Layout({ children }: any) {
   return (
     <div className="h-screen min-h-screen flex flex-col justify-start ">
-      <NavList />
+      {/* <NavList /> */}
       {children}
-      <Footer />
+      {/* <Footer /> */}
     </div>
   );
 }

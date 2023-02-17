@@ -1,6 +1,6 @@
 import { useLoaderData } from "@remix-run/react";
 import supabase from "../../../utils/supabase";
-import { LoaderFunction, redirect,json } from "@remix-run/node";
+import { LoaderFunction, redirect,json, ActionArgs } from "@remix-run/node";
 import { Key } from "react";
 import { chatAuthorization} from "~/utils/auth.prisma";
 import { Form } from "@remix-run/react";
@@ -16,10 +16,22 @@ export const loader: LoaderFunction = async ({ request }) => {
   return json({messages,users});
 };
 
+export const action = async ({request}:ActionArgs)=>{
+  const response = new Response();
+  let user =await chatAuthorization(request);
+  const userId= await supabase.from("users").select().eq('provider_id','63e936f00a2525553d93e0fb');
+  const {message} = Object.fromEntries(await request.formData());
+  const {error}=await  supabase.from('messages').insert({content:String(message)})
+  if(error){
+  }
+  return json(null,{headers:response.headers});
+}
+
 const Chat = () => {
   const data: any = useLoaderData();
 
   return (
+   <Form method="post">
     <div className="container mx-auto my-10 border border-slate-400	 rounded z-[-1]">
       <div className="min-w-full border rounded lg:grid lg:grid-cols-3">
         <div className="border-r border-gray-300 lg:col-span-1">
@@ -29,7 +41,7 @@ const Chat = () => {
             </h2>
             {data.users.data.map((item:any)=>{
               return(
-                <li>
+                <li key={item.id}>
                 <a className="flex items-center px-3 py-2 text-sm transition duration-150 ease-in-out border-b border-gray-300 cursor-pointer hover:bg-gray-100 focus:outline-none">
                   <img
                     className="object-cover w-10 h-10 rounded-full"
@@ -49,7 +61,6 @@ const Chat = () => {
             })}
           </ul>
         </div>
-        <Form method="post" action="/messages">
         <div className="sm:none lg:col-span-2 lg:block">
           <div className="w-full">
             <div className="relative w-full p-6 overflow-y-auto h-[40rem] bg-gray-200	">
@@ -146,9 +157,10 @@ const Chat = () => {
             </div>  
           </div>
         </div>
-        </Form>
+        
       </div>
     </div>
+    </Form> 
   );
 };
 

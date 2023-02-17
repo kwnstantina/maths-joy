@@ -182,6 +182,19 @@ export async function chatAuthorization(request: Request) {
       isActive: true,
     });
   }
+  else{
+    await supabase.from("users").insert({
+      provider_id: userByStorage?.id,
+      email: userByStorage?.email,
+      // password: userByStorage?.password,
+      // createdAt: userByStorage?.createdAt,
+      // updatedAt: userByStorage?.updatedAt,
+      role: userByStorage?.role,
+      firstName: userByStorage?.profile.firstName,
+      lastName: userByStorage?.profile.lastName,
+      isActive: true,
+    });
+  }
   return userByExternalAuth || userByStorage;
 }
 export const authenticator = new Authenticator(storage).use(googleStrategy);

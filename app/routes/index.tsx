@@ -3,6 +3,12 @@ import greg from "../assets/greg.jpg";
 import progress from "../assets/progress.png";
 import {useRef,useEffect,useState} from 'react';
 import { ViewBoardsIcon, BookOpenIcon,ChatIcon} from "@heroicons/react/outline";
+import { json } from "@remix-run/node";
+
+export const loader = async ({ request }:any) => {
+  console.log('request',request)
+  return json(request)
+};
 export function ErrorBoundary({ error }: any) {
   console.log('errror', error)
 }

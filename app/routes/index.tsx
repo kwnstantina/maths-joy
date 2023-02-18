@@ -3,7 +3,9 @@ import greg from "../assets/greg.jpg";
 import progress from "../assets/progress.png";
 import {useRef,useEffect,useState} from 'react';
 import { ViewBoardsIcon, BookOpenIcon,ChatIcon} from "@heroicons/react/outline";
-
+export function ErrorBoundary({ error }: any) {
+  console.log('errror', error)
+}
 export default function Index() {
 
   const getFadeLeftStyles = (isfadeLeftInViewPort:any) => ({

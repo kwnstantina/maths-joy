@@ -1,6 +1,7 @@
 import {useLoaderData } from "@remix-run/react";
 import { json,LoaderFunction ,redirect} from '@remix-run/node';
 import {getUser} from '~/utils/auth.prisma';
+
 export const loader: LoaderFunction = async ({ request }) => {
     let user = await getUser(request)
     return json(user)

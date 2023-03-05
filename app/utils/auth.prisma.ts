@@ -164,10 +164,8 @@ export async function logout(request: Request) {
 export async function chatAuthorization(request: Request) {
   let userByExternalAuth = await getUserByGoogleAuth(request);
   let userByStorage = await getUser(request);
-  let checkIfUserExists = await supabase
-    .from("users")
-    .select()
-    .eq("email", userByExternalAuth?.email);
+  let checkIfUserExists = await supabase.from("users").select().eq("email", userByExternalAuth?.email);
+  let checkIfUserStorageExists=await supabase.from("users").select().eq("email",userByStorage?.email);
   
   if (userByExternalAuth && checkIfUserExists.data?.length===0) {
     await supabase.from("users").insert({
@@ -182,13 +180,10 @@ export async function chatAuthorization(request: Request) {
       isActive: true,
     });
   }
-  else{
+  if(userByStorage && checkIfUserStorageExists.data?.length===0){
     await supabase.from("users").insert({
       provider_id: userByStorage?.id,
       email: userByStorage?.email,
-      // password: userByStorage?.password,
-      // createdAt: userByStorage?.createdAt,
-      // updatedAt: userByStorage?.updatedAt,
       role: userByStorage?.role,
       firstName: userByStorage?.profile.firstName,
       lastName: userByStorage?.profile.lastName,

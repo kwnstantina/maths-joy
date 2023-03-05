@@ -1,5 +1,5 @@
 import excersises from "../assets/excersises.png";
-import greg from "../assets/greg.jpg";
+import greg from "../assets/mathsNewMustash.png";
 import progress from "../assets/progress.png";
 import {useRef,useEffect,useState} from 'react';
 import { ViewBoardsIcon, BookOpenIcon,ChatIcon} from "@heroicons/react/outline";
@@ -120,7 +120,7 @@ useEffect(() => {
     </section>
     <section className="w-10/12 mx-auto px-6 pb-32  bg-gray-100 rounded-t-md mb-6">
     <div  ref={anotherRef} style={getFadeRightStyles(animatedView.section2)} className='flex flex-row justify-end items-center flex-wrap'>
-      <h1 className="text-xl font-bold">Online chatting για απορίες και συζήτηση</h1>
+      <h1 className="text-xl font-bold">Forum για απορίες και συζήτηση</h1>
       <ChatIcon className='w-72 animate-[wiggle_3s_ease-in-out_infinite]' stroke="rgba(217, 119, 6)"/>
    </div>
     </section>

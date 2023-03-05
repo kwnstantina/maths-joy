@@ -1,37 +1,84 @@
-import { useLoaderData } from "@remix-run/react";
+import {useLoaderData } from "@remix-run/react";
 import supabase from "../../../utils/supabase";
 import { LoaderFunction, redirect,json, ActionArgs } from "@remix-run/node";
-import { Key } from "react";
+import { Key, useEffect,useRef,useState } from "react";
 import { chatAuthorization} from "~/utils/auth.prisma";
 import { Form } from "@remix-run/react";
+import { createBrowserClient } from "@supabase/auth-helpers-remix";
+import ChatContent from "components/chat/chatContent/chatContent";
+import UserContent from "components/chat/chatContent/userContent";
 
 
+// user Id is the same how sent the message
+// image of user
+// error boundaris
 export const loader: LoaderFunction = async ({ request }) => {
   let user =await chatAuthorization(request);
+  const env = {
+    SUPABASE_URL: process.env.SUPABASE_URL!,
+    SUPABASE_ANON_KEY: process.env.SUPABASE_ANON_KEY!,
+  };
+
   if(!user){
      return redirect("/login");
   }
   const messages = await supabase.from("messages").select();
   const users= await supabase.from("users").select();
-  return json({messages,users});
-};
+  const userId= await supabase.from("users").select().eq('provider_id',user.id);
 
+ user={
+    ...user,
+    id:userId?.data?.find(item=>item.id)?.id
+  }
+  return json({messages,users,env,user});
+};
+ 
 export const action = async ({request}:ActionArgs)=>{
   const response = new Response();
   let user =await chatAuthorization(request);
-  const userId= await supabase.from("users").select().eq('provider_id','63e936f00a2525553d93e0fb');
+  const userId= await supabase.from("users").select().eq('provider_id',user.id);
   const {message} = Object.fromEntries(await request.formData());
-  const {error}=await  supabase.from('messages').insert({content:String(message)})
-  if(error){
+  const {messageToDom}=await  supabase.from('messages') .insert([
+    {'content': String(message), 
+    'user_id': userId.data?.find(item=>item.id)?.id
   }
+  ]) as any;
+
   return json(null,{headers:response.headers});
 }
 
 const Chat = () => {
   const data: any = useLoaderData();
+  const [supabaseClient] = useState(() =>
+  createBrowserClient(data.env.SUPABASE_URL, data.env.SUPABASE_ANON_KEY));
+ const [messages, setMessages] = useState(data.messages.data);
+
+ let formRef = useRef<HTMLFormElement>(null);
+
+  useEffect(() => {
+    const channel = supabaseClient
+      .channel("*")
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "messages" },
+        (payload) => {
+          const newMessage = payload.new;
+  
+          if (!messages.find((message: { id: string; }) => message.id === newMessage.id)) {
+            setMessages([...messages, newMessage]);
+          }
+        }
+      )
+      .subscribe();
+  
+    return () => {
+      supabaseClient.removeChannel(channel);
+        formRef.current?.reset();
+    };
+  }, [supabaseClient, messages])
 
   return (
-   <Form method="post">
+   <Form method="post"  ref={formRef} >
     <div className="container mx-auto my-10 border border-slate-400	 rounded z-[-1]">
       <div className="min-w-full border rounded lg:grid lg:grid-cols-3">
         <div className="border-r border-gray-300 lg:col-span-1">
@@ -39,71 +86,12 @@ const Chat = () => {
             <h2 className="my-2 mb-2 ml-2 text-lg text-gray-600">
               Χρήστες
             </h2>
-            {data.users.data.map((item:any)=>{
-              return(
-                <li key={item.id}>
-                <a className="flex items-center px-3 py-2 text-sm transition duration-150 ease-in-out border-b border-gray-300 cursor-pointer hover:bg-gray-100 focus:outline-none">
-                  <img
-                    className="object-cover w-10 h-10 rounded-full"
-                    src="https://cdn.pixabay.com/photo/2018/09/12/12/14/man-3672010__340.jpg"
-                    alt="username"
-                  />
-                  <div className="w-full pb-2">
-                    <div className="flex justify-between">
-                      <span className="block ml-2 font-semibold text-gray-600">
-                       {item.firstName}
-                      </span>
-                    </div>
-                  </div>
-                </a>
-                </li>
-              )
-            })}
+             <UserContent users={data?.users}/>
           </ul>
         </div>
         <div className="sm:none lg:col-span-2 lg:block">
           <div className="w-full">
-            <div className="relative w-full p-6 overflow-y-auto h-[40rem] bg-gray-200	">
-              {data.messages.data.map(
-                (message: {
-                  id: Key | null | undefined;
-                  userId: string;
-                  content: any;
-                }) => {
-                  return (
-                    <ul className="space-y-2" key={message.id}>
-                      {message.userId === "kostas" && (
-                        <li className="flex justify-start">
-                          <div className="relative max-w-xl px-4 py-2 text-gray-700 rounded shadow">
-                            <span className="block">{message.content}</span>
-                          </div>
-                        </li>
-                      )}
-                      <li className="flex justify-end mb-2">
-                        <div className="relative max-w-xl px-4 py-2 text-black bg-orange-300 rounded shadow">
-                          <span className="block">{message.content}</span>
-                        </div>
-                        <a className="flex items-center px-3 py-2 text-sm transition duration-150 ease-in-out border-b border-gray-300 cursor-pointer hover:bg-gray-100 focus:outline-none">
-                          <img
-                            className="object-cover w-10 h-10 rounded-full"
-                            src="https://cdn.pixabay.com/photo/2018/01/15/07/51/woman-3083383__340.jpg"
-                            alt="username"
-                          />
-                          <div className="w-full pb-2">
-                            <div className="flex justify-between"></div>
-                          </div>
-                        </a>
-                      </li>
-                    </ul>
-                  );
-                }
-              )}
-              {/* <div className="inline-flex items-center justify-center w-full">
-             <hr className="w-64 h-px my-8 bg-orange-200 border-0 dark:bg-gray-700"/>
-           <span className="absolute px-3 font-medium text-gray-900 -translate-x-1/2  left-1/2 dark:text-white dark:bg-gray-900">{"10:09"}</span>
-           </div> */}
-            </div>
-
+            <ChatContent messages={messages} data={data}/>
             <div className="flex items-center justify-between w-full p-3 border-t border-gray-300">
               <button>
                 <svg
@@ -143,6 +131,7 @@ const Chat = () => {
                 className="block w-full py-2 pl-4 mx-3 bg-gray-100 rounded-full outline-none focus:text-gray-700"
                 name="message"
                 required
+              
               />
               <button type="submit">
                 <svg
@@ -156,8 +145,7 @@ const Chat = () => {
               </button>
             </div>  
           </div>
-        </div>
-        
+        </div>       
       </div>
     </div>
     </Form> 
@@ -165,3 +153,4 @@ const Chat = () => {
 };
 
 export default Chat;
+

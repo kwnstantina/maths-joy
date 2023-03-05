@@ -20,7 +20,9 @@ const Card = (props:any) => {
           <button
             type="button"
             onClick={() => navigate(`${item.id}`)}
-            className="animate-pulse inline-block px-6 py-2.5 bg-orange-400 text-white font-medium text-xs leading-tight uppercase rounded shadow-md hover:bg-orange-700 hover:shadow-lg focus:bg-orange-700 focus:shadow-lg focus:outline-none focus:ring-0 active:bg-orange-800 active:shadow-lg transition duration-150 ease-in-out"
+            className="inline-block px-6 py-2.5 bg-orange-400 text-white 
+            focus:shadow-outline  font-medium 
+            text-xs leading-tight uppercase rounded shadow-2xl hover:bg-orange-700 hover:shadow-2xg focus:bg-orange-700 focus:ring-0 active:bg-orange-800"
           >
             <EyeIcon className="w-5 h-5"/>
           </button>

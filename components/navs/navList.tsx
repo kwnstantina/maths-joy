@@ -23,7 +23,7 @@ const Navbar = () => {
         </NavLink>  
         </div>
         <div>
-            <ul className="hidden md:flex">
+            <ul className="hidden md:flex z-index-100">
               <li>
                 <NavLink
                   to="exercises"
@@ -71,7 +71,7 @@ const Navbar = () => {
           {!nav ? <MenuIcon className="w-5" /> : <XIcon className="w-5" />}
         </div>
       </div>
-      <ul className={!nav ? "hidden" : "absolute bg-orange-600 w-3/4 px-8 z-50"}>
+      <ul className={!nav ? "hidden" : "absolute bg-orange-600 w-3/4 px-8 z-100"}>
         <li className="border-b-2 border-orange-300 w-full">
           <NavLink
             to="exercises"

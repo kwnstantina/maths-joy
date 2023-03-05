@@ -22,7 +22,7 @@ const UserContent = (props: Props) => {
               <div className="w-full pb-2">
                 <div className="flex justify-between">
                   <span className="block ml-2 font-semibold text-gray-600">
-                    {item.firstName}
+                    {item.firstName +' '+  item.lastName}
                   </span>
                 </div>
               </div>

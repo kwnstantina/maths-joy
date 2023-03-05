@@ -9,6 +9,8 @@
     "dev:css": "tailwindcss -w -i ./styles/app.css -o app/styles/app.css"
   },
   "dependencies": {
+    "@emoji-mart/data": "^1.1.2",
+    "@emoji-mart/react": "^1.1.1",
     "@headlessui/react": "^1.7.7",
     "@heroicons/react": "^1.0.6",
     "@prisma/client": "^4.8.1",
@@ -24,6 +26,7 @@
     "bcryptjs": "^2.4.3",
     "better-react-mathjax": "^2.0.2",
     "dotenv": "^16.0.3",
+    "emoji-mart": "^5.5.2",
     "i18next": "^22.4.6",
     "i18next-browser-languagedetector": "^7.0.1",
     "i18next-fs-backend": "^2.1.1",

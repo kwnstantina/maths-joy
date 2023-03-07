@@ -1,5 +1,5 @@
 import React, { useCallback, useState } from "react";
-import { useActionData, useSubmit, useNavigate ,useTransition} from "@remix-run/react";
+import { useActionData, useSubmit, useNavigate ,useTransition, useCatch} from "@remix-run/react";
 import {
   ActionFunction,
   json,
@@ -13,6 +13,7 @@ import { getUser } from "~/utils/auth.prisma";
 import { Tab } from "@headlessui/react";
 import UploadFile from "components/uploadExTabs/uploadFile";
 import UploadExercise from "components/uploadExTabs/uploadExercise";
+import Alerts from "components/alerts/alerts";
 
 export const loader: LoaderFunction = async ({ request }) => {
   let user = await getUser(request);
@@ -20,7 +21,6 @@ export const loader: LoaderFunction = async ({ request }) => {
 };
 export function ErrorBoundary({ error }: any) {
   const navigate = useNavigate();
-
   return (
     <div
       className="w-3/4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative h-screen mb-40"
@@ -28,8 +28,8 @@ export function ErrorBoundary({ error }: any) {
     >
       <strong className="font-bold">Σφάλμα,</strong>
       <span className="block sm:inline">
-        είτε το αρχείο ήταν πολύ μεγάλο, είτε υπάρχει πρόβλημα σύνδεσης.
-        Παρακαλώ ξαναπροσπαθήστε.
+        Παρουσιάστηκε κάποιο πρόβλημα.
+        Παρακαλώ ξαναπροσπαθήστε ξανά.
       </span>
       <span className="absolute top-0 bottom-0 right-0 px-4 py-3">
         <svg
@@ -86,6 +86,7 @@ export default function UploadExcercise(): JSX.Element {
     'Προφίλ',
   ]);
   const [tabIndex,setTabIndex] = useState(0);
+  console.log('actionData',actionData)
 
   const onChangeHandler = useCallback((evt: any) => {
     setUploadData((form: any) => ({
@@ -97,8 +98,7 @@ export default function UploadExcercise(): JSX.Element {
   const classNames=(...classes: any) =>{
     return classes.filter(Boolean).join(" ");
   }
-  const buttonState =
-  transition.state === "submitting"
+  const buttonState = transition.state === "submitting"
     ? "Saving..."
     : transition.state === "loading"
     ? "Saved!"
@@ -143,7 +143,7 @@ export default function UploadExcercise(): JSX.Element {
        onChange={(index) => {
         setTabIndex(index);
       }}>
-        <Tab.List className="flex space-x-1 rounded-xl bg-orange-900/20 p-1">
+        <Tab.List className="flex space-x-1 rounded-xl bg-orange-600 p-1">
           {categories.map((category) => (
             <Tab
               key={category}
@@ -178,8 +178,7 @@ export default function UploadExcercise(): JSX.Element {
           buttonState={buttonState}
           />
        }
-
-    
+      {tabIndex===2 &&  <div className="h-screen	 mx-auto w-full max-w-md"></div>}
         </Tab.Panels>
       </Tab.Group>
     </div>

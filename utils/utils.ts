@@ -19,3 +19,17 @@ let strTime = hours + ':' + minutes  + ampm;
 
 return currentdate.getMonth()+1 + "/" + currentdate.getDate() + "/" + currentdate.getFullYear() + " " + strTime;
 }
+
+export const getRgb = () =>{
+    return Math.floor(Math.random()*256);
+}
+
+export const rgbToHex = (r: any,g: any ,b: any)=>{
+   return  '#' + [r,g,b].map(x=>{
+        const hex =x.toString(16);
+        return hex.lenght ===1? '0'+ hex : hex;
+    }).join('');
+}
+export const starterLetters = (firstName:string,lastName:string)=>{
+    return firstName[0]+ '' +lastName[0] ?? 'A';
+}

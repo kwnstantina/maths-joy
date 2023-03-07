@@ -1,7 +1,7 @@
 export const TAGS = [
   {
     id: 0,
-    name: 'Ταξη',
+    name: "Ταξη",
     title: "title",
     unavailable: true,
   },
@@ -19,14 +19,11 @@ export const TAGS = [
   },
   {
     id: 3,
-    name: "Γ-Λ υκειου",
+    name: "Γ-Λυκειου",
     title: "title",
     unavailable: false,
   },
-  { id: 4, name: "Γυμνάσιο", 
-  title: "title" ,
-  unavailable: false
-  },
+  { id: 4, name: "Γυμνάσιο", title: "title", unavailable: false },
   {
     id: 5,
     name: "Πανεπιστήμιακά Μαθηματικά",
@@ -38,7 +35,7 @@ export const TAGS = [
 export const Category = [
   {
     id: 0,
-    name: 'Κατηγορία',
+    name: "Κατηγορία",
     title: "category",
     unavailable: true,
   },
@@ -89,7 +86,7 @@ export const Category = [
 export const Type = [
   {
     id: 0,
-    name: 'Είδος ασκήσεως',
+    name: "Είδος ασκήσεως",
     title: "tags",
     unavailable: true,
   },
@@ -109,79 +106,89 @@ export const Type = [
     id: 3,
     name: "Ερωτήσεις Επιλογής",
     title: "tags",
-    unavailable: false
+    unavailable: false,
   },
 ];
 
-export const ExerciseNavList=[
+export const ExerciseNavList = [
   {
-    id:1,
-    title:'Γ-Λυκείου',
-    subTitles:[{
-      id:11,
-      title:'Πολλαπλής επιλογής',
-      link:'?searchParam=g1',
-    },{
-      id:12,
-      title:'Λυμένες ασκήσεις',
-      link:'?searchParam=g2',
-    }
-  ]
+    id: 1,
+    title: "Γ-Λυκείου",
+    subTitles: [
+      {
+        id: 11,
+        title: "Πολλαπλής επιλογής",
+        link: "?searchParam=g1",
+      },
+      {
+        id: 12,
+        title: "Λυμένες ασκήσεις",
+        link: "?searchParam=g2",
+      },
+    ],
   },
   {
-    id:2,
-    title:'Β-Λυκείου',
-    subTitles:[{
-      id:21,
-      title:'Πολλαπλής επιλογής',
-      link:'?searchParam=b1',
-    },{
-      id:22,
-      title:'Λυμένες ασκήσεις',
-      link:'?searchParam=b2',
-    }
-  ]
-  }, 
-   {
-    id:3,
-    title:'A-Λυκείου',
-    subTitles:[{
-      id:31,
-      title:'Πολλαπλής επιλογής',
-      link:'?searchParam=a1',
-    },{
-      id:32,
-      title:'Λυμένες ασκήσεις',
-      link:'?searchParam=a2',
-    }
-  ]
-  }, 
-   {
-    id:4,
-    title:'Γυμνάσιο',
-    subTitles:[{
-      id:41,
-      title:'Πολλαπλής επιλογής',
-      link:'?searchParam=s1',
-    },{
-      id:42,
-      title:'Λυμένες ασκήσεις',
-      link:'?searchParam=s2',
-    }
-  ]
+    id: 2,
+    title: "Β-Λυκείου",
+    subTitles: [
+      {
+        id: 21,
+        title: "Πολλαπλής επιλογής",
+        link: "?searchParam=b1",
+      },
+      {
+        id: 22,
+        title: "Λυμένες ασκήσεις",
+        link: "?searchParam=b2",
+      },
+    ],
   },
   {
-    id:5,
-    title:'Πανεπιστήμιο',
-    subTitles:[{
-      id:51,
-      title:'Πολλαπλής επιλογής',
-      link:'?searchParam=p1',
-    },{
-      id:52,
-      title:'Λυμένες ασκήσεις',
-      link:'?searchParam=p2',
-    }
-  ]
+    id: 3,
+    title: "A-Λυκείου",
+    subTitles: [
+      {
+        id: 31,
+        title: "Πολλαπλής επιλογής",
+        link: "?searchParam=a1",
+      },
+      {
+        id: 32,
+        title: "Λυμένες ασκήσεις",
+        link: "?searchParam=a2",
+      },
+    ],
   },
-]
+  {
+    id: 4,
+    title: "Γυμνάσιο",
+    subTitles: [
+      {
+        id: 41,
+        title: "Πολλαπλής επιλογής",
+        link: "?searchParam=s1",
+      },
+      {
+        id: 42,
+        title: "Λυμένες ασκήσεις",
+        link: "?searchParam=s2",
+      },
+    ],
+  },
+  {
+    id: 5,
+    title: "Πανεπιστήμιο",
+    subTitles: [
+      {
+        id: 51,
+        title: "Πολλαπλής επιλογής",
+        link: "?searchParam=p1",
+      },
+      {
+        id: 52,
+        title: "Λυμένες ασκήσεις",
+        link: "?searchParam=p2",
+      },
+    ],
+  },
+];

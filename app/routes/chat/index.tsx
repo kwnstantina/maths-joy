@@ -1,7 +1,7 @@
 import { useLoaderData ,useTransition,useCatch, Link} from "@remix-run/react";
 import supabase from "../../../utils/supabase";
 import { LoaderFunction, redirect, json, ActionArgs } from "@remix-run/node";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { chatAuthorization } from "~/utils/auth.prisma";
 import { Form } from "@remix-run/react";
 import { createBrowserClient } from "@supabase/auth-helpers-remix";
@@ -9,10 +9,10 @@ import ChatContent from "components/chat/chatContent/chatContent";
 import UserContent from "components/chat/chatContent/userContent";
 import dataEmojie from "@emoji-mart/data";
 import Picker from "@emoji-mart/react";
+import xss from 'xss';
+import {getRgb,rgbToHex} from '../../../utils/utils'
 
-//sanitize content
 // image of user
-// error boundaries
 export const loader: LoaderFunction = async ({ request }) => {
   let user = await chatAuthorization(request);
   const env = {
@@ -43,11 +43,11 @@ export const action = async ({ request }: ActionArgs) => {
   const userId = await supabase
     .from("users")
     .select()
-    .eq("provider_id", user.id);
+    .eq("provider_id", user.id);  
   const { message } = Object.fromEntries(await request.formData());
   const { messageToDom } = (await supabase.from("messages").insert([
     {
-      content: String(message),
+      content: xss(String(message)),
       user_id: userId.data?.find((item) => item.id)?.id,
     },
   ])) as any;
@@ -57,14 +57,24 @@ export const action = async ({ request }: ActionArgs) => {
 
 const Chat = () => {
   const data: any = useLoaderData();
+  const transition = useTransition();
   const [supabaseClient] = useState(() =>
     createBrowserClient(data.env.SUPABASE_URL, data.env.SUPABASE_ANON_KEY)
   );
   const [messages, setMessages] = useState<any>(data.messages.data);
   const [showEmojiPicker, setShowEmojiPicker] = useState<boolean>(false);
   const [message, setMessage] = useState<string>('')
-  const transition = useTransition();
   const isPosting=transition.state==='submitting';
+
+  const randomColorChat=useMemo(()=>{
+    let randomChatColor={
+      r:getRgb(),
+      g:getRgb(),
+      b:getRgb()
+    }
+  
+  return rgbToHex(randomChatColor.r,randomChatColor.g,randomChatColor.b)
+  },[])
 
   useEffect(() => {
     const channel = supabaseClient
@@ -115,7 +125,7 @@ const Chat = () => {
             </div>
             <div className="sm:none lg:col-span-2 lg:block">
               <div className="w-full">
-                <ChatContent messages={messages} data={data} isPosting={isPosting}/>
+                <ChatContent messages={messages} data={data} isPosting={isPosting} randomColorChat={randomColorChat}/>
                 <div className="flex items-center justify-between w-full p-3 border-t border-gray-300">
                   <button onClick={() => setShowEmojiPicker(!showEmojiPicker)}>
                     <svg

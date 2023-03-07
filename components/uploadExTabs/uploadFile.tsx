@@ -74,7 +74,7 @@ const UploadFile = (props:Props) => {
             {buttonState}
            </button>
       </Form>
-      {actionData?.error && <Alerts.ErrorAlert error={actionData.error} />}
+      {actionData?.errors && <Alerts.ErrorAlert error={actionData.errors.file} />}
       </div>
     </>
   );

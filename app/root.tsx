@@ -6,7 +6,6 @@ import {
   Outlet,
   Scripts,
   ScrollRestoration,
-  useCatch,
 } from "@remix-run/react";
 import Footer from "components/footer/footer";
 import NavList from "components/navs/navList";

@@ -1,7 +1,7 @@
 export const TAGS = [
   {
     id: 0,
-    name: "Ταξη",
+    name: "",
     title: "title",
     unavailable: true,
   },
@@ -35,7 +35,7 @@ export const TAGS = [
 export const Category = [
   {
     id: 0,
-    name: "Κατηγορία",
+    name: "",
     title: "category",
     unavailable: true,
   },
@@ -86,7 +86,7 @@ export const Category = [
 export const Type = [
   {
     id: 0,
-    name: "Είδος ασκήσεως",
+    name: "",
     title: "tags",
     unavailable: true,
   },

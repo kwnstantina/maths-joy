@@ -2,7 +2,7 @@ import List from "components/lists/lists";
 import {TAGS,Category,Type} from '../../services/models/models';
 
 type Props={
-  setFiltersHandler:Function;
+  setFiltersHandler:any;
   clearFilters:Function | any;
   filters:any
   handleCategorySearch:any
@@ -70,6 +70,8 @@ const SearchInput = (props:Props) => {
           <List
             categories={Category}
             onCallbackFunction={setFiltersHandler}
+            placeholder='Κατηγορία...'
+            value={filters.category}
           />
           </span>
           <span>
@@ -77,6 +79,8 @@ const SearchInput = (props:Props) => {
           <List
             categories={TAGS}
             onCallbackFunction={setFiltersHandler}
+            placeholder='Τάξη...'
+            value={filters.title}
           />
           </span>
           <span>
@@ -84,6 +88,8 @@ const SearchInput = (props:Props) => {
           <List
             categories={Type}
             onCallbackFunction={setFiltersHandler}
+            placeholder='Είδος άσκησης...'
+            value={filters.tags}
           />
           </span>
           

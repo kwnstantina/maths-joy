@@ -151,7 +151,7 @@ export default function Index() {
             </h1>
             <a
               href="/chat"
-              className="inline-flex mt-5 items-center justify-center p-5 bg-orange-200 text-base font-medium text-black-500 rounded-lg hover:text-gray-900 hover:bg-orange-100 dark:text-gray-400 dark:bg-gray-800 dark:hover:bg-gray-700 dark:hover:text-white"
+              className="inline-flex mt-5 h-3 items-center justify-center p-5 bg-orange-200 text-base font-medium text-black-500 rounded-lg hover:text-gray-900 hover:bg-orange-100 dark:text-gray-400 dark:bg-gray-800 dark:hover:bg-gray-700 dark:hover:text-white"
             >
               <span className="w-full">Forum</span>
               <svg
@@ -162,9 +162,9 @@ export default function Index() {
                 xmlns="http://www.w3.org/2000/svg"
               >
                 <path
-                  fill-rule="evenodd"
+                  fillRule="evenodd"
                   d="M12.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-2.293-2.293a1 1 0 010-1.414z"
-                  clip-rule="evenodd"
+                  clipRule="evenodd"
                 ></path>
               </svg>
             </a>

@@ -28,6 +28,7 @@ const UploadFile = (props:Props) => {
         listCategories={TAGS}
         onChange={onChangeHandler}
         required
+        placeholder={'Τάξη...'}
       />
      <FormField
         htmlFor={"category"}
@@ -39,6 +40,7 @@ const UploadFile = (props:Props) => {
         listCategories={Category}
         onChange={onChangeHandler}
         required
+        placeholder={'Κατηγορία...'}
       />
     <FormField
         htmlFor={"tags"}
@@ -50,6 +52,7 @@ const UploadFile = (props:Props) => {
         listCategories={Type}
         onChange={onChangeHandler}
         required
+        placeholder={'Aρχείου...'}
   
       />
          <FormField

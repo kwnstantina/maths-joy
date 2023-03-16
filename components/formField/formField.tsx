@@ -15,6 +15,7 @@ interface FormFieldProps {
   accept?:string
   name?:string
   id?:string;
+  placeholder?: string;
 }
 
 const FormField = ({
@@ -30,7 +31,8 @@ const FormField = ({
   required=false,
   accept,
   name,
-  id
+  id,
+  placeholder,
   
 }: FormFieldProps) => {
 
@@ -40,7 +42,6 @@ const FormField = ({
       <label htmlFor={htmlFor} className={labelStyle}>
         {label}
       </label>
-
       {typeOfField==='input'  ? <input
         onChange={onChange}
         type={type}
@@ -56,8 +57,9 @@ const FormField = ({
           onCallbackFunction={onChange}
           name={htmlFor}
           required={required}
+          placeholder={placeholder}
+          value={value}
      />:null}
-     
       <div className="pt-1 text-red-700">
         {error}
       </div>

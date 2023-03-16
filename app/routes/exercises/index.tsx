@@ -6,6 +6,7 @@ import {
 } from "@remix-run/node";
 import {useState,useCallback} from 'react';
 import {getAllExcersices,getExersiceBySearch} from '../../utils/exersices.prisma';
+import {TAGS,Category,Type} from '../../../services/models/models';
 
 export const loader: LoaderFunction = async ({request}) => {
   let exersisesAll=await getAllExcersices();
@@ -13,7 +14,7 @@ export const loader: LoaderFunction = async ({request}) => {
   const filters={
     category:url.searchParams.get("category"),
     tags:url.searchParams.get("tags"),
-    searchItem:url.searchParams.get("searchItem"),
+    searchItem:url.searchParams.get("input"),
     title:  url.searchParams.get("title")
   }
   let textFilter={}
@@ -23,27 +24,27 @@ export const loader: LoaderFunction = async ({request}) => {
         {
           title: {
                 mode: 'insensitive',
-                equals: filters?.title 
+                contains: filters.title ?? ''
             }
         },
         {
           title: {
               mode: 'insensitive',
-              contains: filters?.searchItem 
+              contains: filters.searchItem ?? ''
           }
        },
       ],
       AND: [  
-         {
+         {  
           tags: {
               mode: 'insensitive',
-              equals: filters?.tags 
+              contains: filters.tags ?? ''
           }
        },
        {
         category: {
             mode: 'insensitive',
-            equals: filters?.category 
+            contains: filters.category  ?? ''
         }
      },
       
@@ -57,11 +58,11 @@ export const loader: LoaderFunction = async ({request}) => {
 
 const Exersices = () => {
   const data = useLoaderData<typeof loader>()
-  const [filters,setFilters] = useState({
-    category:'',
-    title:'',
+  const [filters,setFilters] = useState<any>({
+    category:Category[0].name,
+    title:Type[0].name,
     input:'',
-    tags:''
+    tags:TAGS[0].name
   });
   const [searchParams, setSearchParams] = useSearchParams();
   
@@ -69,24 +70,29 @@ const Exersices = () => {
     setSearchParams({});
     setFilters(
       {
-        category:'',
-        title:'',
-        input:'',
-        tags:''
+    category:Category[0].name,
+    title:Type[0].name,
+    input:'',
+    tags:TAGS[0].name
     })
+
   }
-  const handleCategorySearch=useCallback((selected:any)=>{
-    setSearchParams( {category:filters.category,tags:filters.tags,searchItem:filters.input,title:filters.title});
+  const handleCategorySearch=useCallback(()=>{
+    const entries = Object.entries(filters).filter(([_, value]) => value).filter(item=>item!==undefined) ;
+    const filteredSearchParams=Object.fromEntries(entries) as any;
+    setSearchParams(filteredSearchParams);
   },[filters])
 
    const setFiltersHandler =useCallback((evt:{title:string,name:string} |any ) => {
-    return setFilters((filter) => ({
+     return setFilters((filter:any) => ({
       ...filter,
       [evt?.title]: evt?.name,
     }));
+  
   },[filters]);
 
 
+  console.log('filters',filters)
   return (
     <div className="container px-6 text-center pb-52" >
       <SearchInput 

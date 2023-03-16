@@ -86,14 +86,13 @@ export default function UploadExcercise(): JSX.Element {
     'Προφίλ',
   ]);
   const [tabIndex,setTabIndex] = useState(0);
-  console.log('actionData',actionData)
-
+  
   const onChangeHandler = useCallback((evt: any) => {
-    setUploadData((form: any) => ({
+   return  setUploadData((form: any) => ({
       ...form,
       [evt?.title]: evt?.name,
     }));
-  }, []);
+  }, [uploadData]);
 
   const classNames=(...classes: any) =>{
     return classes.filter(Boolean).join(" ");
@@ -178,7 +177,7 @@ export default function UploadExcercise(): JSX.Element {
           buttonState={buttonState}
           />
        }
-      {tabIndex===2 &&  <div className="h-screen	 mx-auto w-full max-w-md"></div>}
+      {tabIndex===2 &&  <div className="h-screen mx-auto w-full max-w-md"></div>}
         </Tab.Panels>
       </Tab.Group>
     </div>

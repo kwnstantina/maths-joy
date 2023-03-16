@@ -19,7 +19,7 @@ const UploadExercise = (props: Props) => {
         <Form onSubmit={handleSubmit} className="space-y-6">
           <FormField
             htmlFor={"title"}
-            label={"Τάξη"}
+            label={"Επιλογή Τάξης"}
             value={uploadData.title}
             error={actionData?.errors?.title}
             labelStyle={"block text-sm font-medium text-gray-700"}
@@ -27,6 +27,7 @@ const UploadExercise = (props: Props) => {
             listCategories={TAGS}
             onChange={onChangeHandler}
             required
+            placeholder={"Επιλογή Τάξης"}
           />
           <FormField
             htmlFor={"category"}
@@ -38,6 +39,7 @@ const UploadExercise = (props: Props) => {
             listCategories={Category}
             onChange={onChangeHandler}
             required
+            placeholder={"Επιλογή Κατηγορίας"}
           />
           <FormField
             htmlFor={"tags"}
@@ -49,6 +51,7 @@ const UploadExercise = (props: Props) => {
             listCategories={Type}
             onChange={onChangeHandler}
             required
+            placeholder={"Επιλογή Κατηγορίας"}
           />
           <label
             htmlFor="exercise"

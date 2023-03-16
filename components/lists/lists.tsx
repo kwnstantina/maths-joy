@@ -4,29 +4,27 @@ import { CheckIcon } from '@heroicons/react/solid'
 
 type Props={
   categories:Array<any>
-  onCallbackFunction:Function,
+  onCallbackFunction:()=>void,
   isMultiple?:boolean,
   name?:string |undefined,
   required?:boolean
+  placeholder?:string;
+  value?:any;
 }
 
 const List=(props:Props):JSX.Element=> {
-  const {categories,onCallbackFunction,isMultiple=false,name,required}=props;
-  const [selected, setSelected] = useState(isMultiple?[categories[1]]:categories[1]);
-  
-  useEffect(()=>{
-    onCallbackFunction(selected)
-  },[selected])
-
+  const {categories,onCallbackFunction,isMultiple=false,name,required,placeholder,value}=props;
   return (
     <div className='mt-2'>
-      <Listbox value={selected} onChange={setSelected} multiple={isMultiple} refName={name}>
+      <Listbox value={value} onChange={onCallbackFunction} multiple={isMultiple}>
         <div className="relative mt-1 ">
           <Listbox.Button className="relative w-94 cursor-default rounded-lg bg-white py-2 pl-3 pr-10 text-left shadow-md focus:outline-none focus-visible:border-indigo-500 focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75 focus-visible:ring-offset-2 focus-visible:ring-offset-orange-300 sm:text-sm">
-           {isMultiple? <span>
+
+              {/* {isMultiple? <span>
             {selected.map((category: { name: string }) => category.name).join(', ')}
             </span>:<span className="block truncate">{selected.name}</span>
-            } 
+            }  */}
+            {value?<span aria-required={required} className="block truncate">{value}</span> : <span className="block truncate text-gray-400">{placeholder}</span>}
           </Listbox.Button>
           <Listbox.Button>
        

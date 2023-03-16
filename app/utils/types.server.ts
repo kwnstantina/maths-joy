@@ -17,3 +17,11 @@ export type UploadExersiceForm = {
   file:File |any;
   tags:string;
 }
+
+export type CreateTrainingExersice = {
+  title:string;
+  category:string;
+  tags:string;
+  exercise: string;
+  solution:string;
+}

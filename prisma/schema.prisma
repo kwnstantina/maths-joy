@@ -41,3 +41,14 @@ model Exersice {
   updatedAt DateTime @updatedAt
   tags String
 }
+
+model Training {
+  id String   @id @default(auto()) @map("_id") @db.ObjectId
+  title String
+  category String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  tags String
+  content String
+  solution String
+}

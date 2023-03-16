@@ -9,9 +9,10 @@ type Props = {
   uploadData: any;
   actionData: any;
   buttonState: string;
+  addExersiceHandler:(evt:any)=>void;
 };
 const UploadExercise = (props: Props) => {
-  const { handleSubmit, onChangeHandler, uploadData, actionData, buttonState } =
+  const { handleSubmit, onChangeHandler, uploadData, actionData, buttonState,addExersiceHandler } =
     props;
   return (
     <>
@@ -27,7 +28,7 @@ const UploadExercise = (props: Props) => {
             listCategories={TAGS}
             onChange={onChangeHandler}
             required
-            placeholder={"Επιλογή Τάξης"}
+            placeholder={"Τάξη..."}
           />
           <FormField
             htmlFor={"category"}
@@ -39,11 +40,11 @@ const UploadExercise = (props: Props) => {
             listCategories={Category}
             onChange={onChangeHandler}
             required
-            placeholder={"Επιλογή Κατηγορίας"}
+            placeholder={"Κατηγορία..."}
           />
           <FormField
             htmlFor={"tags"}
-            label={" Επιλογή αρχείου"}
+            label={"Επιλογή τύπου ασκήσεως"}
             value={uploadData.tags}
             error={actionData?.errors?.tags}
             labelStyle={"block text-sm font-medium text-gray-700"}
@@ -51,7 +52,7 @@ const UploadExercise = (props: Props) => {
             listCategories={Type}
             onChange={onChangeHandler}
             required
-            placeholder={"Επιλογή Κατηγορίας"}
+            placeholder={"Τύπος άσκησης..."}
           />
           <label
             htmlFor="exercise"
@@ -64,11 +65,9 @@ const UploadExercise = (props: Props) => {
             name="exercise"
             rows={4}
             cols={50}
-            onChange={onChangeHandler}
-            value=''
-          >
-            {uploadData.exercise}
-          </textarea>
+            onChange={addExersiceHandler}
+            value={uploadData.exercise}
+          />
           <label
             htmlFor="exercise"
             className={"block text-sm font-medium text-gray-700"}
@@ -80,14 +79,12 @@ const UploadExercise = (props: Props) => {
             name="solution"
             rows={4}
             cols={50}
-            onChange={onChangeHandler}
-            value=''
-          >
-            {uploadData.exercise}
-          </textarea>
+            onChange={addExersiceHandler}
+            value={uploadData.solution}
+          />
           <button
             value="upload"
-            name="_uploadExercise"
+            name="_uploadTraining"
             type="submit"
             className="w-full mb-4 rounded bg-orange-500  py-2 px-4 text-white hover:bg-orange-600 focus:bg-orange-400"
           >

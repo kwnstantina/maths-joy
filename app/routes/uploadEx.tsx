@@ -1,5 +1,11 @@
-import React, { useCallback, useState } from "react";
-import { useActionData, useSubmit, useNavigate ,useTransition, useCatch} from "@remix-run/react";
+import React, { useCallback, useEffect, useState } from "react";
+import {
+  useActionData,
+  useSubmit,
+  useNavigate,
+  useTransition,
+  useCatch,
+} from "@remix-run/react";
 import {
   ActionFunction,
   json,
@@ -13,7 +19,7 @@ import { getUser } from "~/utils/auth.prisma";
 import { Tab } from "@headlessui/react";
 import UploadFile from "components/uploadExTabs/uploadFile";
 import UploadExercise from "components/uploadExTabs/uploadExercise";
-import Alerts from "components/alerts/alerts";
+import { createTrainingExercise } from "~/utils/training.prisma";
 
 export const loader: LoaderFunction = async ({ request }) => {
   let user = await getUser(request);
@@ -28,8 +34,7 @@ export function ErrorBoundary({ error }: any) {
     >
       <strong className="font-bold">Σφάλμα,</strong>
       <span className="block sm:inline">
-        Παρουσιάστηκε κάποιο πρόβλημα.
-        Παρακαλώ ξαναπροσπαθήστε ξανά.
+        Παρουσιάστηκε κάποιο πρόβλημα. Παρακαλώ ξαναπροσπαθήστε ξανά.
       </span>
       <span className="absolute top-0 bottom-0 right-0 px-4 py-3">
         <svg
@@ -49,75 +54,119 @@ export function ErrorBoundary({ error }: any) {
 
 export const action: ActionFunction = async ({ request }) => {
   const form = await request.formData();
+  const _action = form.get("_action");
   const title = form.get("title") as string;
   const category = form.get("category") as string;
   const file = form.get("file") as File | any;
   const tags = form.get("tags") as string;
+  const exercise = form.get("exercise") as string;
+  const solution = form.get("solution") as string;
   const fileContentType = form.get("fileContentType") as string;
-  const errors = {
-    file: validateFile(file["_name"]),
-  };
-  if (Object.values(errors).some(Boolean))
-    return json(
-      {
-        errors,
-        fields: { file },
-        form: action,
-      },
-      { status: 400 }
-    );
-  return await createExersice({ title, category, file, fileContentType, tags });
+  if(_action ==='uploadExercise'){
+    const errors = {
+      file: validateFile(file["_name"]),
+      title: !!title,
+      category: !!category,
+      tags: !!tags
+    };
+    if (Object.values(errors).some(Boolean))
+      return json(
+        {
+          errors,
+          fields: { file },
+          form: action,
+        },
+        { status: 400 }
+      );
+      return await createExersice({ title, category, file, fileContentType, tags });
+  }
+  if(_action ==='uploadTraning'){
+    return await createTrainingExercise({title,category,exercise,solution,tags})
+    
+  }
 };
 
 export default function UploadExcercise(): JSX.Element {
   const actionData = useActionData();
   const transition = useTransition();
   const submit = useSubmit();
+  const [action, setAction] = useState("uploadExercise") as any;
   const [uploadData, setUploadData] = useState({
     title: "",
     file: "",
     tags: "",
     category: "",
-    exercise:""
+    exercise: "",
+    solution: "",
   } as any);
   const [categories] = useState([
-    'Ανέβασμα Αρχείου',
-    'Ανέβασμα Ασκησης',
-    'Προφίλ',
+    "Ανέβασμα Αρχείου",
+    "Ανέβασμα Ασκησης",
+    "Προφίλ",
   ]);
-  const [tabIndex,setTabIndex] = useState(0);
-  
-  const onChangeHandler = useCallback((evt: any) => {
-   return  setUploadData((form: any) => ({
-      ...form,
-      [evt?.title]: evt?.name,
-    }));
-  }, [uploadData]);
+  const [tabIndex, setTabIndex] = useState(0);
 
-  const classNames=(...classes: any) =>{
+  useEffect(() => {
+    setUploadData({
+      title: "",
+      file: "",
+      tags: "",
+      category: "",
+      exercise: "",
+    });
+
+    setAction(() => {
+      if (tabIndex === 0) {
+        return "uploadExercise";
+      } else if (tabIndex === 1) {
+        return "uploadTraning";
+      }
+    });
+  }, [tabIndex]);
+
+  console.log("action", action);
+
+  const onChangeHandler = useCallback(
+    (evt: any) => {
+      return setUploadData((form: any) => ({
+        ...form,
+        [evt?.title]: evt?.name,
+      }));
+    },
+    [uploadData]
+  );
+
+  const addExersiceHandler = (evt: any) => {
+    setUploadData((form: any) => ({
+      ...form,
+      [evt.target.name]: evt.target.value,
+    }));
+  };
+  const classNames = (...classes: any) => {
     return classes.filter(Boolean).join(" ");
-  }
-  const buttonState = transition.state === "submitting"
-    ? "Saving..."
-    : transition.state === "loading"
-    ? "Saved!"
-    : "Δημημιουργία Ασκησης";
+  };
+  const buttonState =
+    transition.state === "submitting"
+      ? "Saving..."
+      : transition.state === "loading"
+      ? "Saved!"
+      : "Δημημιουργία Ασκησης";
 
   const fileUploadHandler = async (
-    event: React.ChangeEvent<HTMLInputElement> |any
+    event: React.ChangeEvent<HTMLInputElement> | any
   ) => {
-     const file: any = event?.target?.files;
-     const data = await InternalFunctions.getBase64(file[0])
-       .then((result: any) => {
-         return result;
-       })
-       .catch((err: any) => {
-         console.log("error on upload File", err);
-       });
-     setUploadData((form: any) => ({
-       ...form,
-       [event.target?.name]: data,
-     }));
+    const file: any = event?.target?.files;
+    const data = await InternalFunctions.getBase64(file[0])
+      .then((result: any) => {
+        return result;
+      })
+      .catch((err: any) => {
+        console.log("error on upload File", err);
+      });
+    setUploadData((form: any) => ({
+      ...form,
+      [event.target?.name]: data,
+    }));
   };
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
@@ -127,8 +176,17 @@ export default function UploadExcercise(): JSX.Element {
     formData.set("tags", uploadData.tags);
     formData.set("category", uploadData.category);
     formData.set("title", uploadData.title);
-    formData.set("exercise", uploadData.exercise);
-    formData.set("fileContentType", uploadData.file["fileContentType"] as any);
+    formData.set("_action", action);
+    if (action === "uploadExercise") {
+      formData.set(
+        "fileContentType",
+        uploadData.file["fileContentType"] as any
+      );
+    }
+    if (action === "uploadTraning") {
+      formData.set("exercise", uploadData.exercise);
+      formData.set("solution", uploadData.solution);
+    }
     submit(formData, {
       method: "post",
       action: $form.getAttribute("action") ?? $form.action,
@@ -139,9 +197,10 @@ export default function UploadExcercise(): JSX.Element {
   return (
     <div className="lg:w-8/12 sm:w-10/12 px-2 py-16 mx-6">
       <Tab.Group
-       onChange={(index) => {
-        setTabIndex(index);
-      }}>
+        onChange={(index) => {
+          setTabIndex(index);
+        }}
+      >
         <Tab.List className="flex space-x-1 rounded-xl bg-orange-600 p-1">
           {categories.map((category) => (
             <Tab
@@ -160,24 +219,29 @@ export default function UploadExcercise(): JSX.Element {
           ))}
         </Tab.List>
         <Tab.Panels className="mt-2">
-       {tabIndex===0 &&  <UploadFile 
-          handleSubmit={handleSubmit}
-          onChangeHandler={onChangeHandler}
-          uploadData={uploadData}
-          actionData={actionData}
-          fileUploadHandler={fileUploadHandler}
-          buttonState={buttonState}
-          />
-       }
-      {tabIndex===1 &&  <UploadExercise
-          handleSubmit={handleSubmit}
-          onChangeHandler={onChangeHandler}
-          uploadData={uploadData}
-          actionData={actionData}
-          buttonState={buttonState}
-          />
-       }
-      {tabIndex===2 &&  <div className="h-screen mx-auto w-full max-w-md"></div>}
+          {tabIndex === 0 && (
+            <UploadFile
+              handleSubmit={handleSubmit}
+              onChangeHandler={onChangeHandler}
+              uploadData={uploadData}
+              actionData={actionData}
+              fileUploadHandler={fileUploadHandler}
+              buttonState={buttonState}
+            />
+          )}
+          {tabIndex === 1 && (
+            <UploadExercise
+              handleSubmit={handleSubmit}
+              onChangeHandler={onChangeHandler}
+              uploadData={uploadData}
+              actionData={actionData}
+              buttonState={buttonState}
+              addExersiceHandler={addExersiceHandler}
+            />
+          )}
+          {tabIndex === 2 && (
+            <div className="h-screen mx-auto w-full max-w-md"></div>
+          )}
         </Tab.Panels>
       </Tab.Group>
     </div>

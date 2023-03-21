@@ -28,6 +28,7 @@ enum Role {
 type Profile {
   firstName String
   lastName String
+  profilePicture String?
 }
 
 
@@ -51,4 +52,6 @@ model Training {
   tags String
   content String
   solution String
+  contentImage String
+  solutionImage String
 }

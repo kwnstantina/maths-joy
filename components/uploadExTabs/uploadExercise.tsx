@@ -1,4 +1,4 @@
-import { Form } from "@remix-run/react";
+import { Form, useLoaderData } from "@remix-run/react";
 import Alerts from "components/alerts/alerts";
 import { Category, TAGS, Type } from "services/models/models";
 import FormField from "../formField/formField";
@@ -9,11 +9,11 @@ type Props = {
   uploadData: any;
   actionData: any;
   buttonState: string;
-  addExersiceHandler:(evt:any)=>void;
+  fileUploadHandler: (evt:any)=>void;
 };
+
 const UploadExercise = (props: Props) => {
-  const { handleSubmit, onChangeHandler, uploadData, actionData, buttonState,addExersiceHandler } =
-    props;
+  const { handleSubmit, onChangeHandler, uploadData, actionData, buttonState,fileUploadHandler } = props;
   return (
     <>
       <div className="mx-auto w-full max-w-lg  p-5 h-94 mt-5 mb-4 bg-gray-100 mb-20 rounded py-94">
@@ -54,34 +54,60 @@ const UploadExercise = (props: Props) => {
             required
             placeholder={"Τύπος άσκησης..."}
           />
-          <label
+          {/* <label
             htmlFor="exercise"
             className={"block text-sm font-medium text-gray-700"}
           >
             Ανέβασμα Ασκησης:
-          </label>
-          <textarea
+          </label> */}
+          {/* <textarea
             id="exercise"
             name="exercise"
             rows={4}
             cols={50}
             onChange={addExersiceHandler}
             value={uploadData.exercise}
-          />
-          <label
+          /> */}
+             <FormField
+            htmlFor={"exercise"}
+            type="file"
+            name="exercise"
+            label={"Ανέβασμα Ασκησης"}
+            error={actionData?.errors?.exercise}
+            labelStyle={"block text-sm font-medium text-gray-700"}
+            typeOfField={"input"}
+            required
+            id="exercise"
+            accept='image/*, .xlsx, .xls, .csv, .pdf, .pptx, .pptm, .ppt' 
+            onChange={(event) => fileUploadHandler(event)}
+            />
+          {/* <label
             htmlFor="exercise"
             className={"block text-sm font-medium text-gray-700"}
           >
             Λύση ( με αιτιολόγηση):
-          </label>
-          <textarea
+          </label> */}
+          {/* <textarea
             id="solution"
             name="solution"
             rows={4}
             cols={50}
             onChange={addExersiceHandler}
             value={uploadData.solution}
-          />
+          /> */}
+             <FormField
+            htmlFor={"solution"}
+            type="file"
+            name="solution"
+            label={"Λύση"}
+            error={actionData?.errors?.solution}
+            labelStyle={"block text-sm font-medium text-gray-700"}
+            typeOfField={"input"}
+            required
+            id="exercise"
+            accept='image/*, .xlsx, .xls, .csv, .pdf, .pptx, .pptm, .ppt' 
+            onChange={(event) => fileUploadHandler(event)}
+            />
           <button
             value="upload"
             name="_uploadTraining"

@@ -86,7 +86,7 @@ const TestYourself = () => {
         </div>
       </div>
     
-      <main id="content" className="flex-1 p-6 lg:px-8">
+      <main id="content" className="flex-1 p-6 lg:px-8 overflow-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none'] h-full">
         <Outlet />
       </main>
     </div>

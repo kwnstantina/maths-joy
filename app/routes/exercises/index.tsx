@@ -92,7 +92,6 @@ const Exersices = () => {
   },[filters]);
 
 
-  console.log('filters',filters)
   return (
     <div className="container px-6 text-center pb-52" >
       <SearchInput 

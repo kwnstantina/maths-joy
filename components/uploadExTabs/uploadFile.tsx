@@ -1,6 +1,5 @@
 import { Form } from "@remix-run/react";
 import Alerts from "components/alerts/alerts";
-import { useEffect } from "react";
 import { Category, TAGS, Type } from "services/models/models";
 import FormField from "../formField/formField";
 
@@ -10,7 +9,9 @@ type Props = {
   uploadData: any;
   actionData: any;
   fileUploadHandler: any;
-  buttonState: string;};
+  buttonState: string;
+};
+
 const UploadFile = (props: Props) => {
   const {
     handleSubmit,
@@ -20,6 +21,7 @@ const UploadFile = (props: Props) => {
     fileUploadHandler,
     buttonState,
   } = props;
+  
   return (
     <>
       <div className="mx-auto w-full max-w-md p-5 h-94 mt-5 mb-4 bg-gray-100 mb-20 rounded py-94">

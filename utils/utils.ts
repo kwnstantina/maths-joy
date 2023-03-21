@@ -33,3 +33,11 @@ export const rgbToHex = (r: any,g: any ,b: any)=>{
 export const starterLetters = (firstName:string,lastName:string)=>{
     return firstName[0]+ '' +lastName[0] ?? 'A';
 }
+
+
+export const separateLatterMaths=(str:string)=>{
+    const myRex=/^[α-ωΑ-Ω\s]/gm;
+    const greekWithTonesRegex = /[\u0386-\u03AC\u1F00-\u1FBC]/g;
+    const isLetter = greekWithTonesRegex.test(str)  || myRex.test(str);
+    return isLetter;
+}

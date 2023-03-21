@@ -62,6 +62,7 @@ export const action: ActionFunction = async ({ request }) => {
   const exercise = form.get("exercise") as string;
   const solution = form.get("solution") as string;
   const fileContentType = form.get("fileContentType") as string;
+  
   if(_action ==='uploadExercise'){
     const errors = {
       file: validateFile(file["_name"]),
@@ -81,8 +82,7 @@ export const action: ActionFunction = async ({ request }) => {
       return await createExersice({ title, category, file, fileContentType, tags });
   }
   if(_action ==='uploadTraning'){
-    return await createTrainingExercise({title,category,exercise,solution,tags})
-    
+      return await createTrainingExercise({title,category,exercise,solution,tags});
   }
 };
 
@@ -99,6 +99,7 @@ export default function UploadExcercise(): JSX.Element {
     exercise: "",
     solution: "",
   } as any);
+
   const [categories] = useState([
     "Ανέβασμα Αρχείου",
     "Ανέβασμα Ασκησης",
@@ -113,6 +114,7 @@ export default function UploadExcercise(): JSX.Element {
       tags: "",
       category: "",
       exercise: "",
+      solution: "",
     });
 
     setAction(() => {
@@ -124,7 +126,6 @@ export default function UploadExcercise(): JSX.Element {
     });
   }, [tabIndex]);
 
-  console.log("action", action);
 
   const onChangeHandler = useCallback(
     (evt: any) => {
@@ -136,12 +137,6 @@ export default function UploadExcercise(): JSX.Element {
     [uploadData]
   );
 
-  const addExersiceHandler = (evt: any) => {
-    setUploadData((form: any) => ({
-      ...form,
-      [evt.target.name]: evt.target.value,
-    }));
-  };
   const classNames = (...classes: any) => {
     return classes.filter(Boolean).join(" ");
   };
@@ -184,8 +179,8 @@ export default function UploadExcercise(): JSX.Element {
       );
     }
     if (action === "uploadTraning") {
-      formData.set("exercise", uploadData.exercise);
-      formData.set("solution", uploadData.solution);
+      formData.set("exercise", uploadData.exercise['fileContentType']);
+      formData.set("solution", uploadData.solution['fileContentType']);
     }
     submit(formData, {
       method: "post",
@@ -236,7 +231,7 @@ export default function UploadExcercise(): JSX.Element {
               uploadData={uploadData}
               actionData={actionData}
               buttonState={buttonState}
-              addExersiceHandler={addExersiceHandler}
+              fileUploadHandler={fileUploadHandler}
             />
           )}
           {tabIndex === 2 && (

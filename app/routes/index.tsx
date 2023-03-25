@@ -50,12 +50,12 @@ export default function Index() {
 
   return (
     <>
-      <section>
-        <div className="container mx-auto px-6 text-center pb-48">
+      <section className="container mx-auto px-6 text-center pb-48 flex justify-center align-center">
+        <div >
           <img
             src={greg}
             alt="Gregory Kirtsias"
-            className="h-30 rounded-full md:max-w-4xl md:ml-60"
+            className="h-30 rounded-full md:max-w-4xl"
           />
           <h1 className="max-w-2xl mx-auto mb-10 text-3xl font-bold leading-normal  md:text-4xl">
             Ασκήσεις και θέματα μαθηματικών.
@@ -98,15 +98,15 @@ export default function Index() {
     </div>
       </section> */}
 
-      <section className="bg-gray-50 dark:bg-darkBlue1">
+      <section className="container md:mx-8 bg-gray-50 dark:bg-darkBlue1">
         <div
-          className="container mx-auto px-6 pb-32"
+          className="px-6 pb-32"
           ref={refThree}
           style={getFadeLeftStyles(animatedView.section3)}
         >
           <div className="flex flex-col space-y-24 text-center md:space-y-5">
             <div className="flex flex-col items-center space-y-2 md:w-1/2">
-              <div className="flex items-center justify-center mb-6 h-40 w-[36rem]	 bg-gradient-to-r from-orange-300	 to-orange-600  rounded-3xl shadow-md">
+              <div className="flex items-center justify-center mb-6 h-40 md:w-[36rem]	 bg-gradient-to-r from-orange-300	 to-orange-600  rounded-3xl shadow-md">
                 <DocumentAddIcon  className="w-20" />
                 <div>
                   <h3 className="text-xl font-bold">Ασκήσεις Μαθηματικών</h3>
@@ -120,7 +120,7 @@ export default function Index() {
           </div>
           <div className="flex flex-col space-y-24 text-center md:space-y-5 md:ml-32">
             <div className="flex flex-col items-center space-y-2 md:w-1/2">
-              <div className="flex items-center justify-center mb-6 h-40 w-[36rem]	 bg-gradient-to-r from-rose-200	 to-rose-300  rounded-3xl shadow-md">
+              <div className="flex items-center justify-center mb-6 h-40 md:w-[36rem]	 bg-gradient-to-r from-rose-200	 to-rose-300  rounded-3xl shadow-md">
                 <ViewBoardsIcon className="w-20" />   
                 <div>
                 <h3 className="text-xl font-bold">Διδακτικό υλικό</h3>
@@ -135,7 +135,7 @@ export default function Index() {
                    
           <div className="flex flex-col space-y-24 text-center md:space-y-5 md:ml-72">
             <div className="flex flex-col items-center space-y-2 md:w-1/2">
-              <div className="flex items-center justify-center  mb-6 h-40 w-[36rem]	 bg-gradient-to-r from-teal-200	 to-teal-500  rounded-3xl shadow-md">
+              <div className="flex items-center justify-center  mb-6 h-40 md:w-[36rem]	 bg-gradient-to-r from-teal-200	 to-teal-500  rounded-3xl shadow-md">
                 <BookOpenIcon className="w-20" />
                 <div>
                 <h3 className="text-xl font-bold">Βιβλία</h3>
@@ -148,8 +148,8 @@ export default function Index() {
             </div>
             <div className="flex flex-col space-y-24 text-center md:space-y-5 md:ml-[27rem]">
           <div className="flex flex-col items-center space-y-2 md:w-1/2">
-              <div className="flex items-center justify-center h-24 mb-6 h-40 w-[36rem]	 bg-gradient-to-r from-sky-200	 to-sky-500  rounded-3xl shadow-md">
-                <img src={progress} className="w-24" alt="Λύσε ασκήσεις" />
+              <div className="flex items-center justify-center mb-6 h-40 md:w-[36rem]	 bg-gradient-to-r from-sky-200	 to-sky-500  rounded-3xl shadow-md">
+                <img src={progress} className="w-20" alt="Λύσε ασκήσεις" />
                 <div>
                 <h3 className="text-xl font-bold">Εξάσκηση</h3>
                 <p className="max-w-md">Ασκήσεις εμπέδωσης και αξιολόγησης.</p>
@@ -159,16 +159,18 @@ export default function Index() {
             </div>
         </div>
       </section>
-      <section className="w-10/12 mx-auto px-6 pb-32 bg-gray-50 dark:bg-darkBlue1 rounded-t-md mb-6">
+      <section className="w-10/12 mx-auto px-6 pb-32 rounded-t-md mb-6">
         <div
           ref={anotherRef}
           style={getFadeRightStyles(animatedView.section2)}
-          className="flex flex-row justify-end items-center flex-wrap"
+          className="flex flex-col justify-start items-center flex-wrap"
         >
           <div>
-            <h1 className="text-xl  w-64">
+            <h1 className="text-xl text-center">
               Online chat για απορίες  και συζήτηση για ασκήσεις και θέματα
             </h1>
+            </div>
+            <div className="relative top-96 z-50">
             <a
               href="/chat"
               className="inline-flex mt-5 h-3 items-center justify-center p-5 bg-orange-200 text-base font-medium text-black-500 rounded-lg hover:text-gray-900 hover:bg-orange-100 dark:text-gray-400 dark:bg-gray-800 dark:hover:bg-gray-700 dark:hover:text-white"

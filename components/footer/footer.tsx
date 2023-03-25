@@ -4,7 +4,7 @@ import { PhoneIcon, MailIcon } from "@heroicons/react/solid";
 
 const Footer = () => {
   return (
-    <footer className="bg-gray-700 text-white">
+    <footer className="container bg-gray-700 text-white">
       <div className="container mx-auto pt-12 px-5 pb-10">
         <div className="flex flex-col justify-between space-y-24 md:flex-row md:space-y-0">
           <div className="mt-10 space-y-6">
@@ -47,10 +47,15 @@ const Footer = () => {
              <SocialIcons />
           </div> */}
       </div>
-      <div className="flex flex-col text-center pt-2 text-gray-400 text-sm pb-8 items-start ml-4">
-        <span>© 2023 Appy. All rights reserved Konstantina Kirtsia.</span>
-        <span>Terms · Privacy Policy</span>
-      </div>
+      <div className="container mx-auto px-6">
+        <div className="mt-16 border-t-2 border-gray-300 flex flex-col items-center">
+            <div className="sm:w-2/3 text-center py-6">
+                <p className="text-sm text-white font-bold mb-2">
+                © 2023 Appy. All rights reserved Konstantina Kirtsia.
+                </p>
+            </div>
+        </div>
+    </div>
     </footer>
   );
 };

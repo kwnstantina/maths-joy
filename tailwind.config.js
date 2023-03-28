@@ -13,10 +13,17 @@ module.exports = {
         wiggle: {
           '0%, 100%': { transform: 'rotate(-1deg)' },
           '30%': { transform: 'rotate(1deg)' },
+        },
+        gradient: {
+          '0% 100%': { 'background-position':"0% 100%"},
+          '50%': {
+            'background-position': "100% 0%"
+          }
         }
       },
       animation: {
         wiggle: 'wiggle 1s ease-in-out infinite',
+        gradient: 'gradient 20s ease infinite',
       }
     },
   },

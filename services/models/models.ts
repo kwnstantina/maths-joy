@@ -192,3 +192,54 @@ export const ExerciseNavList = [
     ],
   },
 ];
+
+export const staticImages: Array<any> = [
+  {
+    cover_photo: {
+      urls: {
+        regular:
+          "https://i.pinimg.com/564x/d0/91/97/d09197202480d002273b332d379c57a7.jpg",
+      },
+    },
+  },
+  {
+    cover_photo: {
+      urls: {
+        regular:
+          "https://i.pinimg.com/564x/0d/4a/a1/0d4aa16fe31dba498c27f3850cdf0e80.jpg",
+      },
+    },
+  },
+  {
+    cover_photo: {
+      urls: {
+        regular:
+          "https://i.pinimg.com/564x/c8/08/de/c808dec90b152b59edee8ccb23e46f0a.jpg",
+      },
+    },
+  },
+  {
+    cover_photo: {
+      urls: {
+        regular:
+          "https://i.pinimg.com/564x/88/f0/50/88f050f61e9bb02f958a6bf436a60ab5.jpg",
+      },
+    },
+  },
+  {
+    cover_photo: {
+      urls: {
+        regular:
+          "https://i.pinimg.com/564x/0c/2b/44/0c2b446aebb58f16332b4e12913c3340.jpg",
+      },
+    },
+  },
+  {
+    cover_photo: {
+      urls: {
+        regular:
+          "https://i.pinimg.com/564x/06/ef/59/06ef59011706ed98209ff1f3d946a374.jpg",
+      },
+    },
+  },
+];

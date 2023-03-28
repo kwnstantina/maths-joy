@@ -43,6 +43,7 @@
     "remix-auth-google": "^1.2.0",
     "remix-i18next": "^5.0.0",
     "tw-elements": "^1.0.0-alpha13",
+    "unsplash-js": "^7.0.15",
     "xss": "^1.0.14"
   },
   "devDependencies": {

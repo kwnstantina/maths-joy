@@ -1,6 +1,7 @@
 import { prisma } from "./prisma.server";
 import { UploadExersiceForm } from "./types.server";
 
+
 export const createExersice = async (exer: UploadExersiceForm) => {
   const newExercise = await prisma.exersice.create({
     data: {
@@ -16,6 +17,7 @@ export const createExersice = async (exer: UploadExersiceForm) => {
 
 
 export const getAllExcersices = async()=>{
+  
   const exersices =await prisma.exersice.findMany(  {select: {
     id:true,
     title: true,

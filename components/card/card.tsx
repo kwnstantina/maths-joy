@@ -9,13 +9,16 @@ const Card = (props:any) => {
   return (
     <div className="flex justify-center m-10">
       <div className="block rounded-lg shadow-lg bg-white max-w-sm text-center">
-        <div className="py-3 px-6 border-b border-orange-300">Μαθηματικά για {item.title}</div>
+      <img  src={item.photo.regular} alt="Γρηγόρης Κυρτσιάς" className="rounded-t-lg"/>  
         <div className="p-6">
           <h5 className="text-gray-900 text-xl font-medium mb-2">
            Κατηγορία: {item.category}
           </h5>
           <p className="text-gray-700 text-base mb-4">
             Τύπος άσκησης: <strong>{item.tags}</strong>
+          </p>
+          <p className="text-gray-700 text-base mb-4">
+            Τάξη: <strong>{item.title}</strong>
           </p>
           <button
             type="button"

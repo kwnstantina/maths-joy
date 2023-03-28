@@ -98,7 +98,7 @@ export default function Index() {
     </div>
       </section> */}
 
-      <section className="container md:mx-8 bg-gray-50 dark:bg-darkBlue1">
+      <section className="container bg-gray-50 dark:bg-darkBlue1">
         <div
           className="px-6 pb-32"
           ref={refThree}

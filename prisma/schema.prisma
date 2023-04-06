@@ -55,3 +55,15 @@ model Training {
   contentImage String
   solutionImage String
 }
+
+
+model Video{
+  id String   @id @default(auto()) @map("_id") @db.ObjectId
+  title String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  tags String[]
+  description String
+  creatorName String 
+  url String
+}

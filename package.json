@@ -13,7 +13,7 @@
     "@emoji-mart/react": "^1.1.1",
     "@headlessui/react": "^1.7.7",
     "@heroicons/react": "^1.0.6",
-    "@prisma/client": "^4.8.1",
+    "@prisma/client": "^4.12.0",
     "@react-pdf-viewer/core": "^3.10.0",
     "@react-pdf-viewer/default-layout": "^3.10.0",
     "@react-spring/web": "^9.6.1",
@@ -58,7 +58,7 @@
     "concurrently": "^7.6.0",
     "eslint": "^8.27.0",
     "postcss": "^8.4.20",
-    "prisma": "^4.8.1",
+    "prisma": "^4.12.0",
     "supabase": "^1.37.1",
     "tailwindcss": "^3.2.4",
     "typescript": "^4.8.4"

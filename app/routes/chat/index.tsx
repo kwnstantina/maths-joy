@@ -76,6 +76,7 @@ const Chat = () => {
   return rgbToHex(randomChatColor.r,randomChatColor.g,randomChatColor.b)
   },[])
 
+
   useEffect(() => {
     const channel = supabaseClient
       .channel("*")
@@ -109,6 +110,8 @@ const Chat = () => {
   const onChangeHandler =(e: { target: { value: string; }; })=>{
     setMessage(e.target.value);
   }
+  console.log('message.profilePicture',data)
+  console.log('message',message)
 
   return (
     <>
@@ -164,7 +167,7 @@ const Chat = () => {
                     placeholder="Message"
                     className="block w-full py-2 pl-4 mx-3 bg-gray-100 rounded-full outline-none focus:text-gray-700"
                     name="message"
-                    required
+                    required 
                     value={message}
                     onChange={onChangeHandler}
                   />

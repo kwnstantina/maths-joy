@@ -6,6 +6,7 @@ type Message = {
   user_id: string;
   content: string;
   created_at: string;
+  profilePicture:string;
 };
 type Props = {
   messages: Array<Message>;
@@ -39,15 +40,16 @@ const ChatContent = (props: Props) => {
                   <span className="block">{decode(message.content)}</span>
                 </div>
                 <a  className={"flex items-center px-3 py-2 transition duration-150 ease-in-out border-b border-gray-300 cursor-pointer hover:bg-gray-100 focus:outline-none"}>
-                  {/* <img
+                  {data.user?.profile?.profilePicture?
+                   <img
                     className="object-cover w-10 h-10 rounded-full"
-                    src="https://cdn.pixabay.com/photo/2018/01/15/07/51/woman-3083383__340.jpg"
+                    src={data.user.profile.profilePicture}
                     alt="username"
-                  /> */}
+                  /> :
                   <div  className="text-center items-center w-10 h-10 rounded-full" style={{background:message.user_id === data.user?.id? randomColorChat: '#FFFF'}}>
                      <p className="text-lg pt-2">{starterLetters(data.user?.profile?.firstName,data.user?.profile?.lastName)}</p>
                   </div>
-
+                }
                 </a>
               </div>
             </li>

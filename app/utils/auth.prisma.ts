@@ -23,6 +23,7 @@ export const storage = createCookieSessionStorage({
     httpOnly: true,
   },
 });
+
 let googleStrategy = new GoogleStrategy(
   {
     clientID: process.env.GOOGLE_CLIENT_ID,
@@ -41,6 +42,7 @@ let googleStrategy = new GoogleStrategy(
         password: "",
         firstName: profile.displayName,
         lastName: profile.name.givenName,
+        profilePicture:profile["_json"].picture
       };
       let userId = await createUser(newUser);
       const session = await storage.getSession();
@@ -79,6 +81,10 @@ export async function register(user: RegisterForm) {
 
 // Validate the user on email & password
 export async function login({ email, password }: LoginForm) {
+  
+  if(email == null){
+    throw new Error('Incorrect login')
+  };
   const user = await prisma.user.findUnique({
     where: { email },
   });
@@ -178,6 +184,7 @@ export async function chatAuthorization(request: Request) {
       firstName: userByExternalAuth.profile.firstName,
       lastName: userByExternalAuth.profile.lastName,
       isActive: true,
+      profilePicture:userByExternalAuth.profilePicture,
     });
   }
   if(userByStorage && checkIfUserStorageExists.data?.length===0){

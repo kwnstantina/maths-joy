@@ -12,6 +12,7 @@ export const createUser = async (user: RegisterForm) => {
       profile: {
         firstName: user.firstName,
         lastName: user.lastName,
+        profilePicture: user.profilePicture,
       },
     },
   });

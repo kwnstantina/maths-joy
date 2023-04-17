@@ -1,4 +1,4 @@
-import React from "react";
+import HorizontalLine from "components/horizontalLine/horizontalLine";
 
 type Props = {
   contentImage: string;
@@ -8,6 +8,7 @@ type Props = {
   isExersiceViewed:Array<string>
   index:number
 };
+
 const TrainingList = (props: Props) => {
   const { contentImage, solutionImage,id,isExersiceViewed ,handleViewedExersices,index} = props;
   return (
@@ -17,17 +18,24 @@ const TrainingList = (props: Props) => {
         <img src={contentImage} />
       </div>
       <div>
+        <HorizontalLine/>
+      </div>
+      <div>
         <button
-        onClick={()=>handleViewedExersices(id)}
-         className="w-30 h-30 text-center rounded bg-orange-500  py-2 px-4 text-white hover:bg-orange-600 focus:bg-orange-400"
+         onClick={()=>handleViewedExersices(id)}
+         className="w-30 h-30 text-center rounded bg-orange-500  py-2 px-4 text-white hover:bg-orange-600 focus:bg-orange-400 m-5"
          >
           Λύση
         </button>
       </div>
       <div>
-        {isExersiceViewed.includes(id)?  <img src={solutionImage} />: null}
+        {isExersiceViewed.includes(id)?  
+        <>
+         <img src={solutionImage} />
+         <HorizontalLine/>
+         </>
+         : null}
       </div>
-  
     </div>
   );
 };

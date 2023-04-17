@@ -1,6 +1,7 @@
 /** @type {import('tailwindcss').Config} */
 
-const plugin = require('tailwindcss/plugin')
+const plugin = require('tailwindcss/plugin');
+const defaultTheme = require('tailwindcss/defaultTheme');
 
 module.exports = {
   content: [
@@ -8,6 +9,10 @@ module.exports = {
     "./components/**/*.{js,ts,jsx,tsx}",
   ],
   theme: {
+    screens: {
+      'xs': '475px',
+      ...defaultTheme.screens,
+    },
     extend: {
       keyframes: {
         wiggle: {
@@ -19,11 +24,22 @@ module.exports = {
           '50%': {
             'background-position': "100% 0%"
           }
-        }
+        },
+        text: {
+          '0%, 100%': {
+            'background-size': '200% 200%',
+            'background-position': 'left center',
+          },
+          '50%': {
+            'background-size': '200% 200%',
+            'background-position': 'right center',
+          },
+        },
       },
       animation: {
         wiggle: 'wiggle 1s ease-in-out infinite',
         gradient: 'gradient 20s ease infinite',
+        text: 'text 5s ease infinite',
       }
     },
   },

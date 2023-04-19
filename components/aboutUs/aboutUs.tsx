@@ -17,7 +17,7 @@ const AboutUsHoc =()=> {
                             <p className="text-base leading-6 mt-2 text-gray-800">Μαθηματικός</p>
                         </div>
                     </div>
-                    <div className="bg-indigo-700 rounded-md lg:w-96 w-80 flex flex-col items-center justify-center md:py-0 py-12">
+                    <div className="bg-orange-600 rounded-md lg:w-96 w-80 flex flex-col items-center justify-center md:py-0 py-12">
                         <h3 className="text-2xl font-semibold leading-6 text-center text-white">Έστω ότι μαθηματικός με μουστάκι...</h3>
                         <p className="lg:w-80 lg:px-0 px-4 text-base leading-6 text-center text-white mt-6">Η δίψα για τα μαθηματικά και ο ενθουσιασμός, μας ώθησε να δημιουργήσει ένα μέρος που οι μαθητές να έχουν προσβαση σε πληθώρα διδακτικού υλικου. </p>
                     </div>

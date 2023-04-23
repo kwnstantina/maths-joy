@@ -45,5 +45,6 @@ export const getExersiceBySearch = async(filters:any) =>{
     createdAt:true,
     tags:true,
   },where: {...filters}});
+  
   return exersice;
 }

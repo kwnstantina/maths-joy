@@ -110,8 +110,7 @@ const Chat = () => {
   const onChangeHandler =(e: { target: { value: string; }; })=>{
     setMessage(e.target.value);
   }
-  console.log('message.profilePicture',data)
-  console.log('message',message)
+
 
   return (
     <>

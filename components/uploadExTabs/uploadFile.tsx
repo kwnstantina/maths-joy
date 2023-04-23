@@ -21,11 +21,10 @@ const UploadFile = (props: Props) => {
     fileUploadHandler,
     buttonState,
   } = props;
-  
   return (
     <>
       <div className="mx-auto w-full max-w-md p-5 h-94 mt-5 mb-4 bg-gray-100 mb-20 rounded py-94">
-        <Form onSubmit={handleSubmit} className="space-y-6">
+        <Form onSubmit={handleSubmit}  className="space-y-6">
           <FormField
             htmlFor={"title"}
             label={"Επιλογή τάξης"}
@@ -33,7 +32,7 @@ const UploadFile = (props: Props) => {
             error={actionData?.errors?.title}
             labelStyle={"block text-sm font-medium text-gray-700"}
             typeOfField={"select"}
-            listCategories={TAGS}
+            listCategories={Object.values(TAGS.byId)}
             onChange={onChangeHandler}
             required
             placeholder={"Τάξη..."}
@@ -45,7 +44,7 @@ const UploadFile = (props: Props) => {
             error={actionData?.errors?.category}
             labelStyle={"block text-sm font-medium text-gray-700"}
             typeOfField={"select"}
-            listCategories={Category}
+            listCategories={Object.values(Category.byId)}
             onChange={onChangeHandler}
             required
             placeholder={"Κατηγορία..."}
@@ -57,7 +56,7 @@ const UploadFile = (props: Props) => {
             error={actionData?.errors?.tags}
             labelStyle={"block text-sm font-medium text-gray-700"}
             typeOfField={"select"}
-            listCategories={Type}
+            listCategories={Object.values(Type.byId)}
             onChange={onChangeHandler}
             required
             placeholder={"Είδος άσκησης..."}
@@ -80,7 +79,6 @@ const UploadFile = (props: Props) => {
             name="_uploadExercise"
             type="submit"
             className="w-full mb-4 rounded bg-orange-500  py-2 px-4 text-white hover:bg-orange-600 focus:bg-orange-400"
-            id="_uploadExercise"
           >
             {buttonState}
           </button>

@@ -1,114 +1,132 @@
-export const TAGS = [
+export const TAGS = 
   {
-    id: 0,
-    name: "",
-    title: "title",
-    unavailable: true,
-  },
-  {
-    id: 1,
-    name: "Α-Λυκειου",
-    title: "title",
-    unavailable: false,
-  },
-  {
-    id: 2,
-    name: "Β-Λυκειου",
-    title: "title",
-    unavailable: false,
-  },
-  {
-    id: 3,
-    name: "Γ-Λυκειου",
-    title: "title",
-    unavailable: false,
-  },
-  { id: 4, name: "Γυμνάσιο", title: "title", unavailable: false },
-  {
-    id: 5,
-    name: "Πανεπιστήμιακά Μαθηματικά",
-    title: "title",
-    unavailable: false,
-  },
-];
+    byId: {
+      0: {
+        id: 0,
+        name: "",
+        title: "title",
+        unavailable: true,
+      },
+      1: {
+        id: 1,
+        name: "Α-Λυκείου",
+        title: "title",
+        unavailable: false,
+      },
+      2: {
+        id: 2,
+        name: "Β-Λυκείου",
+        title: "title",
+        unavailable: false,
+      },
+      3: {
+        id: 3,
+        name: "Γ-Λυκείου",
+        title: "title",
+        unavailable: false,
+      },
+      4: {
+        id: 4,
+        name: "Γυμνάσιο",
+        title: "title",
+        unavailable: false,
+      },
+      5: {
+        id: 5,
+        name: "Πανεπιστημιακά Μαθηματικά",
+        title: "title",
+        unavailable: false,
+      },
+    },
+    allIds: [0, 1, 2, 3, 4, 5],
+  };
 
-export const Category = [
+export const Category = 
   {
-    id: 0,
-    name: "",
-    title: "category",
-    unavailable: true,
-  },
-  {
-    id: 1,
-    name: "Συναρτήσεις",
-    title: "category",
-    unavailable: false,
-  },
-  {
-    id: 2,
-    name: "Όρια",
-    title: "category",
-    unavailable: false,
-  },
-  {
-    id: 3,
-    name: "Παράγωγοι",
-    title: "category",
-    unavailable: false,
-  },
-  {
-    id: 4,
-    name: "Ολοκληρώματα",
-    title: "category",
-    unavailable: false,
-  },
-  {
-    id: 5,
-    name: "Άλγεβρα",
-    title: "category",
-    unavailable: false,
-  },
-  {
-    id: 6,
-    name: "Γεωμετρία",
-    title: "category",
-    unavailable: false,
-  },
-  {
-    id: 7,
-    name: "Μαθηματικά Προσανατολισμού",
-    title: "category",
-    unavailable: false,
-  },
-];
+    byId: {
+      0: {
+        id: 0,
+        name: "",
+        title: "category",
+        unavailable: true,
+      },
+      1: {
+        id: 1,
+        name: "Συναρτήσεις",
+        title: "category",
+        unavailable: false,
+      },
+      2: {
+        id: 2,
+        name: "Όρια",
+        title: "category",
+        unavailable: false,
+      },
+      3: {
+        id: 3,
+        name: "Παράγωγοι",
+        title: "category",
+        unavailable: false,
+      },
+      4: {
+        id: 4,
+        name: "Ολοκληρώματα",
+        title: "category",
+        unavailable: false,
+      },
+      5: {
+        id: 5,
+        name: "Άλγεβρα",
+        title: "category",
+        unavailable: false,
+      },
+      6: {
+        id: 6,
+        name: "Γεωμετρία",
+        title: "category",
+        unavailable: false,
+      },
+      7: {
+        id: 7,
+        name: "Πανεπιστημιακά Μαθηματικά",
+        title: "category",
+        unavailable: false,
+      },
+    },
+    allIds: [0, 1, 2, 3, 4, 5, 6, 7],
+  }
 
-export const Type = [
+export const Type = 
   {
-    id: 0,
-    name: "",
-    title: "tags",
-    unavailable: true,
-  },
-  {
-    id: 1,
-    name: "Άλυτες ασκήσεις",
-    title: "tags",
-    unavailable: false,
-  },
-  {
-    id: 2,
-    name: "Λυμένες ασκήσεις",
-    title: "tags",
-    unavailable: false,
-  },
-  {
-    id: 3,
-    name: "Ερωτήσεις Επιλογής",
-    title: "tags",
-    unavailable: false,
-  },
-];
+    byId: {
+      0: {
+        id: 0,
+        name: "",
+        title: "tags",
+        unavailable: true,
+      },
+      1: {
+        id: 1,
+        name: "Άλυτες ασκήσεις",
+        title: "tags",
+        unavailable: false,
+      },
+      2: {
+        id: 2,
+        name: "Λυμένες ασκήσεις",
+        title: "tags",
+        unavailable: false,
+      },
+      3: {
+        id: 3,
+        name: "Ερωτήσεις Επιλογής",
+        title: "tags",
+        unavailable: false,
+      },
+    },
+    allIds: [0, 1, 2, 3],
+  };
+
 
 export const ExerciseNavList = [
   {
@@ -242,4 +260,12 @@ export const staticImages: Array<any> = [
       },
     },
   },
+];
+
+export const SIDE_BAR_CATEGORIES = [
+  "Γ-Λυκειου",
+  "B-Λυκείου",
+  "A-Λυκείου",
+  "Γυμνάσιο",
+  "Πανεπιστήμιο",
 ];

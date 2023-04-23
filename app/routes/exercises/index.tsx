@@ -12,11 +12,9 @@ import {staticImages} from '../../../services/models/models';
 
 
 export const loader: LoaderFunction = async ({request}) => {
-
   const unsplash = createApi({ accessKey: process.env.UNSPLASH_ACCESS_TOKEN as string,  fetch: fetch,});
   let exersisesAll=await getAllExcersices();
   const url = new URL(request.url);
-  
   const filters={
     category:url.searchParams.get("category"),
     tags:url.searchParams.get("tags"),
@@ -26,6 +24,7 @@ export const loader: LoaderFunction = async ({request}) => {
   let textFilter={}
   let photos:any=[]
   let photosError=null as null | string;
+
   await unsplash.search.getCollections({
     query: 'maths',
     page: 1,
@@ -70,8 +69,9 @@ export const loader: LoaderFunction = async ({request}) => {
       
       ]
   }
- return  await getExersiceBySearch(textFilter);
+  exersisesAll= await getExersiceBySearch(textFilter);
 } 
+
  return exersisesAll.map(exercise => ({
     ...exercise,
     photo: photos.length>0 && !photosError? photos[Math.floor(Math.random()* photos.length)].cover_photo.urls: staticImages[Math.floor(Math.random()* staticImages.length)].cover_photo.urls,
@@ -81,10 +81,10 @@ export const loader: LoaderFunction = async ({request}) => {
 const Exersices = () => {
   const data = useLoaderData<typeof loader>()
   const [filters,setFilters] = useState<any>({
-    category:Category[0].name,
-    title:Type[0].name,
+    category:Object.values(Category.byId)[0].name,
+    title:Object.values(Type.byId)[0].name,
     input:'',
-    tags:TAGS[0].name
+    tags:Object.values(TAGS.byId)[0].name 
   });
   const [searchParams, setSearchParams] = useSearchParams();
   
@@ -92,10 +92,10 @@ const Exersices = () => {
     setSearchParams({});
     setFilters(
       {
-    category:Category[0].name,
-    title:Type[0].name,
-    input:'',
-    tags:TAGS[0].name
+        category:Object.values(Category.byId)[0].name,
+        title:Object.values(Type.byId)[0].name,
+        input:'',
+        tags:Object.values(TAGS.byId)[0].name 
     })
 
   }

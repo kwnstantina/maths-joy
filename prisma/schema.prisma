@@ -54,6 +54,7 @@ model Training {
   solution String
   contentImage String
   solutionImage String
+  searchableTitle String?
 }
 
 

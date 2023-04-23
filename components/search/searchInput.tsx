@@ -57,7 +57,6 @@ const SearchInput = (props:Props) => {
 
       <div  className="px-2 flex justify-start items-center w-full  items-center md:gap-[23rem]  md:mt-4 md:pl-16">
         <p className="font-medium"> Φίλτρα</p>
-
         <button className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-800 text-sm font-medium rounded-md" onClick={clearFilters}>
           Καθαρισμός φίλτρων
         </button>
@@ -68,7 +67,7 @@ const SearchInput = (props:Props) => {
           <span> 
             <strong>Κατηγορία</strong>
           <List
-            categories={Category}
+            categories={Object.values(Category.byId)}
             onCallbackFunction={setFiltersHandler}
             placeholder='Κατηγορία...'
             value={filters.category}
@@ -77,7 +76,7 @@ const SearchInput = (props:Props) => {
           <span>
             <strong>Τάξη</strong>
           <List
-            categories={TAGS}
+            categories={Object.values(TAGS.byId)}
             onCallbackFunction={setFiltersHandler}
             placeholder='Τάξη...'
             value={filters.title}
@@ -86,7 +85,7 @@ const SearchInput = (props:Props) => {
           <span>
             <strong>Είδος ασκήσεων</strong>
           <List
-            categories={Type}
+            categories={Object.values(Type.byId)}
             onCallbackFunction={setFiltersHandler}
             placeholder='Είδος άσκησης...'
             value={filters.tags}

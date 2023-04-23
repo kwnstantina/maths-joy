@@ -9,11 +9,18 @@ type Props = {
   uploadData: any;
   actionData: any;
   buttonState: string;
-  fileUploadHandler: (evt:any)=>void;
+  fileUploadHandler: (evt: any) => void;
 };
 
 const UploadExercise = (props: Props) => {
-  const { handleSubmit, onChangeHandler, uploadData, actionData, buttonState,fileUploadHandler } = props;
+  const {
+    handleSubmit,
+    onChangeHandler,
+    uploadData,
+    actionData,
+    buttonState,
+    fileUploadHandler,
+  } = props;
   return (
     <>
       <div className="mx-auto w-full max-w-lg  p-5 h-94 mt-5 mb-4 bg-gray-100 mb-20 rounded py-94">
@@ -25,7 +32,7 @@ const UploadExercise = (props: Props) => {
             error={actionData?.errors?.title}
             labelStyle={"block text-sm font-medium text-gray-700"}
             typeOfField={"select"}
-            listCategories={TAGS}
+            listCategories={Object.values(TAGS.byId)}
             onChange={onChangeHandler}
             required
             placeholder={"Τάξη..."}
@@ -37,7 +44,7 @@ const UploadExercise = (props: Props) => {
             error={actionData?.errors?.category}
             labelStyle={"block text-sm font-medium text-gray-700"}
             typeOfField={"select"}
-            listCategories={Category}
+            listCategories={Object.values(Category.byId)}
             onChange={onChangeHandler}
             required
             placeholder={"Κατηγορία..."}
@@ -49,26 +56,12 @@ const UploadExercise = (props: Props) => {
             error={actionData?.errors?.tags}
             labelStyle={"block text-sm font-medium text-gray-700"}
             typeOfField={"select"}
-            listCategories={Type}
+            listCategories={Object.values(Type.byId)}
             onChange={onChangeHandler}
             required
             placeholder={"Τύπος άσκησης..."}
           />
-          {/* <label
-            htmlFor="exercise"
-            className={"block text-sm font-medium text-gray-700"}
-          >
-            Ανέβασμα Ασκησης:
-          </label> */}
-          {/* <textarea
-            id="exercise"
-            name="exercise"
-            rows={4}
-            cols={50}
-            onChange={addExersiceHandler}
-            value={uploadData.exercise}
-          /> */}
-             <FormField
+          <FormField
             htmlFor={"exercise"}
             type="file"
             name="exercise"
@@ -78,24 +71,10 @@ const UploadExercise = (props: Props) => {
             typeOfField={"input"}
             required
             id="exercise"
-            accept='image/*, .xlsx, .xls, .csv, .pdf, .pptx, .pptm, .ppt' 
+            accept="image/*, .xlsx, .xls, .csv, .pdf, .pptx, .pptm, .ppt"
             onChange={(event) => fileUploadHandler(event)}
-            />
-          {/* <label
-            htmlFor="exercise"
-            className={"block text-sm font-medium text-gray-700"}
-          >
-            Λύση ( με αιτιολόγηση):
-          </label> */}
-          {/* <textarea
-            id="solution"
-            name="solution"
-            rows={4}
-            cols={50}
-            onChange={addExersiceHandler}
-            value={uploadData.solution}
-          /> */}
-             <FormField
+          />
+          <FormField
             htmlFor={"solution"}
             type="file"
             name="solution"
@@ -105,9 +84,21 @@ const UploadExercise = (props: Props) => {
             typeOfField={"input"}
             required
             id="exercise"
-            accept='image/*, .xlsx, .xls, .csv, .pdf, .pptx, .pptm, .ppt' 
+            accept="image/*, .xlsx, .xls, .csv, .pdf, .pptx, .pptm, .ppt"
             onChange={(event) => fileUploadHandler(event)}
-            />
+          />
+       <FormField
+            htmlFor={"searchableTitle"}
+            label={"Τίτλος"}
+            value={uploadData.searchableTitle}
+            error={actionData?.errors?.searchableTitle}
+            labelStyle={"block text-sm font-medium text-gray-700"}
+            typeOfField={"input"}
+            onChange={onChangeHandler}
+            required
+            placeholder={""}
+            name={"searchableTitle"}
+          />
           <button
             value="upload"
             name="_uploadTraining"

@@ -3,6 +3,7 @@ import CommandPalette, { filterItems, getItemIndex } from "react-cmdk";
 import { useState } from "react";
 
 const Kbar = () => {
+  //move logic to parent commpenent
   const [page, setPage] = useState<"root" | "projects">("projects");
   const [open, setOpen] = useState<boolean>(false);
   const [search, setSearch] = useState("");

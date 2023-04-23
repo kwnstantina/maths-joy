@@ -4,7 +4,6 @@ import {
   useSubmit,
   useNavigate,
   useTransition,
-  useCatch,
 } from "@remix-run/react";
 import {
   ActionFunction,
@@ -62,27 +61,40 @@ export const action: ActionFunction = async ({ request }) => {
   const exercise = form.get("exercise") as string;
   const solution = form.get("solution") as string;
   const fileContentType = form.get("fileContentType") as string;
-  
-  if(_action ==='uploadExercise'){
+  const searchableTitle = form.get("searchableTitle") as string;
+
+  if (_action === "uploadExercise") {
     const errors = {
       file: validateFile(file["_name"]),
-      title: !!title,
-      category: !!category,
-      tags: !!tags
     };
-    if (Object.values(errors).some(Boolean))
+
+    if (errors.file || !title || !category) {
       return json(
         {
           errors,
-          fields: { file },
+          fields: { file, title, category },
           form: action,
         },
         { status: 400 }
       );
-      return await createExersice({ title, category, file, fileContentType, tags });
+    }
+    return await createExersice({
+      title,
+      category,
+      file,
+      fileContentType,
+      tags,
+    });
   }
-  if(_action ==='uploadTraning'){
-      return await createTrainingExercise({title,category,exercise,solution,tags});
+  if (_action === "uploadTraning") {
+    return await createTrainingExercise({
+      title,
+      category,
+      exercise,
+      solution,
+      tags,
+      searchableTitle,
+    });
   }
 };
 
@@ -98,6 +110,7 @@ export default function UploadExcercise(): JSX.Element {
     category: "",
     exercise: "",
     solution: "",
+    searchableTitle: "",
   } as any);
 
   const [categories] = useState([
@@ -115,6 +128,7 @@ export default function UploadExcercise(): JSX.Element {
       category: "",
       exercise: "",
       solution: "",
+      searchableTitle: "",
     });
 
     setAction(() => {
@@ -126,13 +140,19 @@ export default function UploadExcercise(): JSX.Element {
     });
   }, [tabIndex]);
 
-
   const onChangeHandler = useCallback(
     (evt: any) => {
-      return setUploadData((form: any) => ({
-        ...form,
-        [evt?.title]: evt?.name,
-      }));
+      if (evt && evt.target && evt.target.value) {
+        return setUploadData((form: any) => ({
+          ...form,
+          [evt?.target.name]: evt?.target.value,
+        }));
+      } else {
+        return setUploadData((form: any) => ({
+          ...form,
+          [evt?.title]: evt?.name,
+        }));
+      }
     },
     [uploadData]
   );
@@ -158,16 +178,20 @@ export default function UploadExcercise(): JSX.Element {
       .catch((err: any) => {
         console.log("error on upload File", err);
       });
+
     setUploadData((form: any) => ({
       ...form,
       [event.target?.name]: data,
     }));
   };
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
+  console.log("uploadData", uploadData);
+
+  const handleSubmit = (
+    event: React.FormEvent<HTMLFormElement | any> | any
+  ) => {
     let $form = event.currentTarget;
-    let formData = new FormData($form);
+    let formData = new FormData(event.target);
     formData.set("tags", uploadData.tags);
     formData.set("category", uploadData.category);
     formData.set("title", uploadData.title);
@@ -179,8 +203,9 @@ export default function UploadExcercise(): JSX.Element {
       );
     }
     if (action === "uploadTraning") {
-      formData.set("exercise", uploadData.exercise['fileContentType']);
-      formData.set("solution", uploadData.solution['fileContentType']);
+      formData.set("exercise", uploadData.exercise["fileContentType"]);
+      formData.set("solution", uploadData.solution["fileContentType"]);
+      formData.set("searchableTitle", uploadData.searchableTitle);
     }
     submit(formData, {
       method: "post",

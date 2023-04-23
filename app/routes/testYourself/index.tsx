@@ -8,23 +8,11 @@ export const loader: LoaderFunction = async ({ request }) => {
   let exercises = await getTrainingExercises();
   return json(exercises);
 };
-
-// for MathJaxContext
-const config = {
-  loader: { load: ["input/asciimath"] },
-  asciimath: {
-    displaystyle: true,
-    delimiters: [
-      ["$", "$"],
-      ["`", "`"],
-    ],
-  },
-};
-
+  
 const TestYourself = () => {
   const data: any = useLoaderData();
   const [isExersiceViewed, setIsExerciseViewed] = useState([""]);
-
+  
   const handleViewedExersices = (id: string) => {
     if (isExersiceViewed.includes(id)) {
       setIsExerciseViewed((prev) => prev.filter((item) => item != id));

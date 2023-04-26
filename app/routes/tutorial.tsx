@@ -59,7 +59,7 @@ const Tutorial = () => {
       setItems((prev: any) => [...prev, ...newItems]);
     }
   }, [fetcher.data]);
-  console.log("items", initialItems);
+  
 
   return (
     <div className="container mx-auto text-center pb-52 flex justify-start  sm:flex-col md:flex-row">

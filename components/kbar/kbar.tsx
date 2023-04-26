@@ -1,13 +1,15 @@
 import "react-cmdk/dist/cmdk.css";
 import CommandPalette, { filterItems, getItemIndex } from "react-cmdk";
-import { useState } from "react";
-
-const Kbar = () => {
+import { useEffect, useState } from "react";
+type Props={
+  isOpenKbar:boolean;
+  onCloseKbar: () => any;
+}
+const Kbar = (props:Props) => {
+  const {isOpenKbar,onCloseKbar}=props;
   //move logic to parent commpenent
   const [page, setPage] = useState<"root" | "projects">("projects");
-  const [open, setOpen] = useState<boolean>(false);
   const [search, setSearch] = useState("");
-
   const filteredItems = filterItems(
     [
       {
@@ -68,13 +70,13 @@ const Kbar = () => {
   );
 
   return (
+    
     <CommandPalette
       onChangeSearch={setSearch}
-      onChangeOpen={setOpen}
+      onChangeOpen={onCloseKbar}
       search={search}
-      isOpen={open}
+      isOpen={isOpenKbar}
       page={page}
-  
     >
       <CommandPalette.Page id="projects">
         {filteredItems.length ? (

@@ -261,11 +261,3 @@ export const staticImages: Array<any> = [
     },
   },
 ];
-
-export const SIDE_BAR_CATEGORIES = [
-  "Γ-Λυκειου",
-  "B-Λυκείου",
-  "A-Λυκείου",
-  "Γυμνάσιο",
-  "Πανεπιστήμιο",
-];

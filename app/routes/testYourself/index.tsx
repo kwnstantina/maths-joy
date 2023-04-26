@@ -1,11 +1,13 @@
 import { json, LoaderFunction } from "@remix-run/node";
-import { getTrainingExercises } from "~/utils/training.prisma";
+import { getTraingingExerciseByTitle } from "~/utils/training.prisma";
 import { useLoaderData } from "@remix-run/react";
 import { useState } from "react";
 import TrainingList from "components/training/trainingList";
 
 export const loader: LoaderFunction = async ({ request }) => {
-  let exercises = await getTrainingExercises();
+  const url = new URL(request.url);
+  const searchableTitle=url.searchParams.get("searchableTitle")
+  let exercises = await getTraingingExerciseByTitle(searchableTitle);
   return json(exercises);
 };
   
@@ -20,12 +22,11 @@ const TestYourself = () => {
       setIsExerciseViewed([...isExersiceViewed, id]);
     }
   };
-
   return (
     <div className="w-full mx-auto h-full">
       <div className="px-4 py-6 sm:px-0  h-full">
         <div className="border-4 border-dashed border-gray-200 rounded-lg  flex-col gap-4 h-full">
-          {data.exersicesList?.map((item: any, index: number) => {
+          {data?.map((item: any, index: number) => {
             return (
               <TrainingList
                 key={item.id}

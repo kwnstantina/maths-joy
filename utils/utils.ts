@@ -61,29 +61,28 @@ export const separateLatterMaths = (str: string) => {
 };
 
 export const groupBy = (array: Array<any>, keyFunc: CallableFunction) => {
-    return array.reduce((result, item) => {
-        const key = keyFunc(item);
-        if (!result[key]) {
-          result[key] = [];
-        }
-        if (!result[key].some((i:any) => isEqual(i, item))) {
-          result[key].push(item);
-        }
-        return result;
-      }, {});
+  return array.reduce((result, item) => {
+    const key = keyFunc(item);
+    if (!result[key]) {
+      result[key] = [];
+    }
+    if (!result[key].some((i: any) => isEqual(i, item))) {
+      result[key].push(item);
+    }
+    return result;
+  }, {});
 };
 
-
-export const  isEqual=(a:any, b:any)=> {
-    const aKeys = Object.keys(a);
-    const bKeys = Object.keys(b);
-    if (aKeys.length !== bKeys.length) {
+export const isEqual = (a: any, b: any) => {
+  const aKeys = Object.keys(a);
+  const bKeys = Object.keys(b);
+  if (aKeys.length !== bKeys.length) {
+    return false;
+  }
+  for (const key of aKeys) {
+    if (a[key] !== b[key]) {
       return false;
     }
-    for (const key of aKeys) {
-      if (a[key] !== b[key]) {
-        return false;
-      }
-    }
-    return true;
   }
+  return true;
+};

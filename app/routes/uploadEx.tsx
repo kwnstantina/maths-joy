@@ -185,8 +185,6 @@ export default function UploadExcercise(): JSX.Element {
     }));
   };
 
-  console.log("uploadData", uploadData);
-
   const handleSubmit = (
     event: React.FormEvent<HTMLFormElement | any> | any
   ) => {

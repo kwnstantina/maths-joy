@@ -1,21 +1,27 @@
 import { Outlet, useLoaderData, useSearchParams } from "@remix-run/react";
 import { Disclosure, Transition } from "@headlessui/react";
-import { ChevronUpIcon } from "@heroicons/react/solid";
+import { ChevronUpIcon,ChevronDoubleLeftIcon,ChevronDoubleRightIcon } from "@heroicons/react/solid";
 import Input from "components/input/input";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import "react-cmdk/dist/cmdk.css";
 import Kbar from "components/kbar/kbar";
 import { LoaderFunction, json } from "@remix-run/node";
-import { getTrainingExercises } from "~/utils/training.prisma";
+import { getTrainingExercises} from "~/utils/training.prisma";
+
 export const loader: LoaderFunction = async ({ request }) => {  
-  let exercises = await getTrainingExercises();
+  const exercises = await getTrainingExercises();
   return json(exercises);
 };
 
 const TestYourself = () => {
   const data: any = useLoaderData();
-  const [searchParams, setSearchParams] = useSearchParams();
-  const [isOpenKbar, setIsOpenKbar] = useState<boolean>(false) ;
+  const [_, setSearchParams] = useSearchParams();
+  const [isOpenKbar, setIsOpenKbar] = useState<boolean>(false);
+  const [isSideBarClose, setIsSideBarClose] = useState(false);
+
+  const handleToggle=()=> {
+    setIsSideBarClose(!isSideBarClose);
+  }
 
   const searchHandler = useCallback((evt: any) => {
     setIsOpenKbar(true)
@@ -30,22 +36,31 @@ const TestYourself = () => {
   }, [setIsOpenKbar]);
 
   const handleKeyDown = useCallback((event:any) => {
-    console.log('2')
     if (event.ctrlKey && event.key === "k") {
       event.preventDefault();
       setIsOpenKbar(true);
     }
   },[]);
-
+ 
   return (
     <div tabIndex={0} onKeyDown={handleKeyDown}>
-      <Kbar isOpenKbar={isOpenKbar} onCloseKbar={onCloseKbar}/>
+        <button
+          className={`relative top-[20rem] bg-orange-700 rounded-full ${isSideBarClose ? "left-[5em]" : "left-[14em]"} pl-2 h-7 w-10  text-white hover:text-gray-700 focus:outline-none transition-all ease-in-out duration-300`}
+          onClick={handleToggle}
+        >
+          {isSideBarClose ? (
+            <ChevronDoubleLeftIcon className="h-6 w-6 " />
+          ) : (
+            <ChevronDoubleRightIcon className="h-6 w-6" />
+          )}
+          </button>
+      <Kbar isOpenKbar={isOpenKbar} onCloseKbar={onCloseKbar} data={data?.searchableExersices}/>
       <div className="flex">
-        <div className="flex flex-col h-screen p-3 bg-white shadow-2xl ring-2 ring-gray-200 w-60">
+       <div className={`flex flex-col h-[100vh] p-3 bg-white shadow-2xl ring-1 ring-gray-10 ${isSideBarClose ? "w-24" : "w-60"} transition-all ease-in-out duration-300`}>
           <div className="space-y-3">
             <div className="flex items-center">
               <div className="mt-1">
-                <Input onChangeCallback={searchHandler} />
+                <Input onChangeCallback={searchHandler} isSideBarClose={isSideBarClose}/>
               </div>
             </div>
             <div className="flex-1">
@@ -98,7 +113,7 @@ const TestYourself = () => {
               </Transition>
             </div>
           </div>
-        </div>
+        </div>   
         <main
           id="content"
           className="flex-1 p-6 lg:px-8 overflow-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none'] h-full"

@@ -1,54 +1,32 @@
 import "react-cmdk/dist/cmdk.css";
 import CommandPalette, { filterItems, getItemIndex } from "react-cmdk";
-import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+
+import { useState } from "react";
 type Props={
   isOpenKbar:boolean;
   onCloseKbar: () => any;
+  data:any;
 }
 const Kbar = (props:Props) => {
-  const {isOpenKbar,onCloseKbar}=props;
+  const {isOpenKbar,onCloseKbar,data}=props;
   //move logic to parent commpenent
   const [page, setPage] = useState<"root" | "projects">("projects");
   const [search, setSearch] = useState("");
+  const navigate = useNavigate();
   const filteredItems = filterItems(
     [
       {
-        heading: "Home",
-        id: "home",
+        heading: "Ασκήσεις",
+        id: "exercises",
         items: [
-          {
-            id: "home",
-            children: "Home",
-    
-            href: "#",
-          },
-          {
-            id: "settings",
-            children: "Settings",
-      
-            href: "#",
-          },
-          {
-            id: "projects",
-            children: "Projects",
-        
-            closeOnSelect: false,
-            onClick: () => {
-              setPage("projects");
-            },
-          },
+          ...data,
         ],
       },
       {
-        heading: "Other",
+        heading: "Aλλα",
         id: "advanced",
         items: [
-          {
-            id: "developer-settings",
-            children: "Developer settings",
-        
-            href: "#",
-          },
           {
             id: "privacy-policy",
             children: "Privacy policy",
@@ -60,7 +38,7 @@ const Kbar = (props:Props) => {
             children: "Log out",
     
             onClick: () => {
-              alert("Logging out...");
+              navigate("/logout");
             },
           },
         ],

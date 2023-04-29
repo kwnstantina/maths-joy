@@ -1,9 +1,11 @@
 type Props={
   onChangeCallback:Function | any;
+  isSideBarClose:boolean;
 }
 
 const Input = (props:Props) => {
-  const {onChangeCallback}=props;
+  const {onChangeCallback,isSideBarClose}=props;
+
   return (
     <form className="flex items-center">
       <label htmlFor="simple-search" className="hidden">
@@ -33,15 +35,15 @@ const Input = (props:Props) => {
           onChange={onChangeCallback}
         >
         </input>
-        <div className="flex absolute bottom-3 right-3 text-sm">
+        {!isSideBarClose && <div className="flex absolute bottom-3 right-3 text-sm">
           <div className=" items-center flex h-5 relative w-6 rounded shadow-md bg-gray-100 ring-4  justify-center ring-gray-200 mr-3">
           Ctr
           </div>
           <div  className=" items-center flex h-5 relative w-6 rounded shadow-md bg-gray-100 ring-4 justify-center ring-gray-200">
             K
           </div>
-         
         </div>
+        }
       </div>
     </form>
   );

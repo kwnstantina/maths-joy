@@ -12,8 +12,8 @@ const SearchInput = (props:Props) => {
 
   return (
     <>
-      <div className="relative w-2/5 mt-5 ml-16">
-        <div  className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none" >
+      <div className="flex mt-4 ml-8 gap-3 relative">
+        <div  className="relative inset-y-0 top-[2px] left-[3rem] flex items-center pl-3 pointer-events-none" >
           <svg
             aria-hidden="true"
             className="w-5 h-5 text-gray-500"
@@ -33,7 +33,7 @@ const SearchInput = (props:Props) => {
         <input
           type="search"
           id="default-search"
-          className="block w-full p-4 pl-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500"
+          className="block w-[60%] p-4 pl-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-orange-100 focus:border-orange-100"
           placeholder="Παράγωγοι, ολοκληρώματα..."
           required
           name="input"
@@ -46,25 +46,26 @@ const SearchInput = (props:Props) => {
           }}
           value={filters?.input || ''}
         />
+       
         <button
           type="submit"
           onClick={handleCategorySearch}
-          className="block md:hidden lg:block text-white absolute right-2.5 bottom-2.5 bg-orange-600 hover:bg-orange-800 focus:ring-4 focus:outline-none  font-medium rounded-lg text-sm px-4 py-2"
+          className="block lg:block text-white bg-orange-600 hover:bg-orange-800 focus:ring-4 focus:outline-none  font-medium rounded-lg text-sm px-4 py-2"
         >
           Αναζήτηση
         </button>
-      </div>
+        </div>
 
-      <div  className="px-2 flex justify-start items-center w-full  items-center md:gap-[23rem]  md:mt-4 md:pl-16">
-        <p className="font-medium"> Φίλτρα</p>
+      <div  className=" flex justify-between items-center w-[58rem]  items-center   md:mt-4 md:pl-16">
+        <p className="font-medium pl-4"> Φίλτρα</p>
         <button className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-800 text-sm font-medium rounded-md" onClick={clearFilters}>
           Καθαρισμός φίλτρων
         </button>
       </div>
 
       <div>
-        <div className="flex items-center justify-start mt-4 pl-16 gap-4">
-          <span> 
+        <div className="flex items-center justify-start mt-4  pl-10 gap-4 ">
+          <span className="w-56"> 
             <strong>Κατηγορία</strong>
           <List
             categories={Object.values(Category.byId)}
@@ -73,7 +74,7 @@ const SearchInput = (props:Props) => {
             value={filters.category}
           />
           </span>
-          <span>
+        <span className="w-56"> 
             <strong>Τάξη</strong>
           <List
             categories={Object.values(TAGS.byId)}
@@ -82,7 +83,7 @@ const SearchInput = (props:Props) => {
             value={filters.title}
           />
           </span>
-          <span>
+          <span className="w-56"> 
             <strong>Είδος ασκήσεων</strong>
           <List
             categories={Object.values(Type.byId)}

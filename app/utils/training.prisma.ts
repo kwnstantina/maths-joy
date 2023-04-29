@@ -1,7 +1,6 @@
 import { groupBy } from "utils/utils";
 import { prisma } from "./prisma.server";
 import { CreateTrainingExersice } from "./types.server";
-import { json } from "@remix-run/node";
 
 export const createTrainingExercise = async (item: CreateTrainingExersice) => {
   const newTrainingExersice= await prisma.training.create({
@@ -30,11 +29,17 @@ export const getTrainingExercises = async () => {
       searchableTitle:true
     }
    }) as any;
-   const key="searchableTitle"
-   const arrayUniqueByKey = [...new Map(exersicesList.map((item:any) =>
-    [item[key], item])).values()];
+  const key="searchableTitle"
+  const arrayUniqueByKey = [...new Map(exersicesList.map((item:any) =>[item[key], item])).values()];
+  const searchableExersices = arrayUniqueByKey.map((item:any)=>{
+    return{
+      id: item.id,
+      children: item.searchableTitle,
+      href: `?searchableTitle=${item.searchableTitle}`,
+    }
+  })
   const groupedExersices=groupBy(arrayUniqueByKey,(exersicesList:any)=>exersicesList.title)
-  return {groupedExersices};
+  return {groupedExersices,searchableExersices};
 };
 
 
@@ -46,5 +51,5 @@ export const getTraingingExerciseByTitle =async (searchableTitle:string | null)=
       }
     },
   });
-  return exersiceByTitle
+  return exersiceByTitle;
 }

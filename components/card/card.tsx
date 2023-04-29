@@ -9,7 +9,9 @@ const Card = (props:any) => {
   return (
     <div className="flex justify-center m-10">
       <div className="block rounded-lg shadow-lg bg-white max-w-sm text-center">
+      <div className="aspect-w-3 aspect-h-4">
       <img  src={item?.photo?.regular} alt="Γρηγόρης Κυρτσιάς" className="rounded-t-lg"/>  
+      </div>
         <div className="p-6">
           <h5 className="text-gray-900 text-xl font-medium mb-2">
            Κατηγορία: {item.category}

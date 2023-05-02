@@ -74,6 +74,30 @@ const UploadFile = (props: Props) => {
             accept=".pdf"
             onChange={(event) => fileUploadHandler(event)}
           />
+              <FormField
+            htmlFor={"description"}
+            label={"Περιγραφή"}
+            value={uploadData.description}
+            error={actionData?.errors?.description}
+            labelStyle={"block text-sm font-medium text-gray-700"}
+            typeOfField={"input"}
+            onChange={onChangeHandler}
+            required
+            placeholder={"Περιγραφή άσκησης...."}
+            name={"description"}
+          />
+          <FormField
+            htmlFor={"exerciseImgUrl"}
+            label={"Εικόνα"}
+            value={uploadData.exerciseImgUrl}
+            error={actionData?.errors?.exerciseImgUrl}
+            labelStyle={"block text-sm font-medium text-gray-700"}
+            typeOfField={"input"}
+            onChange={onChangeHandler}
+            required
+            placeholder={"Διεύθυνση εικόνας...."}
+            name={"exerciseImgUrl"}
+          />
           <button
             value="upload"
             name="_uploadExercise"

@@ -17,6 +17,8 @@ export type UploadExersiceForm = {
   fileContentType:string;
   file:File |any;
   tags:string;
+  description:string,
+  exerciseImgUrl:string,
 }
 
 export type CreateTrainingExersice = {

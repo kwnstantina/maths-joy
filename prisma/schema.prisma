@@ -41,6 +41,8 @@ model Exersice {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   tags String
+  description String?
+  exerciseImgUrl String?
 }
 
 model Training {

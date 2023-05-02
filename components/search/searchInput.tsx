@@ -12,7 +12,7 @@ const SearchInput = (props:Props) => {
 
   return (
     <>
-      <div className="flex mt-4 ml-8 gap-3 relative">
+      <div className="flex mt-4  gap-3 relative">
         <div  className="relative inset-y-0 top-[2px] left-[3rem] flex items-center pl-3 pointer-events-none" >
           <svg
             aria-hidden="true"
@@ -57,15 +57,15 @@ const SearchInput = (props:Props) => {
         </div>
 
       <div  className=" flex justify-between items-center w-[58rem]  items-center   md:mt-4 md:pl-16">
-        <p className="font-medium pl-4"> Φίλτρα</p>
+        <p className="font-medium"> Φίλτρα</p>
         <button className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-800 text-sm font-medium rounded-md" onClick={clearFilters}>
           Καθαρισμός φίλτρων
         </button>
       </div>
 
       <div>
-        <div className="flex items-center justify-start mt-4  pl-10 gap-4 ">
-          <span className="w-56"> 
+        <div className="flex items-center justify-start mt-8  pl-10 gap-4 ">
+          <span className="w-56 text-left "> 
             <strong>Κατηγορία</strong>
           <List
             categories={Object.values(Category.byId)}
@@ -74,7 +74,7 @@ const SearchInput = (props:Props) => {
             value={filters.category}
           />
           </span>
-        <span className="w-56"> 
+        <span className="w-56 text-left"> 
             <strong>Τάξη</strong>
           <List
             categories={Object.values(TAGS.byId)}
@@ -83,7 +83,7 @@ const SearchInput = (props:Props) => {
             value={filters.title}
           />
           </span>
-          <span className="w-56"> 
+          <span className="w-56 text-left"> 
             <strong>Είδος ασκήσεων</strong>
           <List
             categories={Object.values(Type.byId)}

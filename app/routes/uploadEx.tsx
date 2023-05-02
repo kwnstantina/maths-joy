@@ -62,6 +62,8 @@ export const action: ActionFunction = async ({ request }) => {
   const solution = form.get("solution") as string;
   const fileContentType = form.get("fileContentType") as string;
   const searchableTitle = form.get("searchableTitle") as string;
+  const description = form.get("description") as string;
+  const exerciseImgUrl = form.get("exerciseImgUrl") as string;
 
   if (_action === "uploadExercise") {
     const errors = {
@@ -84,6 +86,8 @@ export const action: ActionFunction = async ({ request }) => {
       file,
       fileContentType,
       tags,
+      description,
+      exerciseImgUrl,
     });
   }
   if (_action === "uploadTraning") {
@@ -111,6 +115,8 @@ export default function UploadExcercise(): JSX.Element {
     exercise: "",
     solution: "",
     searchableTitle: "",
+    description:"",
+    exerciseImgUrl:""
   } as any);
 
   const [categories] = useState([
@@ -129,6 +135,8 @@ export default function UploadExcercise(): JSX.Element {
       exercise: "",
       solution: "",
       searchableTitle: "",
+      description:"",
+      exerciseImgUrl:""
     });
 
     setAction(() => {
@@ -204,6 +212,8 @@ export default function UploadExcercise(): JSX.Element {
       formData.set("exercise", uploadData.exercise["fileContentType"]);
       formData.set("solution", uploadData.solution["fileContentType"]);
       formData.set("searchableTitle", uploadData.searchableTitle);
+      formData.set("description", uploadData.description);
+      formData.set("exerciseImgUrl", uploadData.exerciseImgUrl);
     }
     submit(formData, {
       method: "post",

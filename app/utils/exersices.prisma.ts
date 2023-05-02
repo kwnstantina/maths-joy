@@ -10,6 +10,8 @@ export const createExersice = async (exer: UploadExersiceForm) => {
       fileContentType: exer.fileContentType,
       fileName: exer.file['_name'],
       tags: exer.tags,
+      description: exer.description,
+      exerciseImgUrl:exer.exerciseImgUrl
     },
   });
   return { id: newExercise.id };

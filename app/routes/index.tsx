@@ -1,4 +1,3 @@
-import progress from "../assets/progress.png";
 import chat from "../assets/chat.png";
 import { useRef, useEffect, useState } from "react";
 import {

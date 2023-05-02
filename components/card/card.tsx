@@ -1,7 +1,6 @@
 import { EyeIcon } from "@heroicons/react/outline";
 import { dateFormat } from "../../utils/utils";
 import { useNavigate } from "@remix-run/react";
-
 const Card = (props: any) => {
   const { item } = props;
   const navigate = useNavigate();

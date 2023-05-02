@@ -13,7 +13,7 @@ export const createTrainingExercise = async (item: CreateTrainingExersice) => {
       content:'',
       solution:'',
       searchableTitle:item.searchableTitle,
-    },
+    } as any,
   });
   return { id: newTrainingExersice.id };
 };
@@ -47,7 +47,7 @@ export const getTraingingExerciseByTitle =async (searchableTitle:string | null)=
   const exersiceByTitle = await prisma.training.findMany({
     where: {
       searchableTitle:{
-      equals: searchableTitle
+      equals: searchableTitle || ''
       }
     },
   });

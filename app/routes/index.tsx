@@ -8,6 +8,7 @@ import {
 import AboutUsHoc from "components/aboutUs/aboutUs";
 import Intro from "components/intro/intro";
 import Box from "components/box/box";
+import NewsLetter from "components/newsletter/newsletter";
 
 export default function Index() {
   const getFadeLeftStyles = (isfadeLeftInViewPort: any) => ({
@@ -19,7 +20,6 @@ export default function Index() {
   const getFadeRightStyles = (isfadeRightInViewPort: any) => ({
     transition: "all 1s ease-in",
     opacity: isfadeRightInViewPort ? "1" : "0",
-    // transform: isfadeRightInViewPort ? 'translateXY(50%)': 'translateXY(-100%)'
   });
   const [animatedView, setAnimatedView] = useState({
     section1: false,
@@ -56,8 +56,8 @@ export default function Index() {
       <section className="container mx-auto px-6 text-center pb-48 flex justify-center align-center">
         <Intro />
       </section>
-      <section className="w-full flex items-start  xs:flex-col md:flex-row bg-gray-50">
-      <div  className="w-94 pl-10 pt-10" >
+      <section className="w-full flex items-start xs:flex-col sm:flex-col md:flex-row bg-gray-50">
+        <div className="w-94 pl-10 pt-10">
           <p className="animate-text bg-gradient-to-r from-teal-500 via-purple-500 to-orange-500 bg-clip-text text-transparent text-5xl font-black">
             {" "}
             Εδώ θα βρεις...
@@ -80,7 +80,7 @@ export default function Index() {
             title="Διδακτικό υλικό"
             link="/tutorial"
             content="Οπτικό ακουστικό υλικό με καθοδήγηση και επεξήγηση μαθηματικών."
-            additionStyle="ml-10 flex items-center justify-center mb-6 h-40 md:w-[36rem]	 bg-gradient-to-r from-rose-200	 to-rose-300  rounded-3xl shadow-md"
+            additionStyle="sm:md-0 md:ml-10 flex items-center justify-center mb-6 h-40 md:w-[36rem]	 bg-gradient-to-r from-rose-200	 to-rose-300  rounded-3xl shadow-md"
           >
             <ViewBoardsIcon className="w-20" />
           </Box>
@@ -88,11 +88,11 @@ export default function Index() {
             title="Ασκήσεις Εμπέδωσης"
             link="/testYourself"
             content="Ασκήσεις πολλαπλής επιλογής για εμπέδωση με επεξεγηματική λύση."
-            additionStyle="ml-24 flex items-center justify-center  mb-6 h-40 md:w-[36rem]	 bg-gradient-to-r from-teal-200	 to-teal-500  rounded-3xl shadow-md"
+            additionStyle="sm:md-0 md:ml-24 flex items-center justify-center  mb-6 h-40 md:w-[36rem]	 bg-gradient-to-r from-teal-200	 to-teal-500  rounded-3xl shadow-md"
           >
             <BookOpenIcon className="w-20" />
           </Box>
-        </div>  
+        </div>
       </section>
       <section className="w-10/12 mx-auto px-6 pb-32 rounded-t-md mb-6">
         <div
@@ -102,11 +102,11 @@ export default function Index() {
         >
           <div>
             <h1 className="text-4xl text-center mt-10 font-black">
-              Online chat 
+              Online chat
             </h1>
-             <p className="animate-text bg-gradient-to-r from-teal-500 via-purple-500 to-orange-500 bg-clip-text text-transparent text-xl font-black">
-               Για απορίες και συζήτηση επί των ασκήσεων και των θεμάτων  
-          </p>
+            <p className="animate-text bg-gradient-to-r from-teal-500 via-purple-500 to-orange-500 bg-clip-text text-transparent text-xl font-black">
+              Για απορίες και συζήτηση επί των ασκήσεων και των θεμάτων
+            </p>
           </div>
           <div className="relative top-[9rem] left-[12rem] z-50">
             <a
@@ -137,6 +137,9 @@ export default function Index() {
       </section>
       <section>
         <AboutUsHoc />
+      </section>
+      <section className="bg-white">
+        <NewsLetter/>  
       </section>
     </>
   );

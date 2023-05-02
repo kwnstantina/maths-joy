@@ -12,7 +12,7 @@ export const createExersice = async (exer: UploadExersiceForm) => {
       tags: exer.tags,
       description: exer.description,
       exerciseImgUrl:exer.exerciseImgUrl
-    },
+    } as any,
   });
   return { id: newExercise.id };
 };

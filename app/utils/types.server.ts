@@ -27,5 +27,5 @@ export type CreateTrainingExersice = {
   tags:string;
   exercise: string;
   solution:string;
-  searchableTitle:string;
+  searchableTitle:string | any;
 }

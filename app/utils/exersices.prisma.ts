@@ -26,6 +26,8 @@ export const getAllExcersices = async()=>{
     category:true,
     createdAt:true,
     tags:true,
+    description:true,
+    exerciseImgUrl:true,
   }})
   return exersices;
 }
@@ -46,6 +48,8 @@ export const getExersiceBySearch = async(filters:any) =>{
     category:true,
     createdAt:true,
     tags:true,
+    description:true,
+    exerciseImgUrl:true,
   },where: {...filters}});
   
   return exersice;

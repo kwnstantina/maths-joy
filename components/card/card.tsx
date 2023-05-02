@@ -11,7 +11,8 @@ const Card = (props: any) => {
       <div className="block rounded-lg shadow-lg bg-white max-w-sm text-center cursor-pointer">
         <div className="aspect-w-3 aspect-h-4" typeof="button"   onClick={() => navigate(`${item.id}`)}>
           <img
-            src={item?.photo?.regular}
+            //src={item?.photo?.regular}
+            src={item?.exerciseImgUrl}
             alt="Γρηγόρης Κυρτσιάς"
             className="rounded-t-lg"
           />
@@ -21,7 +22,7 @@ const Card = (props: any) => {
             {item.category}
           </h5>
           <p className="text-gray-700 text-base mb-4">
-            Μαθηματικά για μαθητές που θέλουν να πειραματιστούν με extreme maths 
+            {item?.description} 
           </p>
           <div className="px-6 pt-4 pb-2">
             <span className="inline-block bg-gray-200 rounded-full px-3 py-1 text-sm font-semibold text-gray-700 mr-2 mb-2">

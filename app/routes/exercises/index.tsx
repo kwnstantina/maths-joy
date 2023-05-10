@@ -20,16 +20,13 @@ export const loader: LoaderFunction = async ({ request }) => {
     title: url.searchParams.get("title"),
   };
 
-  let photos: any = [];
-  let photosError = null as null | string;
-
   if (Object.values(filters).filter(Boolean).length > 0) {
     const where = {
       ...(filters.searchItem
         ? {
             OR: [
               {
-                title: {
+                descriptions: {
                   contains: filters.searchItem,
                   mode: "insensitive",
                 },

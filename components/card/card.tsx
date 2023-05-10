@@ -10,7 +10,6 @@ const Card = (props: any) => {
       <div className="block rounded-lg shadow-lg bg-white max-w-sm text-center cursor-pointer">
         <div className="aspect-w-3 aspect-h-4" typeof="button"   onClick={() => navigate(`${item.id}`)}>
           <img
-            //src={item?.photo?.regular}
             src={item?.exerciseImgUrl}
             alt="Γρηγόρης Κυρτσιάς"
             className="rounded-t-lg"

@@ -62,12 +62,10 @@ const Tutorial = () => {
   
 
   return (
-    <div className="container mx-auto text-center pb-52 flex justify-start  sm:flex-col md:flex-row">
+    <div className=" text-center pb-52 flex justify-start  xs:flex-col sm:flex-col md:flex-row">
       <div>
         <img src={svg2} alt="Γρηγόρης Κυρτσιάς" />
-      </div>
-
-     
+      </div>   
         <InfiniteScroller
           loadNext={() => {
             const page = fetcher.data

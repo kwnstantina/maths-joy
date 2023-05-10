@@ -33,7 +33,7 @@ const TestYourself = () => {
 
   const onCloseKbar=useCallback(() => {
     setIsOpenKbar(false)
-  }, [setIsOpenKbar]);
+  }, []);
 
   const handleKeyDown = useCallback((event:any) => {
     if (event.ctrlKey && event.key === "k") {
@@ -91,11 +91,11 @@ const TestYourself = () => {
                               {grouped?.map((sub: any) => {
                                 return (
                                   <Disclosure.Panel
-                                    className="px-8 p-2 text-sm text-black-500"
+                                    className="px-8 p-2 text-sm text-black-500 overflow-hidden"
                                     key={sub.id}
                                   >
                                     <button
-                                      className="text-orange-900 text-left background-transparent font-bold uppercase  text-m outline-none focus:outline-none mr-1 mb-1 ease-linear transition-all duration-150"
+                                      className=" text-orange-900 text-left background-transparent font-bold uppercase  text-m outline-none focus:outline-none mr-1 mb-1 ease-linear transition-all duration-150"
                                       onClick={()=>setFilterHander(sub.searchableTitle)}
                                     >
                                       {sub.searchableTitle}

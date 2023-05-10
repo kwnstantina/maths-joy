@@ -1,5 +1,6 @@
 
-import {Metric} from 'web-vitals'
+// import {Metric} from 'web-vitals'
+// import { getCLS, getFCP, getFID, getLCP, getTTFB } from 'web-vitals/dist/web-vitals'
 
 const vitalsUrl = 'https://vitals.vercel-analytics.com/v1/vitals'
 

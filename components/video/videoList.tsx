@@ -16,7 +16,7 @@ const VideoList = (props: Props): JSX.Element => {
   const { data } = props;
 
   return (
-    <div className="w-[42rem] mt-14  mx-5 bg-gray-100 rounded-xl shadow-md overflow-hidden">
+    <div className="md:w-[42rem] mt-14  mx-5 bg-gray-100 rounded-xl shadow-md overflow-hidden xs:w-[10rem] sm:w-[10rem]">
     <div className="flex flex-col" key={data.id}>
       <div className="flex  aspect-video">
         {/* <embed

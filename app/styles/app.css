@@ -1031,10 +1031,6 @@ video {
   width: 60%;
 }
 
-.w-\[58rem\] {
-  width: 58rem;
-}
-
 .w-\[42rem\] {
   width: 42rem;
 }
@@ -2468,8 +2464,16 @@ video {
 }
 
 @media (min-width: 300px) {
+  .xs\:w-16 {
+    width: 4rem;
+  }
+
   .xs\:flex-col {
     flex-direction: column;
+  }
+
+  .xs\:pl-10 {
+    padding-left: 2.5rem;
   }
 }
 
@@ -2488,6 +2492,10 @@ video {
 
   .sm\:w-2\/3 {
     width: 66.666667%;
+  }
+
+  .sm\:w-16 {
+    width: 4rem;
   }
 
   .sm\:max-w-md {
@@ -2609,6 +2617,10 @@ video {
 
   .md\:w-1\/2 {
     width: 50%;
+  }
+
+  .md\:w-\[58rem\] {
+    width: 58rem;
   }
 
   .md\:max-w-xl {

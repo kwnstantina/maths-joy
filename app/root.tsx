@@ -6,6 +6,7 @@ import {
   Outlet,
   Scripts,
   ScrollRestoration,
+  useLoaderData,
   useLocation,
 } from "@remix-run/react";
 import Footer from "components/footer/footer";
@@ -14,7 +15,15 @@ import styles from "./styles/app.css";
 import LoadingPage from "components/loadingPage/loadingPage";
 import { useEffect, useState } from "react";
 import usePrevious from "hooks/usePrevious";
+import { Analytics } from '@vercel/analytics/react';
 
+export const loader = () => {
+  return {
+    ENV: {
+      VERCEL_ANALYTICS_ID: process.env.VERCEL_ANALYTICS_ID,
+    },
+  }
+}
 export function links() {
   return [{ rel: "stylesheet", href: styles }];
 }
@@ -36,6 +45,8 @@ export default function App() {
 }
 
 function Document({ children }: any) {
+  const {ENV} = useLoaderData<typeof loader>()
+
 
   return (
     <html lang="el">
@@ -47,6 +58,13 @@ function Document({ children }: any) {
        {children}
         <ScrollRestoration />
         <Scripts />
+        <Analytics />
+        {/* 👇 Write the ENV values to the window */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `window.ENV = ${JSON.stringify(ENV)}`,
+          }}
+        />       
         {process.env.NODE_ENV === "development" && <LiveReload />}
       </body>
     </html>

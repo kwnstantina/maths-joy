@@ -22,6 +22,7 @@
     "@remix-run/vercel": "^1.9.0",
     "@supabase/auth-helpers-remix": "^0.1.4",
     "@supabase/supabase-js": "^2.7.1",
+    "@vercel/analytics": "^1.0.1",
     "@vercel/node": "^2.6.2",
     "bcryptjs": "^2.4.3",
     "better-react-mathjax": "^2.0.2",
@@ -44,6 +45,7 @@
     "remix-i18next": "^5.0.0",
     "tw-elements": "^1.0.0-alpha13",
     "unsplash-js": "^7.0.15",
+    "web-vitals": "^3.3.1",
     "xss": "^1.0.14"
   },
   "devDependencies": {

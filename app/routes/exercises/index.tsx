@@ -1,21 +1,16 @@
 import SearchInput from "../../../components/search/searchInput";
 import Card from "../../../components/card/card";
 import { useLoaderData, useSearchParams } from "@remix-run/react";
-import { LoaderFunction } from "@remix-run/node";
+import { LoaderFunction, json } from "@remix-run/node";
 import { useState, useCallback } from "react";
 import {
   getAllExcersices,
   getExersiceBySearch,
 } from "../../utils/exersices.prisma";
 import { TAGS, Category, Type } from "../../../services/models/models";
-import { createApi } from "unsplash-js";
-import { staticImages } from "../../../services/models/models";
 
 export const loader: LoaderFunction = async ({ request }) => {
-  const unsplash = createApi({
-    accessKey: process.env.UNSPLASH_ACCESS_TOKEN as string,
-    fetch: fetch,
-  });
+
   let exersisesAll = await getAllExcersices();
   const url = new URL(request.url);
   const filters = {
@@ -27,20 +22,6 @@ export const loader: LoaderFunction = async ({ request }) => {
 
   let photos: any = [];
   let photosError = null as null | string;
-
-  await unsplash.search
-    .getCollections({
-      query: "maths",
-      page: 1,
-      perPage: 10,
-    })
-    .then((result) => {
-      if (result.errors) {
-        photosError = result.errors[0];
-      } else {
-        photos = [...result.response.results];
-      }
-    });
 
   if (Object.values(filters).filter(Boolean).length > 0) {
     const where = {
@@ -78,16 +59,7 @@ export const loader: LoaderFunction = async ({ request }) => {
     exersisesAll = await getExersiceBySearch(where);
   }
 
-  return (
-    exersisesAll.map((exercise) => ({
-      ...exercise,
-      photo:
-        photos.length > 0 && !photosError
-          ? photos[Math.floor(Math.random() * photos.length)].cover_photo.urls
-          : staticImages[Math.floor(Math.random() * staticImages.length)]
-              .cover_photo.urls,
-    })) ?? []
-  );
+  return json(exersisesAll) ?? []
 };
 
 const Exersices = () => {

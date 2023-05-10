@@ -1,19 +1,20 @@
 import List from "components/lists/lists";
-import {TAGS,Category,Type} from '../../services/models/models';
+import { TAGS, Category, Type } from "../../services/models/models";
 
-type Props={
-  setFiltersHandler:any;
-  clearFilters:Function | any;
-  filters:any
-  handleCategorySearch:any
-}
-const SearchInput = (props:Props) => {
-  const {setFiltersHandler,clearFilters,filters,handleCategorySearch} = props;
+type Props = {
+  setFiltersHandler: any;
+  clearFilters: Function | any;
+  filters: any;
+  handleCategorySearch: any;
+};
+const SearchInput = (props: Props) => {
+  const { setFiltersHandler, clearFilters, filters, handleCategorySearch } =
+    props;
 
   return (
     <>
       <div className="flex mt-4  gap-3 relative">
-        <div  className="relative inset-y-0 top-[2px] left-[3rem] flex items-center pl-3 pointer-events-none" >
+        <div className="relative inset-y-0 top-[2px] left-[3rem] flex items-center pl-3 pointer-events-none">
           <svg
             aria-hidden="true"
             className="w-5 h-5 text-gray-500"
@@ -37,16 +38,16 @@ const SearchInput = (props:Props) => {
           placeholder="Παράγωγοι, ολοκληρώματα..."
           required
           name="input"
-          onChange={(evt)=>{
-            let input={
-              title:evt.target.name,
-              name:evt.target.value
-            }
-            setFiltersHandler(input)
+          onChange={(evt) => {
+            let input = {
+              title: evt.target.name,
+              name: evt.target.value,
+            };
+            setFiltersHandler(input);
           }}
-          value={filters?.input || ''}
+          value={filters?.input || ""}
         />
-       
+
         <button
           type="submit"
           onClick={handleCategorySearch}
@@ -54,45 +55,45 @@ const SearchInput = (props:Props) => {
         >
           Αναζήτηση
         </button>
-        </div>
-
-      <div  className=" flex justify-between items-center w-[58rem]  items-center   md:mt-4 md:pl-16">
-        <p className="font-medium"> Φίλτρα</p>
-        <button className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-800 text-sm font-medium rounded-md" onClick={clearFilters}>
-          Καθαρισμός φίλτρων
-        </button>
       </div>
-
+        <div className=" flex justify-between items-center xs:w-16 sm:w-16 md:w-[58rem]  items-center md:mt-4 xs:pl-10 md:pl-16">
+          <p className="font-medium"> Φίλτρα</p>
+          <button
+            className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-800 text-sm font-medium rounded-md"
+            onClick={clearFilters}
+          >
+            Καθαρισμός φίλτρων
+          </button>
+        </div>
       <div>
         <div className="flex items-center justify-start mt-8  pl-10 gap-4 ">
-          <span className="w-56 text-left "> 
+          <span className="w-56 text-left ">
             <strong>Κατηγορία</strong>
-          <List
-            categories={Object.values(Category.byId)}
-            onCallbackFunction={setFiltersHandler}
-            placeholder='Κατηγορία...'
-            value={filters.category}
-          />
+            <List
+              categories={Object.values(Category.byId)}
+              onCallbackFunction={setFiltersHandler}
+              placeholder="Κατηγορία..."
+              value={filters.category}
+            />
           </span>
-        <span className="w-56 text-left"> 
+          <span className="w-56 text-left">
             <strong>Τάξη</strong>
-          <List
-            categories={Object.values(TAGS.byId)}
-            onCallbackFunction={setFiltersHandler}
-            placeholder='Τάξη...'
-            value={filters.title}
-          />
+            <List
+              categories={Object.values(TAGS.byId)}
+              onCallbackFunction={setFiltersHandler}
+              placeholder="Τάξη..."
+              value={filters.title}
+            />
           </span>
-          <span className="w-56 text-left"> 
+          <span className="w-56 text-left">
             <strong>Είδος ασκήσεων</strong>
-          <List
-            categories={Object.values(Type.byId)}
-            onCallbackFunction={setFiltersHandler}
-            placeholder='Είδος άσκησης...'
-            value={filters.tags}
-          />
+            <List
+              categories={Object.values(Type.byId)}
+              onCallbackFunction={setFiltersHandler}
+              placeholder="Είδος άσκησης..."
+              value={filters.tags}
+            />
           </span>
-          
         </div>
       </div>
     </>

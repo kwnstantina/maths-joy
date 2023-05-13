@@ -10,7 +10,6 @@ import {
 import { TAGS, Category, Type } from "../../../services/models/models";
 
 export const loader: LoaderFunction = async ({ request }) => {
-
   let exersisesAll = await getAllExcersices();
   const url = new URL(request.url);
   const filters = {

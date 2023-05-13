@@ -669,6 +669,10 @@ video {
   margin: 1.25rem;
 }
 
+.m-auto {
+  margin: auto;
+}
+
 .mx-auto {
   margin-left: auto;
   margin-right: auto;
@@ -841,6 +845,10 @@ video {
 
 .mt-14 {
   margin-top: 3.5rem;
+}
+
+.mr-6 {
+  margin-right: 1.5rem;
 }
 
 .block {
@@ -1031,16 +1039,16 @@ video {
   width: 60%;
 }
 
-.w-\[42rem\] {
-  width: 42rem;
-}
-
 .w-3 {
   width: 0.75rem;
 }
 
 .w-64 {
   width: 16rem;
+}
+
+.w-9\/12 {
+  width: 75%;
 }
 
 .min-w-full {
@@ -1760,6 +1768,11 @@ video {
   padding-right: 0.25rem;
 }
 
+.px-12 {
+  padding-left: 3rem;
+  padding-right: 3rem;
+}
+
 .pb-48 {
   padding-bottom: 12rem;
 }
@@ -1812,10 +1825,6 @@ video {
   padding-top: 3rem;
 }
 
-.pl-8 {
-  padding-left: 2rem;
-}
-
 .pl-3 {
   padding-left: 0.75rem;
 }
@@ -1826,6 +1835,14 @@ video {
 
 .pt-2 {
   padding-top: 0.5rem;
+}
+
+.pb-8 {
+  padding-bottom: 2rem;
+}
+
+.pt-8 {
+  padding-top: 2rem;
 }
 
 .text-left {
@@ -1887,6 +1904,11 @@ video {
 .text-xs {
   font-size: 0.75rem;
   line-height: 1rem;
+}
+
+.text-6xl {
+  font-size: 3.75rem;
+  line-height: 1;
 }
 
 .font-black {
@@ -2283,6 +2305,10 @@ video {
   --tw-bg-opacity: 0.3;
 }
 
+.hover\:to-orange-500:hover {
+  --tw-gradient-to: #f97316;
+}
+
 .hover\:text-gray-900:hover {
   --tw-text-opacity: 1;
   color: rgb(17 24 39 / var(--tw-text-opacity));
@@ -2476,16 +2502,12 @@ video {
     flex-direction: column;
   }
 
-  .xs\:overflow-hidden {
-    overflow: hidden;
+  .xs\:pl-0 {
+    padding-left: 0px;
   }
 
   .xs\:pl-10 {
     padding-left: 2.5rem;
-  }
-
-  .xs\:pl-0 {
-    padding-left: 0px;
   }
 }
 
@@ -2538,12 +2560,12 @@ video {
     margin-bottom: calc(0px * var(--tw-space-y-reverse));
   }
 
-  .sm\:overflow-hidden {
-    overflow: hidden;
-  }
-
   .sm\:rounded-none {
     border-radius: 0px;
+  }
+
+  .sm\:rounded-lg {
+    border-radius: 0.5rem;
   }
 
   .sm\:rounded-l-lg {
@@ -2683,21 +2705,17 @@ video {
     margin-bottom: calc(6rem * var(--tw-space-y-reverse));
   }
 
-  .md\:overflow-auto {
-    overflow: auto;
-  }
-
   .md\:py-0 {
     padding-top: 0px;
     padding-bottom: 0px;
   }
 
-  .md\:pl-16 {
-    padding-left: 4rem;
-  }
-
   .md\:pl-8 {
     padding-left: 2rem;
+  }
+
+  .md\:pl-16 {
+    padding-left: 4rem;
   }
 
   .md\:text-2xl {

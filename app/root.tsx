@@ -15,15 +15,17 @@ import styles from "./styles/app.css";
 import LoadingPage from "components/loadingPage/loadingPage";
 import { useEffect, useState } from "react";
 import usePrevious from "hooks/usePrevious";
-import { Analytics } from '@vercel/analytics/react';
+import { Analytics } from "@vercel/analytics/react";
+import ErrorPage from "components/errorPage/errorPage";
+import logo from './assets/mathsLogo.png';
 
 export const loader = () => {
   return {
     ENV: {
       VERCEL_ANALYTICS_ID: process.env.VERCEL_ANALYTICS_ID,
     },
-  }
-}
+  };
+};
 export function links() {
   return [{ rel: "stylesheet", href: styles }];
 }
@@ -45,17 +47,17 @@ export default function App() {
 }
 
 function Document({ children }: any) {
-  const {ENV} = useLoaderData<typeof loader>()
-
+  const { ENV } = useLoaderData<typeof loader>();
 
   return (
     <html lang="el">
       <head>
         <Meta />
         <Links />
+        <link rel="icon" type="image/x-icon" href={logo}/>
       </head>
       <body className="font-mono">
-       {children}
+        {children}
         <ScrollRestoration />
         <Scripts />
         <Analytics />
@@ -64,7 +66,7 @@ function Document({ children }: any) {
           dangerouslySetInnerHTML={{
             __html: `window.ENV = ${JSON.stringify(ENV)}`,
           }}
-        />       
+        />
         {process.env.NODE_ENV === "development" && <LiveReload />}
       </body>
     </html>
@@ -78,7 +80,7 @@ export function Layout({ children }: any) {
 
   useEffect(() => {
     let timeoutId: NodeJS.Timeout;
-    if ((location.pathname !== prevPath) && location.pathname!=='/' ) {
+    if (location.pathname !== prevPath && location.pathname !== "/") {
       setIsLoading(true);
       timeoutId = setTimeout(() => {
         setIsLoading(false);
@@ -90,8 +92,29 @@ export function Layout({ children }: any) {
   return (
     <div className="h-screen min-h-screen flex flex-col justify-start ">
       <NavList />
-      {isLoading? <LoadingPage/>: children}
+      {isLoading ? <LoadingPage /> : children}
       <Footer />
     </div>
+  );
+}
+
+export function ErrorBoundary({ error: error }: { error: Error }) {
+  console.error('error',error);
+  return (
+    <html>
+      <head>
+        <title>Oh no!</title>
+        <Meta />
+        <Links />
+      </head>
+      <body>
+        <div className="h-screen min-h-screen flex flex-col justify-start ">
+          <NavList />
+          <ErrorPage />
+          <Footer />
+        </div>
+        <Scripts />
+      </body>
+    </html>
   );
 }

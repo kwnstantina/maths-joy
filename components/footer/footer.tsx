@@ -23,7 +23,7 @@ const Footer = () => {
               className="ml-2 -mr-1 h-5 w-5 text-white hover:text-orange-300"
               aria-hidden="true"
             />
-            <div>konstantinakirtsia@gmail.com</div>
+            <div>gregkirmaths@gmail.com</div>
           </div>
         </div>
 

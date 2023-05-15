@@ -56,7 +56,9 @@ export default function Index() {
       <section className="container mx-auto px-6 text-center pb-48 flex justify-center align-center">
         <Intro />
       </section>
-      <section className="w-full flex items-start xs:flex-col sm:flex-col md:flex-row bg-gray-50">
+      <section 
+      className="w-full flex items-start flex-col  bg-gray-50"
+      >
         <div className="w-94 pl-10 pt-10">
           <p className="animate-text bg-gradient-to-r from-teal-500 via-purple-500 to-orange-500 bg-clip-text text-transparent text-5xl font-black">
             {" "}
@@ -64,7 +66,7 @@ export default function Index() {
           </p>
         </div>
         <div
-          className="px-6 pb-32 pt-24"
+          className="px-6 pb-32 pt-24 self-center"
           ref={refThree}
           style={getFadeLeftStyles(animatedView.section3)}
         >
@@ -72,7 +74,7 @@ export default function Index() {
             title="Ασκήσεις Μαθηματικών"
             link="/exercises"
             content="Άλυτες και λυμένες ασκήσεις και πολλαπλής επιλογής για τάξεις γυμνασίου, λυκείου και πανεπιστήμιου."
-            additionStyle=" flex items-center justify-center mb-6 h-40 md:w-[36rem] bg-gradient-to-r from-orange-300	to-orange-600  rounded-3xl shadow-md"
+            additionStyle="flex items-center justify-center mb-6 h-40 md:w-[36rem] bg-gradient-to-r from-orange-300	to-orange-600  rounded-3xl shadow-md"
           >
             <DocumentAddIcon className="w-20" />
           </Box>
@@ -95,6 +97,11 @@ export default function Index() {
         </div>
       </section>
       <section className="w-10/12 mx-auto px-6 pb-32 rounded-t-md mb-6">
+      <div className="absolute z-[-1]">
+      <div
+    className="relative  top-0 right-0 bg-gradient-to-br from-orange-600 to-white rounded-full h-96 w-96"
+  />
+</div>
         <div
           ref={anotherRef}
           style={getFadeRightStyles(animatedView.section2)}
@@ -104,7 +111,7 @@ export default function Index() {
             <h1 className="text-4xl text-center mt-10 font-black">
               Online chat
             </h1>
-            <p className="animate-text bg-gradient-to-r from-teal-500 via-purple-500 to-orange-500 bg-clip-text text-transparent text-xl font-black">
+            <p className="text-xl font-black text-center">
               Για απορίες και συζήτηση επί των ασκήσεων και των θεμάτων
             </p>
           </div>

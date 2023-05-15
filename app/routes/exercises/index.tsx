@@ -25,8 +25,8 @@ export const loader: LoaderFunction = async ({ request }) => {
         ? {
             OR: [
               {
-                descriptions: {
-                  contains: filters.searchItem,
+                description: {
+                  contains: filters.searchItem, 
                   mode: "insensitive",
                 },
               },

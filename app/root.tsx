@@ -52,6 +52,7 @@ function Document({ children }: any) {
   return (
     <html lang="el">
       <head>
+      <title>GregKyrMaths</title>
         <Meta />
         <Links />
         <link rel="icon" type="image/x-icon" href={logo}/>
@@ -61,7 +62,6 @@ function Document({ children }: any) {
         <ScrollRestoration />
         <Scripts />
         <Analytics />
-        {/* 👇 Write the ENV values to the window */}
         <script
           dangerouslySetInnerHTML={{
             __html: `window.ENV = ${JSON.stringify(ENV)}`,
@@ -103,7 +103,7 @@ export function ErrorBoundary({ error: error }: { error: Error }) {
   return (
     <html>
       <head>
-        <title>Oh no!</title>
+        <title>GregKyrMaths error!</title>
         <Meta />
         <Links />
       </head>

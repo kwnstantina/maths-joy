@@ -1,19 +1,24 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { MenuIcon, XIcon } from "@heroicons/react/outline";
 import { NavLink } from "@remix-run/react";
 import UserSettings from "./userSettings";
 import logo from '../../app/assets/logoD.png';
+import useDetectOutside from "hooks/useDetectOutside";
 
 const Navbar = () => {
   const [nav, setNav] = useState(false);
   const handleClick = () => setNav(!nav);
+  const closeModal = () => setNav(false);
 
   const activeStyle = {
     textDecoration: "underline",
   };
+  const wrapperRef = useRef(null);
+  
+  useDetectOutside(wrapperRef,closeModal);
 
   return (
-    <div className="container mx-auto mt-10 px-6 text-center h-40 md:h-20">
+    <div ref={wrapperRef} className="container mx-auto mt-10 px-6 text-center h-40 md:h-20">
       <div className="px-2 flex justify-between items-center w-full h-full">
         <div>
         <NavLink

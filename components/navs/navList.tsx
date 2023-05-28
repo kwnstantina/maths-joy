@@ -18,7 +18,7 @@ const Navbar = () => {
   useDetectOutside(wrapperRef,closeModal);
 
   return (
-    <div ref={wrapperRef} className="container mx-auto mt-10 px-6 text-center h-40 md:h-20">
+    <div ref={wrapperRef} className="mx-20 mt-10  text-center h-40 md:h-20">
       <div className="px-2 flex justify-between items-center w-full h-full">
         <div>
         <NavLink

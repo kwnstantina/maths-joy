@@ -61,7 +61,7 @@ function Document({ children }: any) {
         {children}
         <ScrollRestoration />
         <Scripts />
-        <Analytics />
+        {/* <Analytics /> */}
         <script
           dangerouslySetInnerHTML={{
             __html: `window.ENV = ${JSON.stringify(ENV)}`,

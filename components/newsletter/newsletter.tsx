@@ -3,11 +3,10 @@ const NewsLetter = ():JSX.Element =>{
     <div className="py-8 px-4 mx-auto max-w-screen-xl lg:py-16 lg:px-6">
           <div className="mx-auto max-w-screen-md sm:text-center">
             <h2 className="mb-4 text-3xl tracking-tight font-extrabold text-gray-900 sm:text-4xl">
-              Sign up for our newsletter
+             Εγγραφείτε στο newsletter μας
             </h2>
             <p className="mx-auto mb-8 max-w-2xl font-light text-gray-500 md:mb-12 sm:text-xl">
-              Stay up to date with the roadmap progress, announcements and
-              exclusive discounts feel free to sign up with your email.
+                 Μείνετε συντονισμένοι με το gregkyrMath!
             </p>
             <form action="#">
               <div className="items-center mx-auto mb-3 space-y-4 max-w-screen-sm sm:flex sm:space-y-0">
@@ -31,10 +30,12 @@ const NewsLetter = ():JSX.Element =>{
                   </div>
                   <input
                     className="block p-3 pl-10 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 sm:rounded-none sm:rounded-l-lg focus:ring-orange-500 focus:border-orange-500"
-                    placeholder="Enter your email"
+                    placeholder="Your email..."
                     type="email"
                     id="email"
                     required
+                    value=''
+                    onChange= {() =>console.log('hello')}
                   />
                 </div>
                 <div>

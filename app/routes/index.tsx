@@ -9,6 +9,71 @@ import AboutUsHoc from "components/aboutUs/aboutUs";
 import Intro from "components/intro/intro";
 import Box from "components/box/box";
 import NewsLetter from "components/newsletter/newsletter";
+import { ActionFunction, json } from "@remix-run/node";
+
+// export const action: ActionFunction = async ({ request }) => {
+//   const { email, name, message } = await request.json();
+
+//   const convertApiKit =  process.env.CONVERTKIT_API_KEY;
+
+//   const caonvertkitASecret = process.env.CONVERTKIT_API_SECRET;
+
+//   const sendGridResponse = await fetch('https://api.sendgrid.com/v3/mail/send', {
+//     method: 'POST',
+//     headers: {
+//       'Content-Type': 'application/json',
+//       Authorization: `Bearer ${convertApiKit}`,
+//     },
+//     body: JSON.stringify({
+//       personalizations: [
+//         {
+//           to: [
+//             {
+//               email: 'YOUR_CONVERTKIT_EMAIL',
+//             },
+//           ],
+//           subject: 'New Email from Remix',
+//         },
+//       ],
+//       from: {
+//         email: email,
+//         name: name,
+//       },
+//       content: [
+//         {
+//           type: 'text/plain',
+//           value: message,
+//         },
+//       ],
+//     }),
+//   });
+
+//   if (sendGridResponse.status !== 202) {
+//     // Handle the error when SendGrid API call fails
+//     return json({ error: 'Failed to send email' }, { status: 500 });
+//   }
+
+//   // Call ConvertKit API to add the subscriber to your form
+//   const convertKitResponse = await fetch(`https://api.convertkit.com/v3/forms/${}/subscribe`, {
+//     method: 'POST',
+//     headers: {
+//       'Content-Type': 'application/json',
+//       Authorization: `Bearer ${convertApiKit}`,
+//     },
+//     body: JSON.stringify({
+//       email: email,
+//       first_name: name,
+//     }),
+//   });
+
+//   if (!convertKitResponse.ok) {
+//     // Handle the error when ConvertKit API call fails
+//     return json({ error: 'Failed to subscribe' }, { status: 500 });
+//   }
+
+//   // Redirect the user after successful submission
+
+// };
 
 export default function Index() {
   const getFadeLeftStyles = (isfadeLeftInViewPort: any) => ({
@@ -51,57 +116,109 @@ export default function Index() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  const subscribe = () => {};
+
   return (
     <>
-      <section className="container mx-auto px-6 text-center pb-48 flex justify-center align-center">
+      <section className="container mx-auto px-6 text-center pb-8 flex justify-center align-center">
         <Intro />
       </section>
-      <section 
-      className="w-full flex items-start flex-col  bg-gray-50"
-      >
+
+      <section className="my-32 flex items-start flex-col  bg-gray-50  mx-8">
         <div className="w-94 pl-10 pt-10">
-          <p className="animate-text bg-gradient-to-r from-teal-500 via-purple-500 to-orange-500 bg-clip-text text-transparent text-5xl font-black">
-            {" "}
-            Εδώ θα βρεις...
-          </p>
         </div>
         <div
-          className="px-6 pb-32 pt-24 self-center"
+          className="px-6 pb-32 pt-24 flex items-start xs:flex-col sm:flex-col md:flex-col lg:flex-row xl:flex-row 2xl:flex-row"
           ref={refThree}
-          style={getFadeLeftStyles(animatedView.section3)}
+           style={getFadeLeftStyles(animatedView.section3)}
         >
+          <div className="h-8 relative px-2">
+            <div className="absolute left-0 top-0 h-full w-1 bg-gradient-to-b from-orange-500 to-orange-800" />
+          </div>
           <Box
-            title="Ασκήσεις Μαθηματικών"
-            link="/exercises"
-            content="Άλυτες και λυμένες ασκήσεις και πολλαπλής επιλογής για τάξεις γυμνασίου, λυκείου και πανεπιστήμιου."
-            additionStyle="flex items-center justify-center mb-6 h-40 md:w-[36rem] bg-gradient-to-r from-orange-300	to-orange-600  rounded-3xl shadow-md"
-          >
-            <DocumentAddIcon className="w-20" />
+              title="Ασκήσεις Μαθηματικών"
+              content="Άλυτες, λυμένες και πολλαπλής επιλογής ασκήσεις για  Γυμνάσιο, Λύκειου,Πανεπιστήμιου."
+            >
+              <a
+                href="#"
+                className="mb-6 inline-flex items-center font-medium  hover:underline text-gray-800"
+              >
+                Ασκήσεις εδώ
+                <svg
+                  aria-hidden="true"
+                  className="w-5 h-5 ml-1"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M12.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-2.293-2.293a1 1 0 010-1.414z"
+                    clipRule="evenodd"
+                  ></path>
+                </svg>
+              </a>
           </Box>
+            <div className="h-8 relative px-2">
+            <div className="absolute left-0 top-0 h-full w-1 bg-gradient-to-b from-teal-500 to-teal-700" />
+          </div>
           <Box
-            title="Διδακτικό υλικό"
-            link="/tutorial"
-            content="Οπτικό ακουστικό υλικό με καθοδήγηση και επεξήγηση μαθηματικών."
-            additionStyle="sm:md-0 md:ml-10 flex items-center justify-center mb-6 h-40 md:w-[36rem]	 bg-gradient-to-r from-rose-200	 to-rose-300  rounded-3xl shadow-md"
-          >
-            <ViewBoardsIcon className="w-20" />
-          </Box>
+             title="Ασκήσεις Εμπέδωσης"
+             content="Ασκήσεις πολλαπλής επιλογής για εμπέδωση με επεξεγηματική λύση."
+            >
+              <a
+                href="#"
+                className="mb-6 inline-flex items-center font-medium  hover:underline text-gray-800"
+              >
+                Ασκήσεις Εμπέδωσης εδώ
+                <svg
+                  aria-hidden="true"
+                  className="w-5 h-5 ml-1"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M12.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-2.293-2.293a1 1 0 010-1.414z"
+                    clipRule="evenodd"
+                  ></path>
+                </svg>
+              </a>
+            </Box>
+            <div className="h-8 relative px-2">
+            <div className="absolute left-0 top-0 h-full w-1 bg-gradient-to-b from-pink-500 to-pink-800" />
+          </div>
           <Box
-            title="Ασκήσεις Εμπέδωσης"
-            link="/testYourself"
-            content="Ασκήσεις πολλαπλής επιλογής για εμπέδωση με επεξεγηματική λύση."
-            additionStyle="sm:md-0 md:ml-24 flex items-center justify-center  mb-6 h-40 md:w-[36rem]	 bg-gradient-to-r from-teal-200	 to-teal-500  rounded-3xl shadow-md"
-          >
-            <BookOpenIcon className="w-20" />
-          </Box>
-        </div>
+              title="Διδακτικό υλικό"       
+              content="Οπτικό ακουστικό υλικό με καθοδήγηση και επεξήγηση μαθηματικών."
+            >
+              <a
+                href="#"
+                className="mb-6 inline-flex items-center font-medium  hover:underline text-gray-800"
+              > 
+                Διδακτικό υλικό εδώ
+                <svg
+                  aria-hidden="true"
+                  className="w-5 h-5 ml-1"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M12.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-2.293-2.293a1 1 0 010-1.414z"
+                    clipRule="evenodd"
+                  ></path>
+                </svg>
+              </a>
+            </Box>
+          </div>
       </section>
-      <section className="w-10/12 mx-auto px-6 pb-32 rounded-t-md mb-6">
-      <div className="absolute z-[-1]">
-      <div
-    className="relative  top-0 right-0 bg-gradient-to-br from-orange-600 to-white rounded-full h-96 w-96"
-  />
-</div>
+      <section className="w-10/12 mx-8 px-6  rounded-t-md my-32">
+        <div className="absolute z-[-1]">
+          <div className="relative  top-0 right-0 bg-gradient-to-br from-orange-600 to-white rounded-full h-96 w-96" />
+        </div>
         <div
           ref={anotherRef}
           style={getFadeRightStyles(animatedView.section2)}
@@ -145,8 +262,8 @@ export default function Index() {
       <section>
         <AboutUsHoc />
       </section>
-      <section className="bg-white">
-        <NewsLetter/>  
+      <section className="bg-white my-32">
+        <NewsLetter />
       </section>
     </>
   );

@@ -1,81 +1,43 @@
 import chat from "../assets/chat.png";
-import { useRef, useEffect, useState } from "react";
-import {
-  ViewBoardsIcon,
-  BookOpenIcon,
-  DocumentAddIcon,
-} from "@heroicons/react/outline";
+import { useRef, useEffect, useState, useTransition } from "react";
 import AboutUsHoc from "components/aboutUs/aboutUs";
 import Intro from "components/intro/intro";
 import Box from "components/box/box";
 import NewsLetter from "components/newsletter/newsletter";
 import { ActionFunction, json } from "@remix-run/node";
+import { useActionData, useFetcher, useSubmit } from "@remix-run/react";
+import { validateEmail } from "utils/utils";
 
-// export const action: ActionFunction = async ({ request }) => {
-//   const { email, name, message } = await request.json();
-
-//   const convertApiKit =  process.env.CONVERTKIT_API_KEY;
-
-//   const caonvertkitASecret = process.env.CONVERTKIT_API_SECRET;
-
-//   const sendGridResponse = await fetch('https://api.sendgrid.com/v3/mail/send', {
-//     method: 'POST',
-//     headers: {
-//       'Content-Type': 'application/json',
-//       Authorization: `Bearer ${convertApiKit}`,
-//     },
-//     body: JSON.stringify({
-//       personalizations: [
-//         {
-//           to: [
-//             {
-//               email: 'YOUR_CONVERTKIT_EMAIL',
-//             },
-//           ],
-//           subject: 'New Email from Remix',
-//         },
-//       ],
-//       from: {
-//         email: email,
-//         name: name,
-//       },
-//       content: [
-//         {
-//           type: 'text/plain',
-//           value: message,
-//         },
-//       ],
-//     }),
-//   });
-
-//   if (sendGridResponse.status !== 202) {
-//     // Handle the error when SendGrid API call fails
-//     return json({ error: 'Failed to send email' }, { status: 500 });
-//   }
-
-//   // Call ConvertKit API to add the subscriber to your form
-//   const convertKitResponse = await fetch(`https://api.convertkit.com/v3/forms/${}/subscribe`, {
-//     method: 'POST',
-//     headers: {
-//       'Content-Type': 'application/json',
-//       Authorization: `Bearer ${convertApiKit}`,
-//     },
-//     body: JSON.stringify({
-//       email: email,
-//       first_name: name,
-//     }),
-//   });
-
-//   if (!convertKitResponse.ok) {
-//     // Handle the error when ConvertKit API call fails
-//     return json({ error: 'Failed to subscribe' }, { status: 500 });
-//   }
-
-//   // Redirect the user after successful submission
-
-// };
+export const action: ActionFunction = async ({ request }) => {
+  const form = await request.formData();
+ const email = form.get("email") as string;
+  if (!email || !validateEmail(email)) {
+    return json(
+      {
+        error: "Παρακαλώ εισάγετε ένα έγκυρο email"
+      },
+    );
+  }
+  const convertApiKit =  process.env.CONVERTKIT_API_KEY;
+  const converFormId =  process.env.CONVERT_API_TEMPLATE_ID;
+  const res= await fetch(`https://api.convertkit.com/v3/forms/${converFormId}/subscribe`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json; charset=utf-8',
+    },
+    body: JSON.stringify({
+      api_key: convertApiKit,
+      email:email,
+    }),
+  });
+  return await res.json();
+};
 
 export default function Index() {
+  const [newsletterEmail, setNewsletterEmail] = useState("");
+  const fetcher = useFetcher();
+
+
   const getFadeLeftStyles = (isfadeLeftInViewPort: any) => ({
     transition: "all 1s ease-in",
     opacity: isfadeLeftInViewPort ? "1" : "0",
@@ -116,7 +78,16 @@ export default function Index() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  const subscribe = () => {};
+  const subscribe = (email:string) => {
+    setNewsletterEmail(email);
+  };
+  const handleSubmit = (
+    event: React.FormEvent<HTMLFormElement | any> | any
+  ) => {
+    event.preventDefault();
+    fetcher.submit({ email:newsletterEmail}, { method: "post" });
+  };
+
 
   return (
     <>
@@ -263,7 +234,7 @@ export default function Index() {
         <AboutUsHoc />
       </section>
       <section className="bg-white my-32">
-        <NewsLetter />
+        <NewsLetter subscribe={subscribe} newsletterEmail={newsletterEmail} handleSubmit={handleSubmit} fetcher={fetcher}/>
       </section>
     </>
   );

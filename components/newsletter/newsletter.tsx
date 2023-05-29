@@ -1,4 +1,14 @@
-const NewsLetter = ():JSX.Element =>{
+import { Form } from "@remix-run/react";
+
+type Props ={
+  newsletterEmail?: string;
+  subscribe: (email:string) => void;
+  handleSubmit?: any;
+  fetcher: any;
+}
+const NewsLetter = (props:Props):JSX.Element =>{
+  const { newsletterEmail, subscribe,handleSubmit,fetcher} = props;
+
  return(
     <div className="py-8 px-4 mx-auto max-w-screen-xl lg:py-16 lg:px-6">
           <div className="mx-auto max-w-screen-md sm:text-center">
@@ -8,7 +18,7 @@ const NewsLetter = ():JSX.Element =>{
             <p className="mx-auto mb-8 max-w-2xl font-light text-gray-500 md:mb-12 sm:text-xl">
                  Μείνετε συντονισμένοι με το gregkyrMath!
             </p>
-            <form action="#">
+             <fetcher.Form onSubmit={handleSubmit}  className="space-y-6">
               <div className="items-center mx-auto mb-3 space-y-4 max-w-screen-sm sm:flex sm:space-y-0">
                 <div className="relative w-full">
                   <label
@@ -34,20 +44,30 @@ const NewsLetter = ():JSX.Element =>{
                     type="email"
                     id="email"
                     required
-                    value=''
-                    onChange= {() =>console.log('hello')}
+                    value={newsletterEmail}
+                    onChange= {(e)=>subscribe(e.target.value)}
                   />
+                
                 </div>
                 <div>
                   <button
                     type="submit"
+                    value="newsletter"
+                    name="_newsletter"
+                    disabled={fetcher.state === "submitting"}
                     className="py-3 px-5 w-full text-sm font-medium text-center text-white rounded-lg border cursor-pointer bg-orange-700 border-orange-600 sm:rounded-none sm:rounded-r-lg hover:bg-orange-800 focus:ring-4 focus:ring-orange-300"
                   >
                     Subscribe
                   </button>
                 </div>
+               
               </div>
-              <div className="mx-auto max-w-screen-sm text-sm text-left text-gray-500 newsletter-form-footer">
+              <div className="mx-auto max-w-screen-sm text-sm text-left">
+               {fetcher?.data?.error && <p className="w-full text-sm text-red-600">
+                      {fetcher?.data.error}
+                    </p>}
+                    </div>
+              <div className="mx-auto max-w-screen-sm text-sm text-left text-gray-500">
                 We care about the protection of your data.{" "}
                 <a
                   href="#"
@@ -57,7 +77,7 @@ const NewsLetter = ():JSX.Element =>{
                 </a>
                 .
               </div>
-            </form>
+            </fetcher.Form>
           </div>
         </div>
  );

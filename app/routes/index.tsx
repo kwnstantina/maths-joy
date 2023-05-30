@@ -22,14 +22,15 @@ export const action: ActionFunction = async ({ request }) => {
   const converFormId =  process.env.CONVERT_API_TEMPLATE_ID;
   const res= await fetch(`https://api.convertkit.com/v3/forms/${converFormId}/subscribe`, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json; charset=utf-8',
-    },
     body: JSON.stringify({
       api_key: convertApiKit,
       email:email,
     }),
+    headers: {
+      'Content-Type': 'application/json; charset=utf-8',
+    },
   });
+
   return await res.json();
 };
 

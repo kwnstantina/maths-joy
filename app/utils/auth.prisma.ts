@@ -6,6 +6,7 @@ import type { RegisterForm, LoginForm } from "./types.server";
 import { GoogleStrategy } from "remix-auth-google";
 import { Authenticator } from "remix-auth";
 import supabase from "../../utils/supabase";
+import { arrayOfColors } from "utils/utils";
 
 const sessionSecret = process.env.SESSION_SECRET;
 if (!sessionSecret) {
@@ -147,7 +148,7 @@ export async function getUser(request: Request) {
       where: { id: userId },
       select: { id: true, email: true, profile: true, role: true },
     });
-    await supabase.from('users').update({ isActive: false }).eq('provider_id', userId);
+    //await supabase.from('users').update({ isActive: false }).eq('provider_id', userId);
 
     return user;
   } catch {
@@ -157,7 +158,10 @@ export async function getUser(request: Request) {
 
 export async function logout(request: Request) {
   const session = await getUserSession(request);
-  let user = await authenticator.isAuthenticated(request);
+  let user:any = await authenticator.isAuthenticated(request);
+  console.log('user',user)
+   await  updateUserStatus(user.id,false);
+
   if (user) {
     await authenticator.logout(request, { redirectTo: "/login" });
     return redirect("/", {
@@ -187,6 +191,7 @@ export async function chatAuthorization(request: Request) {
       lastName: userByExternalAuth.profile.lastName,
       isActive: true,
       profilePicture:userByExternalAuth.profilePicture,
+      color: arrayOfColors(),
     });
   }
   if(userByStorage && checkIfUserStorageExists.data?.length===0){
@@ -197,8 +202,28 @@ export async function chatAuthorization(request: Request) {
       firstName: userByStorage?.profile.firstName,
       lastName: userByStorage?.profile.lastName,
       isActive: true,
+      color: arrayOfColors(),
     });
   }
+  await updateUserStatus(userByExternalAuth?.id || userByStorage?.id,true);
   return userByExternalAuth || userByStorage;
 }
+
+export const updateUserStatus=async(userId:string,isActive:boolean)=> {
+  try {
+    const { data, error } = await supabase
+      .from('users')
+      .update({ isActive: isActive })
+      .eq('provider_id', userId);
+
+    if (error) {
+      console.error('Error updating user status:', error);
+      return;
+    }
+    console.log('User status updated successfully');
+  } catch (error) {
+    console.error('Error updating user status:', error);
+  }
+}
+
 export const authenticator = new Authenticator(storage).use(googleStrategy);

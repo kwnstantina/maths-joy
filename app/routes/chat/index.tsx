@@ -1,4 +1,4 @@
-import { useLoaderData ,useTransition,useCatch, Link} from "@remix-run/react";
+import { useLoaderData, useTransition, useCatch, Link } from "@remix-run/react";
 import supabase from "../../../utils/supabase";
 import { LoaderFunction, redirect, json, ActionArgs } from "@remix-run/node";
 import { useEffect, useMemo, useState } from "react";
@@ -9,10 +9,8 @@ import ChatContent from "components/chat/chatContent/chatContent";
 import UserContent from "components/chat/chatContent/userContent";
 import dataEmojie from "@emoji-mart/data";
 import Picker from "@emoji-mart/react";
-import xss from 'xss';
-import {getRgb,rgbToHex} from '../../../utils/utils'
+import xss from "xss";
 
-// image of user
 export const loader: LoaderFunction = async ({ request }) => {
   let user = await chatAuthorization(request);
   const env = {
@@ -23,8 +21,19 @@ export const loader: LoaderFunction = async ({ request }) => {
   if (!user) {
     return redirect("/login");
   }
-  const messages = await supabase.from("messages").select();
-  const users = await supabase.from("users").select();
+  const messages: any = await supabase.from("messages").select();
+  const users: any = await supabase.from("users").select();
+
+
+  // Create a new object with nested user information
+  const messagesWithUserInfo = messages?.data.map((message: any) => {
+    const userId = message.user_id;
+    const user = users.data.find((user: any) => user.id === userId);
+    return {
+      ...message,
+      user: user,
+    };
+  });
   const userId = await supabase
     .from("users")
     .select()
@@ -33,8 +42,10 @@ export const loader: LoaderFunction = async ({ request }) => {
   user = {
     ...user,
     id: userId?.data?.find((item) => item.id)?.id,
+    isActive: true,
   };
-  return json({ messages, users, env, user });
+
+  return json({ messagesWithUserInfo, users, env, user });
 };
 
 export const action = async ({ request }: ActionArgs) => {
@@ -43,7 +54,7 @@ export const action = async ({ request }: ActionArgs) => {
   const userId = await supabase
     .from("users")
     .select()
-    .eq("provider_id", user.id);  
+    .eq("provider_id", user.id);
   const { message } = Object.fromEntries(await request.formData());
   const { messageToDom } = (await supabase.from("messages").insert([
     {
@@ -61,21 +72,10 @@ const Chat = () => {
   const [supabaseClient] = useState(() =>
     createBrowserClient(data.env.SUPABASE_URL, data.env.SUPABASE_ANON_KEY)
   );
-  const [messages, setMessages] = useState<any>(data.messages.data);
+  const [messages, setMessages] = useState<any>(data.messagesWithUserInfo);
   const [showEmojiPicker, setShowEmojiPicker] = useState<boolean>(false);
-  const [message, setMessage] = useState<string>('')
-  const isPosting=transition.state==='submitting';
-
-  const randomColorChat=useMemo(()=>{
-    let randomChatColor={
-      r:getRgb(),
-      g:getRgb(),
-      b:getRgb()
-    }
-  
-  return rgbToHex(randomChatColor.r,randomChatColor.g,randomChatColor.b)
-  },[])
-
+  const [message, setMessage] = useState<string>("");
+  const isPosting = transition.state === "submitting";
 
   useEffect(() => {
     const channel = supabaseClient
@@ -85,13 +85,17 @@ const Chat = () => {
         { event: "INSERT", schema: "public", table: "messages" },
         (payload) => {
           const newMessage = payload.new;
-
+          const senderId = newMessage.user_id;
+          const user = data.users.data.find(
+            (user: any) => user.id === senderId
+          );
+          const newUserMessage = { ...newMessage, user: user };
           if (
             !messages.find(
               (message: { id: string }) => message.id === newMessage.id
             )
           ) {
-            setMessages([...messages, newMessage]);
+            setMessages([...messages, newUserMessage]);
           }
         }
       )
@@ -99,22 +103,21 @@ const Chat = () => {
 
     return () => {
       supabaseClient.removeChannel(channel);
-      setMessage('')
+      setMessage("");
     };
-  }, [supabaseClient, messages]);
+  }, [supabaseClient, messages, data.users]);
 
   const handleEmojiClick = (emoji: any) => {
     const emojiCode = emoji.native;
-    setMessage(prev=>prev+emojiCode);
+    setMessage((prev) => prev + emojiCode);
   };
-  const onChangeHandler =(e: { target: { value: string; }; })=>{
+  const onChangeHandler = (e: { target: { value: string } }) => {
     setMessage(e.target.value);
-  }
-
+  };
 
   return (
     <>
-      <Form method="post" >
+      <Form method="post">
         <div className="container mx-auto my-10 border border-slate-400	 rounded z-[-1]">
           <div className="min-w-full border rounded lg:grid lg:grid-cols-3">
             <div className="border-r border-gray-300 lg:col-span-1">
@@ -127,7 +130,11 @@ const Chat = () => {
             </div>
             <div className="sm:none lg:col-span-2 lg:block">
               <div className="w-full">
-                <ChatContent messages={messages} data={data} isPosting={isPosting} randomColorChat={randomColorChat}/>
+                <ChatContent
+                  messages={messages}
+                  data={data}
+                  isPosting={isPosting}
+                />
                 <div className="flex items-center justify-between w-full p-3 border-t border-gray-300">
                   <button onClick={() => setShowEmojiPicker(!showEmojiPicker)}>
                     <svg
@@ -145,28 +152,12 @@ const Chat = () => {
                       />
                     </svg>
                   </button>
-                  {/* <button>
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="w-5 h-5 text-gray-500"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth="2"
-                        d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"
-                      />
-                    </svg>
-                  </button> */}
                   <input
                     type="text"
                     placeholder="Γράψε το μήνυμα σου!"
                     className="block w-full py-2 pl-4 mx-3 bg-gray-100 rounded-full outline-none focus:text-gray-700"
                     name="message"
-                    required 
+                    required
                     value={message}
                     onChange={onChangeHandler}
                   />
@@ -185,12 +176,14 @@ const Chat = () => {
                   {showEmojiPicker && (
                     <Picker
                       onEmojiSelect={handleEmojiClick}
-                      onClickOutside={() => setShowEmojiPicker(!showEmojiPicker)}
+                      onClickOutside={() =>
+                        setShowEmojiPicker(!showEmojiPicker)
+                      }
                       data={dataEmojie}
-                       previewPosition='top'
+                      previewPosition="top"
                       skin={3}
                       style={{
-                        marginTop:'30px',
+                        marginTop: "30px",
                         zIndex: 9999,
                       }}
                     />
@@ -206,13 +199,9 @@ const Chat = () => {
 };
 export function CatchBoundary() {
   const caught = useCatch();
- 
+
   if (caught.status === 404) {
-    return (
-      <div className="text-red-500 h-full">
-         Κάτι πήγε στραβά 
-      </div>
-    );
+    return <div className="text-red-500 h-full">Κάτι πήγε στραβά</div>;
   }
   throw new Error(`Unsupported thrown response status code: ${caught.status}`);
 }
@@ -221,17 +210,15 @@ export function ErrorBoundary({ error }: { error: unknown }) {
   if (error instanceof Error) {
     return (
       <main className="text-center flex justify-center h-full ">
-      <div className="max-w-lg">
-        <div className="text-black-500">
-        Κάτι πήγε στραβά!
-        Παρακαλώ επικοινωνήστε με τον διαχειριστή.
-      </div>
-        <Link className="text-orange-500 underline" to="/" >
-          Πίσω στην αρχική
-        </Link>
-      </div>
-    </main>
-      
+        <div className="max-w-lg">
+          <div className="text-black-500">
+            Κάτι πήγε στραβά! Παρακαλώ επικοινωνήστε με τον διαχειριστή.
+          </div>
+          <Link className="text-orange-500 underline" to="/">
+            Πίσω στην αρχική
+          </Link>
+        </div>
+      </main>
     );
   }
   return <div className="text-red-500 h-full ">Κάτι πήγε στραβά!</div>;

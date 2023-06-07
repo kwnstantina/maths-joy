@@ -48,6 +48,7 @@ model User {
   profile   UserProfile
   role      String
   updatedAt DateTime    @db.Date
+  isActive  Boolean     @default(false)
 }
 
 model Video {

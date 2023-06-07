@@ -34,21 +34,6 @@ export const dateTimeFormat = (dateTime: string) => {
   );
 };
 
-export const getRgb = () => {
-  return Math.floor(Math.random() * 256);
-};
-
-export const rgbToHex = (r: any, g: any, b: any) => {
-  return (
-    "#" +
-    [r, g, b]
-      .map((x) => {
-        const hex = x.toString(16);
-        return hex.lenght === 1 ? "0" + hex : hex;
-      })
-      .join("")
-  );
-};
 export const starterLetters = (firstName: string, lastName: string) => {
   return firstName[0] + "" + lastName[0] ?? "A";
 };
@@ -91,4 +76,10 @@ export const isEqual = (a: any, b: any) => {
 export const validateEmail = (email: string) => {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   return emailRegex.test(email);
+}
+
+export const arrayOfColors =()=>{
+const colors= ["#ff643e","#fc35a0","#f96e77",'#f5d300','#7777ff','#08f7fe'];
+const randomIndex = Math.floor(Math.random() * colors.length);
+return colors[randomIndex];
 }

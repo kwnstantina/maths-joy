@@ -36,7 +36,7 @@ const AboutUsHoc = () => {
               διδακτικού υλικου.{" "}
             </p>
             <a
-              href="#"
+              href="/aboutUs"
               className="inline-flex items-center font-medium text-white hover:underline mt-10"
             >
               Διάβασε περισότερα εδώ

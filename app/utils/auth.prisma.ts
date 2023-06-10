@@ -148,8 +148,6 @@ export async function getUser(request: Request) {
       where: { id: userId },
       select: { id: true, email: true, profile: true, role: true },
     });
-    //await supabase.from('users').update({ isActive: false }).eq('provider_id', userId);
-
     return user;
   } catch {
     throw logout(request);
@@ -159,7 +157,6 @@ export async function getUser(request: Request) {
 export async function logout(request: Request) {
   const session = await getUserSession(request);
   let user:any = await authenticator.isAuthenticated(request);
-  console.log('user',user)
    await  updateUserStatus(user.id,false);
 
   if (user) {

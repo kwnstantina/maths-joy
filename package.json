@@ -23,7 +23,7 @@
     "@supabase/auth-helpers-remix": "^0.1.4",
     "@supabase/supabase-js": "^2.7.1",
     "@vercel/analytics": "^1.0.1",
-    "@vercel/node": "^2.6.2",
+    "@vercel/node": "^2.15.1",
     "bcryptjs": "^2.4.3",
     "better-react-mathjax": "^2.0.2",
     "dotenv": "^16.0.3",

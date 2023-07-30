@@ -1,3 +1,26 @@
 {
-    "greeting": "Hello"
+    "title": "Math exercises and topics.",  
+    "exersice":"Exercises",
+    "topic":"Tutorials",
+    "training":"Training",
+    "user":"User",
+    "notifications":"Notifications",
+    "subTitle":"At GregKyrMaths you will find exercises, topics, books and teaching materials for students of all educational levels.",
+    "start":"Let's start!",
+    "mathsExersice":"Maths Exercises",
+    "mathsTopic":"Training Exercises",
+    "mathsTraining":"Tutorials",
+    "mathsExerciseContent":"Unsolved, solved and multiple choice exercises for Middle and High School.",
+    "mathsLink":"Exercises here",
+    "mathsTopicContent":"Multiple choice exercises for consolidation with explanatory solution.",
+    "mathsTopicLink":"Training Exercise εδώ",
+    "mathsTrainingContent":"Audio-visual material with guidance and explanation of exercises in mathematics.",
+    "mathsTrainingLink":"Tutorials here",
+    "onlineChat":"For questions and discussion on exercises and topics",
+    "aboutUs":"About us",
+    "name":"Gregory Kirtsias",
+    "type":"Mathematician",
+    "aboutUsType":"Εven a mathematician with a mustache...",
+    "aboutUsDescription": "The thirst for mathematics and the enthusiasm, prompted us to create an online site where students will have access to a wealth of teaching material.",
+    "aboutUsReadMore":"Read more here"
   }

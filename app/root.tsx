@@ -1,4 +1,4 @@
-import type { MetaFunction } from "@remix-run/node";
+import { json, type LoaderArgs, type MetaFunction } from "@remix-run/node";
 import {
   Links,
   LiveReload,
@@ -18,14 +18,28 @@ import usePrevious from "hooks/usePrevious";
 import { Analytics } from "@vercel/analytics/react";
 import ErrorPage from "components/errorPage/errorPage";
 import logo from './assets/mathsLogo.png';
+import { useTranslation } from "react-i18next";
+import i18next from "~/i18next.server";
+import useChangeLanguage from "hooks/useChangeLanguage";
 
-export const loader = () => {
+export async function loader({ request }: LoaderArgs) {
+  let locale = await i18next.getLocale(request);
   return {
+    locale: locale,
     ENV: {
-      VERCEL_ANALYTICS_ID: process.env.VERCEL_ANALYTICS_ID,
-    },
-  };
+    VERCEL_ANALYTICS_ID: process.env.VERCEL_ANALYTICS_ID,
+  },
+}
+}
+
+export let handle = {
+  // In the handle export, we can add a i18n key with namespaces our route
+  // will need to load. This key can be a single string or an array of strings.
+  // TIP: In most cases, you should set this to your defaultNS from your i18n config
+  // or if you did not set one, set it to the i18next default namespace "translation"
+  i18n: ["common"],
 };
+
 export function links() {
   return [{ rel: "stylesheet", href: styles }];
 }
@@ -47,10 +61,11 @@ export default function App() {
 }
 
 function Document({ children }: any) {
-  const { ENV } = useLoaderData<typeof loader>();
+  const { ENV ,locale} = useLoaderData<typeof loader>();
+  let { i18n } = useTranslation();
 
   return (
-    <html lang="el">
+    <html lang={locale as any} dir={i18n.dir()}>
       <head>
       <title>GregKyrMaths</title>
         <Meta />
@@ -87,7 +102,7 @@ export function Layout({ children }: any) {
       }, 1000);
     }
     return () => clearTimeout(timeoutId);
-  }, [location.pathname, prevPath]);
+  }, [location.pathname, prevPath]);  
 
   return (
     <div className="h-screen min-h-screen flex flex-col justify-start ">

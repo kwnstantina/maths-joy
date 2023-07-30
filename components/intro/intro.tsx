@@ -1,6 +1,9 @@
-import greg from '../../app/assets/mathsNewMustash.png'
+import greg from "../../app/assets/mathsNewMustash.png";
+import { useTranslation } from "react-i18next";
 
 const Intro = () => {
+  let { t } = useTranslation();
+
   return (
     <div>
       <img
@@ -9,17 +12,16 @@ const Intro = () => {
         className="h-30 rounded-full md:max-w-4xl"
       />
       <h1 className="max-w-2xl mx-auto mb-10 text-3xl font-bold leading-normal  md:text-4xl">
-        Ασκήσεις και θέματα μαθηματικών.
+        {t("title")}
       </h1>
       <p className="max-w-sm mx-auto mb-10 text-sm md:max-w-xl md:text-lg">
-        Στο GregKyrMaths θα βρεις ασκήσεις, θέματα, βιβλία και διδακτικό υλικό,
-        για μαθητές όλων των εκπαιδευτικών βαθμίδων.
+        {t("subTitle")}
       </p>
       <a
         href="exercises"
         className="inline-flex items-center px-3 py-3 text-sm font-medium text-center text-white bg-orange-600 rounded-lg hover:bg-orange-800 focus:ring-4 focus:outline-none focus:ring-orange-300"
       >
-        Ας ξεκινήσουμε
+        {t("start")}
         <svg
           aria-hidden="true"
           className="w-4 h-4 ml-2 -mr-1"

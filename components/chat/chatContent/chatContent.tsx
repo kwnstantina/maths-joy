@@ -18,6 +18,7 @@ type Props = {
 const ChatContent = (props: Props) => {
   const { messages, data, isPosting } = props;
   return (
+    <>
     <div className="relative w-full p-6 overflow-y-auto h-[40rem] bg-gray-200	">
       {messages?.map((message: Message) => {
         return (
@@ -83,6 +84,13 @@ const ChatContent = (props: Props) => {
      <span className="absolute px-3 font-medium text-gray-900 -translate-x-1/2  left-1/2 dark:text-white dark:bg-gray-900">{"10:09"}</span>
      </div> */}
     </div>
+    <div>
+            <button className="fixed bottom-4 right-4 p-4 bg-blue-500 text-white rounded" onClick={()=>console.log('s')}>
+          Scroll to Top
+        </button>
+    
+    </div>
+    </>
   );
 };
 

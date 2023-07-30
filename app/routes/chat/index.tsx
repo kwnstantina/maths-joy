@@ -26,7 +26,7 @@ export const loader: LoaderFunction = async ({ request }) => {
 
 
   // Create a new object with nested user information
-  const messagesWithUserInfo = messages?.data.map((message: any) => {
+  const messagesWithUserInfo = messages?.data?.map((message: any) => {
     const userId = message.user_id;
     const user = users.data.find((user: any) => user.id === userId);
     return {
@@ -75,6 +75,8 @@ const Chat = () => {
   const [messages, setMessages] = useState<any>(data.messagesWithUserInfo);
   const [showEmojiPicker, setShowEmojiPicker] = useState<boolean>(false);
   const [message, setMessage] = useState<string>("");
+  const [showButton, setShowButton] = useState(false);
+
   const isPosting = transition.state === "submitting";
 
   useEffect(() => {
@@ -106,6 +108,32 @@ const Chat = () => {
       setMessage("");
     };
   }, [supabaseClient, messages, data.users]);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const { scrollTop, clientHeight, scrollHeight } = document.documentElement;
+      setShowButton(scrollTop > clientHeight);
+
+      if (scrollTop + clientHeight === scrollHeight) {
+        // User has scrolled to the bottom
+        // Add logic to display a button or perform an action
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, []);
+  
+  const scrollToTop = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth',
+    });
+  };
+  
 
   const handleEmojiClick = (emoji: any) => {
     const emojiCode = emoji.native;

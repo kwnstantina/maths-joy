@@ -5,13 +5,11 @@ import UserSettings from "./userSettings";
 import logo from "../../app/assets/logoD.png";
 import useDetectOutside from "hooks/useDetectOutside";
 import {
-  ChevronDownIcon,
-  ViewListIcon,
+
   UserIcon,
   LoginIcon,
   LogoutIcon,
-  InboxIcon,
-  UserCircleIcon,
+
 } from "@heroicons/react/solid";
 
 import LanguageIndicator from "components/languageIndicator/languageIndicator";

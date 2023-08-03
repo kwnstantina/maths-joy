@@ -20,7 +20,6 @@ import ErrorPage from "components/errorPage/errorPage";
 import logo from './assets/mathsLogo.png';
 import { useTranslation } from "react-i18next";
 import i18next from "~/i18next.server";
-import useChangeLanguage from "hooks/useChangeLanguage";
 
 export async function loader({ request }: LoaderArgs) {
   let locale = await i18next.getLocale(request);

@@ -34,7 +34,7 @@ export default async function handleRequest(
     lng:'el', // The locale we detected above
     fallbackLng: 'en', // The fallback locale we detected above
     ns, // The namespaces the routes about to render wants to use
-    backend: { loadPath: resolve("./public/locales/{{lng}}/{{ns}}.json") },
+    backend: { loadPath: process.env.NODE_ENV === 'development'? resolve("./public/locales/{{lng}}/{{ns}}.json") :  resolve('./locales/{{lng}}/{{ns}}.json')},
   });
 
 

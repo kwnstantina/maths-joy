@@ -14,7 +14,7 @@ let i18next = new RemixI18Next({
    ...i18n,
    lng: i18n.lng,
     backend: {
-      loadPath: resolve("./public/locales/{{lng}}/{{ns}}.json"),
+      loadPath: process.env.NODE_ENV === 'development'? resolve("./public/locales/{{lng}}/{{ns}}.json") :  resolve('./locales/{{lng}}/{{ns}}.json'),
     },
   },
   // The backend you want to use to load the translations

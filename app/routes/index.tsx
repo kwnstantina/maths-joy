@@ -97,7 +97,7 @@ export default function Index() {
       <section className="container mx-auto px-6 text-center pb-8 flex justify-center align-center">
         <Intro />
       </section>
-      <section className="my-22 flex items-start flex-col  bg-gray-50  mx-8">
+      <section className="my-20 flex items-start flex-col  bg-gray-50  mx-8">
         <div className="w-94 pl-10 pt-10">
         </div>
         <div
@@ -188,7 +188,7 @@ export default function Index() {
             </Box>
           </div>
       </section>
-      <section className="w-10/12 mx-8 px-6  rounded-t-md my-30">
+      <section className="w-10/12 mx-20 px-6  rounded-t-md">
         <div className="absolute z-[-1]">
           <div className="relative  top-0 right-0 bg-gradient-to-br from-orange-600 to-white rounded-full h-96 w-96" />
         </div>
@@ -226,16 +226,13 @@ export default function Index() {
               </svg>
             </a>
           </div>
-          <img
-            src={chat}
-            className="w-72 animate-[wiggle_3s_ease-in-out_infinite]"
-          />
+          <img src={chat}className="w-72 animate-[wiggle_3s_ease-in-out_infinite]"/>
         </div>
       </section>
       <section>
         <AboutUsHoc />
       </section>
-      <section className="bg-white my-22">
+      <section className="bg-white my-20">
         <NewsLetter subscribe={subscribe} newsletterEmail={newsletterEmail} handleSubmit={handleSubmit} fetcher={fetcher}/>
       </section>
     </>

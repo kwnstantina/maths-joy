@@ -22,5 +22,16 @@
     "type":"Mathematician",
     "aboutUsType":"Εven a mathematician with a mustache...",
     "aboutUsDescription": "The thirst for mathematics and the enthusiasm, prompted us to create an online site where students will have access to a wealth of teaching material.",
-    "aboutUsReadMore":"Read more here"
+    "aboutUsReadMore":"Read more here",
+    "newsletterTitle":"Subscribe to our newsletter!",
+    "newletterSubTitle":"Stay tuned to gregkyrMath!",
+    "newletterPlaceholder":" We care about the protection of your data.",
+    "privacyPolicy":"Read our Privacy Policy",
+    "search":"Seach",
+    "clear":"Clear filters",
+    "category":"Category",
+    "typeOfExercise":"Type of Exercise",
+    "filter":"Filters",
+    "searchPlaceholder":"Producers, Integrals...",
+    "level":"Level"
   }

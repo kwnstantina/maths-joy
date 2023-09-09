@@ -24,6 +24,7 @@ model Exersice {
   tags            String
   title           String
   updatedAt       DateTime @db.Date
+  translation     Json?
 }
 
 model Training {
@@ -38,6 +39,7 @@ model Training {
   tags            String
   title           String
   updatedAt       DateTime @db.Date
+  translation     Json?
 }
 
 model User {
@@ -60,4 +62,6 @@ model Video {
   title       String
   updatedAt   DateTime @db.Date
   url         String
+  translation  Json?
 }
+

@@ -28,6 +28,7 @@ export const getAllExcersices = async()=>{
     tags:true,
     description:true,
     exerciseImgUrl:true,
+    translation:true,
   }})
   return exersices;
 }
@@ -37,6 +38,7 @@ export const getExersiceById= async(id:string | undefined)=>{
   const exersice =await prisma.exersice.findFirst({select: {
     fileContentType:true,
     title: true,
+    translation:true,
   },where: {id}});
   return exersice;
 }
@@ -50,6 +52,7 @@ export const getExersiceBySearch = async(filters:any) =>{
     tags:true,
     description:true,
     exerciseImgUrl:true,
+    translation:true,
   },where: {...filters}});
   
   return exersice;

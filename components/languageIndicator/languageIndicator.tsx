@@ -1,22 +1,23 @@
-import React, { useState, ChangeEvent, Fragment } from "react";
+import React, { useState, Fragment } from "react";
 import gb from '../../app/assets/united-kingdom.png';
 import gr from '../../app/assets/greece.png';
 import { Listbox, Transition } from '@headlessui/react'
 import { CheckIcon, TranslateIcon } from '@heroicons/react/solid'
 import { useTranslation } from "react-i18next";
+
 interface Language {
   code: string;
   name: string;
 }
 
 const languages: Language[] = [
-  { code: 'en', name: 'English' },
   { code: 'el', name: 'Greek' },
+  { code: 'en', name: 'English' },
 ];
 
 const LanguageIndicator: React.FC = () => {
-  const [selectedLanguage, setSelectedLanguage] = useState<Language>(languages[1]);
-  let { t,i18n } = useTranslation();
+  const [selectedLanguage, setSelectedLanguage] = useState<Language>(languages[0]);
+  let { i18n } = useTranslation();
 
   const handleLanguageSelect = (language: Language) => {
     setSelectedLanguage(language);
@@ -44,7 +45,7 @@ const LanguageIndicator: React.FC = () => {
               <Listbox.Option
                 key={langIdx}
                 className={({ active }) =>
-                  `relative cursor-default select-none py-2 pl-10 pr-4 ${
+                  `relative cursor-pointer	 pl-10 pr-4 w-full ${
                     active ? 'bg-amber-100 text-amber-900' : 'text-gray-900'
                   }`
                 }
@@ -53,11 +54,11 @@ const LanguageIndicator: React.FC = () => {
                 {({ selected }) => (
                   <>
                     <span
-                      className={`block truncate ${
+                      className={`block truncate cursor-pointer	 ${
                         selected ? 'font-medium' : 'font-normal'
                       }`}
                     >
-                      {lang.code==='en'?<img src={gb} className="w-5 h-5 mr-2" />:<img src={gr} className="w-5 h-5 mr-2" />}
+                      {lang.code==='en'?<img src={gb} className="w-5 h-5 my-4" />:<img src={gr} className="w-5 h-5 my-4" />}
                     </span>
                     {selected ? (
                       <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-amber-600">

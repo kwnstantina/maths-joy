@@ -29,8 +29,8 @@ const Navbar = () => {
   useDetectOutside(wrapperRef, closeModal);
 
   return (
-    <div ref={wrapperRef} className="md:mx-20 mt-10  text-center h-40 md:h-20">
-      <div className="px-2 flex justify-between items-center w-full h-full">
+    <div ref={wrapperRef} className="md:mx-12 mt-10  text-center h-40 md:h-20 z-50">
+      <div className="flex justify-between items-center w-full h-full">
         <div>
           <NavLink to="/">
             <img className="w-32 h-20" src={logo}></img>
@@ -79,14 +79,12 @@ const Navbar = () => {
             </li>
           </ul>
         </div>
-        <li className="list-none visible md:visible sm:invisble xs:invisible">
-          <LanguageIndicator />
-        </li>
+    
         <div className="md:hidden mr-4" onClick={handleClick}>
           {!nav ? <MenuIcon className="w-8" /> : <XIcon className="w-8" />}
-      
+  
         </div>
-        <div className="w-20">
+        <div >
         <LanguageIndicator />
         </div>
       </div>
@@ -143,8 +141,7 @@ const Navbar = () => {
           >
             <span className="flex align-center justify-center">
             <UserIcon className="mr-2 h-5 w-5" aria-hidden="true" /> {t("user")}
-            </span>
-          
+            </span> 
           </NavLink>
         </li>
         <li className="border-b-2 border-orange-300 w-full">

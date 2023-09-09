@@ -8,4 +8,5 @@ export default {
     defaultNS: 'common',
     // Disabling suspense is recommended
     react: {useSuspense: false},
+    debug: false,
 };

@@ -28,10 +28,12 @@ const UserContent = (props: Props) => {
                     </svg>
                   </span>
                   {item?.profilePicture ? (
+                  
                     <img
                       className=" w-10 h-10  sm:w-16 h-10 sm:h-16 rounded-full"
                       src={item.profilePicture}
                       alt="username"
+                      loading="eager"
                     />
                   ) : (
                     <div

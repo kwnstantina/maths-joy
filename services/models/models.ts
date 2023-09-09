@@ -211,53 +211,216 @@ export const ExerciseNavList = [
   },
 ];
 
-export const staticImages: Array<any> = [
+
+export const TAGS_En = 
   {
-    cover_photo: {
-      urls: {
-        regular:
-          "https://i.pinimg.com/564x/d0/91/97/d09197202480d002273b332d379c57a7.jpg",
+    byId: {
+      0: {
+        id: 0,
+        name: "",
+        title: "title",
+        unavailable: true,
+      },
+      1: {
+        id: 1,
+        name: "A-High School",
+        title: "title",
+        unavailable: false,
+      },
+      2: {
+        id: 2,
+        name: "B-High School",
+        title: "title",
+        unavailable: false,
+      },
+      3: {
+        id: 3,
+        name: "C-High School",
+        title: "title",
+        unavailable: false,
+      },
+      4: {
+        id: 4,
+        name: "Middle School",
+        title: "title",
+        unavailable: false,
+      },
+      5: {
+        id: 5,
+        name: "University Mathematics",
+        title: "title",
+        unavailable: false,
       },
     },
+    allIds: [0, 1, 2, 3, 4, 5],
+  };
+
+export const Category_En = 
+  {
+    byId: {
+      0: {
+        id: 0,
+        name: "",
+        title: "category",
+        unavailable: true,
+      },
+      1: {
+        id: 1,
+        name: "Functions",
+        title: "category",
+        unavailable: false,
+      },
+      2: {
+        id: 2,
+        name: "Limits",
+        title: "category",
+        unavailable: false,
+      },
+      3: {
+        id: 3,
+        name: "Derivatives",
+        title: "category",
+        unavailable: false,
+      },
+      4: {
+        id: 4,
+        name: "Integrals",
+        title: "category",
+        unavailable: false,
+      },
+      5: {
+        id: 5,
+        name: "Algebra",
+        title: "category",
+        unavailable: false,
+      },
+      6: {
+        id: 6,
+        name: "Geometry",
+        title: "category",
+        unavailable: false,
+      },
+      7: {
+        id: 7,
+        name: "University Mathematics",
+        title: "category",
+        unavailable: false,
+      },
+    },
+    allIds: [0, 1, 2, 3, 4, 5, 6, 7],
+  }
+
+export const Type_En = 
+  {
+    byId: {
+      0: {
+        id: 0,
+        name: "",
+        title: "tags",
+        unavailable: true,
+      },
+      1: {
+        id: 1,
+        name: "Unsolved Exercises",
+        title: "tags",
+        unavailable: false,
+      },
+      2: {
+        id: 2,
+        name: "Solved Exercises",
+        title: "tags",
+        unavailable: false,
+      },
+      3: {
+        id: 3,
+        name: "Multiple Choice Questions",
+        title: "tags",
+        unavailable: false,
+      },
+    },
+    allIds: [0, 1, 2, 3],
+  };
+
+
+export const ExerciseNavList_En = [
+  {
+    id: 1,
+    title: "C-High School",
+    subTitles: [
+      {
+        id: 11,
+        title: "Multiple Choice",
+        link: "?searchParam=g1",
+      },
+      {
+        id: 12,
+        title: "Solved Exercises",
+        link: "?searchParam=g2",
+      },
+    ],
   },
   {
-    cover_photo: {
-      urls: {
-        regular:
-          "https://i.pinimg.com/564x/0d/4a/a1/0d4aa16fe31dba498c27f3850cdf0e80.jpg",
+    id: 2,
+    title: "B-High School",
+    subTitles: [
+      {
+        id: 21,
+        title: "Multiple Choice",
+        link: "?searchParam=b1",
       },
-    },
+      {
+        id: 22,
+        title: "Solved Exercises",
+        link: "?searchParam=b2",
+      },
+    ],
   },
   {
-    cover_photo: {
-      urls: {
-        regular:
-          "https://i.pinimg.com/564x/c8/08/de/c808dec90b152b59edee8ccb23e46f0a.jpg",
+    id: 3,
+    title: "A-High School",
+    subTitles: [
+      {
+        id: 31,
+        title: "Multiple Choice",
+        link: "?searchParam=a1",
       },
-    },
+      {
+        id: 32,
+        title: "Solved Exercises",
+        link: "?searchParam=a2",
+      },
+    ],
   },
   {
-    cover_photo: {
-      urls: {
-        regular:
-          "https://i.pinimg.com/564x/88/f0/50/88f050f61e9bb02f958a6bf436a60ab5.jpg",
+    id: 4,
+    title: "Middle School",
+    subTitles: [
+      {
+        id: 41,
+        title: "Multiple Choice",
+        link: "?searchParam=s1",
       },
-    },
+      {
+        id: 42,
+        title: "Solved Exercises",
+        link: "?searchParam=s2",
+      },
+    ],
   },
   {
-    cover_photo: {
-      urls: {
-        regular:
-          "https://i.pinimg.com/564x/0c/2b/44/0c2b446aebb58f16332b4e12913c3340.jpg",
+    id: 5,
+    title: "University",
+    subTitles: [
+      {
+        id: 51,
+        title: "Multiple Choice",
+        link: "?searchParam=p1",
       },
-    },
-  },
-  {
-    cover_photo: {
-      urls: {
-        regular:
-          "https://i.pinimg.com/564x/06/ef/59/06ef59011706ed98209ff1f3d946a374.jpg",
+      {
+        id: 52,
+        title: "Solved Exercises",
+        link: "?searchParam=p2",
       },
-    },
+    ],
   },
 ];

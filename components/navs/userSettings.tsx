@@ -2,13 +2,15 @@ import { Menu, Transition } from '@headlessui/react';
 import { Fragment } from 'react';
 import { ChevronDownIcon,ViewListIcon,UserIcon,LoginIcon,LogoutIcon,InboxIcon,UserCircleIcon } from '@heroicons/react/solid';
 import {Link} from "@remix-run/react";
+import { useTranslation } from 'react-i18next';
 
 const  UserSettings=()=> {  
+  const {t}=useTranslation();
   return (
     <div className="z-50">
       <Menu as="div" className="ml-2 relative inline-block text-left z-50">
         <div>
-          <Menu.Button className="z-50 inline-flex justify-center rounded-md bg-orange-500  px-4 py-2 text-sm font-medium text-white hover:bg-opacity-30 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75">
+          <Menu.Button className="z-50 inline-flex justify-center rounded-md bg-orange-500  px-4 py-2 text-sm font-medium text-white hover:bg-orange-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75">
             <UserCircleIcon className="h-5 w-5" />
             <ChevronDownIcon
               className="ml-2 -mr-1 h-5 w-5 text-orange-200 hover:text-orange-300"
@@ -46,7 +48,7 @@ const  UserSettings=()=> {
                         aria-hidden="true"
                       />
                     )}
-                    Χρήστης
+                   {t('user')}
                   </Link>
                 )}
               </Menu.Item>
@@ -69,7 +71,7 @@ const  UserSettings=()=> {
                         aria-hidden="true"
                       />
                     )}
-                    Ειδοποιήσεις
+                   {t('notifications')}
                   </button>
                 )}
               </Menu.Item>

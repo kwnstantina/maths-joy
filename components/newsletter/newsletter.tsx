@@ -1,4 +1,5 @@
 import { Form } from "@remix-run/react";
+import { useTranslation } from "react-i18next";
 
 type Props ={
   newsletterEmail?: string;
@@ -8,15 +9,16 @@ type Props ={
 }
 const NewsLetter = (props:Props):JSX.Element =>{
   const { newsletterEmail, subscribe,handleSubmit,fetcher} = props;
+  const { t } = useTranslation();
 
  return(
     <div className="py-8 px-4 mx-auto max-w-screen-xl lg:py-16 lg:px-6">
           <div className="mx-auto max-w-screen-md sm:text-center">
             <h2 className="mb-4 text-3xl tracking-tight font-extrabold text-gray-900 sm:text-4xl">
-             Εγγραφείτε στο newsletter μας
+              {t('newsletterTitle')}
             </h2>
             <p className="mx-auto mb-8 max-w-2xl font-light text-gray-500 md:mb-12 sm:text-xl">
-                 Μείνετε συντονισμένοι με το gregkyrMath!
+               {t('newletterSubTitle')}
             </p>
              <fetcher.Form onSubmit={handleSubmit}  className="space-y-6">
               <div className="items-center mx-auto mb-3 space-y-4 max-w-screen-sm sm:flex sm:space-y-0">
@@ -68,12 +70,12 @@ const NewsLetter = (props:Props):JSX.Element =>{
                     </p>}
                     </div>
               <div className="mx-auto max-w-screen-sm text-sm text-left text-gray-500">
-                We care about the protection of your data.{" "}
+                {t("newletterPlaceholder")}{" "}
                 <a
                   href="#"
                   className="font-medium text-orange-600 hover:underline"
                 >
-                  Read our Privacy Policy
+                 {t("privacyPolicy")}
                 </a>
                 .
               </div>

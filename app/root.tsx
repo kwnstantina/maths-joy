@@ -20,15 +20,18 @@ import ErrorPage from "components/errorPage/errorPage";
 import logo from './assets/mathsLogo.png';
 import { useTranslation } from "react-i18next";
 import i18next from "~/i18next.server";
+import { i18nCookie } from '../services/cookies/cookies';
+
 
 export async function loader({ request }: LoaderArgs) {
   let locale = await i18next.getLocale(request);
-  return {
+  return json({
     locale: locale,
     ENV: {
     VERCEL_ANALYTICS_ID: process.env.VERCEL_ANALYTICS_ID,
-  },
-}
+  }},{
+  headers: {"Set-Cookie": await i18nCookie.serialize(locale)}
+  })
 }
 
 export let handle = {
@@ -89,8 +92,8 @@ function Document({ children }: any) {
 
 export function Layout({ children }: any) {
   const location = useLocation();
-  const [isLoading, setIsLoading] = useState(false);
-  const prevPath = usePrevious(location.pathname);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const prevPath:string |null = usePrevious(location.pathname);
 
   useEffect(() => {
     let timeoutId: NodeJS.Timeout;

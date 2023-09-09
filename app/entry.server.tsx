@@ -31,7 +31,7 @@ export default async function handleRequest(
   .use(Backend) // Setup our backend
   .init({
     ...i18n, // Spread the i18n configuration
-    lng:'el', // The locale we detected above
+    lng:lng, // The locale we detected above
     fallbackLng: 'en', // The fallback locale we detected above
     ns, // The namespaces the routes about to render wants to use
     backend: { loadPath: process.env.NODE_ENV === 'development'? resolve("./public/locales/{{lng}}/{{ns}}.json") :  resolve('./locales/{{lng}}/{{ns}}.json')},

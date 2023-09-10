@@ -36,7 +36,7 @@ const Navbar = () => {
             <img className="w-32 h-20" src={logo}></img>
           </NavLink>
         </div>
-        <div>
+        <div className="mr-32">
           <ul className="hidden md:flex z-index-100">
             <li>
               <NavLink

@@ -94,7 +94,7 @@ export default function Index() {
 
   return (
     <>
-      <section className="container mx-auto px-6 text-center pb-8 flex justify-center align-center">
+      <section className="px-6 text-center pb-8 flex justify-center align-center">
         <Intro />
       </section>
       <section className="my-20 flex items-start flex-col  bg-gray-50  mx-8">
@@ -190,7 +190,7 @@ export default function Index() {
       </section>
       <section className="w-10/12 mx-20 px-6  rounded-t-md">
         <div className="absolute z-[-1]">
-          <div className="relative  top-0 right-0 bg-gradient-to-br from-orange-600 to-white rounded-full h-96 w-96" />
+          <div className="relative  top-30 right-0 bg-gradient-to-br from-orange-600 to-white rounded-full h-96 w-96" />
         </div>
         <div
           ref={anotherRef}

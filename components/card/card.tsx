@@ -6,8 +6,8 @@ const Card = (props: any) => {
   const navigate = useNavigate();
 
   return (
-    <div className="flex justify-center m-10">
-      <div className="block rounded-lg shadow-lg bg-white max-w-sm text-center cursor-pointer">
+    <div className="flex justify-center md:m-10 ">
+      <div className="block rounded-lg shadow-2xl bg-white md:max-w-md	xs:max-w-full sm:max-w-full	 xs:mb-7 sm:mb-7 text-center cursor-pointer ring-2 ring-neutral-100 ring-offset-0">
         <div className="aspect-w-3 aspect-h-4" typeof="button"   onClick={() => navigate(`${item.id}`)}>
           <img
             src={item?.exerciseImgUrl}

@@ -9,6 +9,7 @@ import {
 } from "../../utils/exersices.prisma";
 import { TAGS, Category, Type } from "../../../services/models/models";
 import { useTranslation } from "react-i18next";
+import LoadingPage from "components/loadingPage/loadingPage";
 
 export const loader: LoaderFunction = async ({ request }) => {
   let exersisesAll = await getAllExcersices();
@@ -159,7 +160,7 @@ const Exersices = () => {
   );
 
   console.log("data", data);
-
+  if(!data || data?.length===0) return <LoadingPage />
   return (
     <div className="container px-6 text-center pb-52 my-20">
       <SearchInput
@@ -168,7 +169,7 @@ const Exersices = () => {
         clearFilters={clearFilters}
         filters={filters}
       />
-      <div className="container flex flex-wrap gap-3 mb-5 mt-10 bg-orange-100	bg-opacity-30 rounded-lg shadow-lg">
+      <div className="container flex flex-wrap gap-3 mb-5 mt-10">
         {data?.map((item: any) => {
           return <Card key={item.id} item={item} />;
         })}

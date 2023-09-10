@@ -34,8 +34,8 @@ const Footer = () => {
             </p>
             <Link to="/exercises">Ασκησεις</Link>{" "}
             <Link to="/tutorials"> Διδακτικό υλικό</Link>{" "}
-            <Link to="/books">Chat</Link>
-            <Link to="/learn">Εξάσκηση</Link>
+            <Link to="/chat">Chat</Link>
+            <Link to="/testYourself">Εξάσκηση</Link>
           </nav>
           <nav className="flex flex-col space-y-3">
             <Link to="/terms">Terms</Link>

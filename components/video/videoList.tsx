@@ -16,7 +16,7 @@ const VideoList = (props: Props): JSX.Element => {
   const { data } = props;
 
   return (
-    <div className="md:w-[42rem] mt-14  mx-5 bg-gray-100 rounded-xl shadow-md overflow-hidden xs:w-[10rem] sm:w-[10rem]">
+    <div className="md:w-[42rem] mt-14  mx-5 bg-gray-100 rounded-xl shadow-md overflow-hidden xs:w-[20rem] sm:w-[20rem]">
     <div className="flex flex-col" key={data.id}>
       <div className="flex  aspect-video">
         {/* <embed
@@ -29,7 +29,7 @@ const VideoList = (props: Props): JSX.Element => {
         <a
           href={data.url}
           target="_blank"
-          className="uppercase tracking-wide text-sm text-indigo-500 font-semibold block mt-1 text-lg leading-tight font-medium text-black hover:underline"
+          className="uppercase tracking-wide  text-indigo-500 font-semibold block mt-1 text-lg leading-tight  hover:underline"
         >
           {data.title}
         </a>

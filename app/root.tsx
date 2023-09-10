@@ -21,6 +21,7 @@ import logo from './assets/mathsLogo.png';
 import { useTranslation } from "react-i18next";
 import i18next from "~/i18next.server";
 import { i18nCookie } from '../services/cookies/cookies';
+import useScrollToTop from "hooks/useScrollToTop";
 
 
 export async function loader({ request }: LoaderArgs) {
@@ -30,7 +31,7 @@ export async function loader({ request }: LoaderArgs) {
     ENV: {
     VERCEL_ANALYTICS_ID: process.env.VERCEL_ANALYTICS_ID,
   }},{
-  headers: {"Set-Cookie": await i18nCookie.serialize(locale)}
+ // headers: {"Set-Cookie": await i18nCookie.serialize(locale)}
   })
 }
 
@@ -65,7 +66,6 @@ export default function App() {
 function Document({ children }: any) {
   const { ENV ,locale} = useLoaderData<typeof loader>();
   let { i18n } = useTranslation();
-
   return (
     <html lang={locale as any} dir={i18n.dir()}>
       <head>
@@ -93,18 +93,19 @@ function Document({ children }: any) {
 export function Layout({ children }: any) {
   const location = useLocation();
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const prevPath:string |null = usePrevious(location.pathname);
-
-  useEffect(() => {
-    let timeoutId: NodeJS.Timeout;
-    if (location.pathname !== prevPath && location.pathname !== "/") {
-      setIsLoading(true);
-      timeoutId = setTimeout(() => {
-        setIsLoading(false);
-      }, 1000);
-    }
-    return () => clearTimeout(timeoutId);
-  }, [location.pathname, prevPath]);  
+  const prevPath:string |any = usePrevious(location.pathname);
+  useScrollToTop({location,prevPath});
+  
+  // useEffect(() => {
+  //   let timeoutId: NodeJS.Timeout;
+  //   if (location.pathname !== prevPath && location.pathname !== "/") {
+  //     setIsLoading(true);
+  //     timeoutId = setTimeout(() => {
+  //       setIsLoading(false);
+  //     }, 1000);
+  //   }
+  //   return () => clearTimeout(timeoutId);
+  // }, [location.pathname, prevPath]);  
 
   return (
     <div className="h-screen min-h-screen flex flex-col justify-start ">

@@ -33,7 +33,7 @@ const VideoList = (props: Props): JSX.Element => {
         >
           {data.title}
         </a>
-        <p className="mt-2 text-gray-500">{data.description}</p>
+        <p className="mt-2 text-gray-500 text-left indent-2.5	">{data.description}</p>
         <div className="mt-4">
           {data.tags.map((tag) => {
             return (

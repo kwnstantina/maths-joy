@@ -30,7 +30,7 @@
     "emoji-mart": "^5.5.2",
     "gridfs-stream": "^1.1.1",
     "html-entities": "^2.3.3",
-    "i18next": "^23.2.3",
+    "i18next": "^24.2.3",
     "i18next-browser-languagedetector": "^7.1.0",
     "i18next-fs-backend": "^2.1.5",
     "i18next-http-backend": "^2.2.1",

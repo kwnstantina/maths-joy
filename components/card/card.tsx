@@ -1,14 +1,26 @@
 import { EyeIcon } from "@heroicons/react/outline";
 import { dateFormat } from "../../utils/utils";
 import { useNavigate } from "@remix-run/react";
+
 const Card = (props: any) => {
   const { item } = props;
   const navigate = useNavigate();
 
+  const handleClick = (item:any) => {
+
+   navigate(`${item.exerciseFile.fileName}`,
+          {
+            state: {
+              fileName: item.exerciseFile.fileName,
+            }
+          }
+        )
+  };
+
   return (
     <div className="flex justify-center md:m-10 ">
       <div className="block rounded-lg shadow-2xl bg-white md:max-w-md	xs:max-w-full sm:max-w-full	 xs:mb-7 sm:mb-7 text-center cursor-pointer ring-2 ring-neutral-100 ring-offset-0">
-        <div className="aspect-w-3 aspect-h-4" typeof="button"   onClick={() => navigate(`${item.id}`)}>
+        <div className="aspect-w-3 aspect-h-4" typeof="button"   onClick={() =>handleClick(item) }>
           <img
             src={item?.exerciseImgUrl}
             alt="Γρηγόρης Κυρτσιάς"
@@ -32,7 +44,7 @@ const Card = (props: any) => {
           </div>
           <button
             type="button"
-            onClick={() => navigate(`${item.id}`)}
+            onClick={() =>handleClick(item) }
             className="inline-block px-6 py-2.5 bg-orange-400 text-white 
             focus:shadow-outline  font-medium 
             text-xs leading-tight uppercase rounded shadow-2xl hover:bg-orange-700 hover:shadow-2xg focus:bg-orange-700 focus:ring-0 active:bg-orange-800"

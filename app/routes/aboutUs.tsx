@@ -1,6 +1,6 @@
 import svg2 from "../assets/svg/svg1.svg";
 
-//balle kai to youtube
+// youtube links
 
 const AboutUs=()=> {
  

@@ -1,9 +1,12 @@
 import { RemixI18Next } from 'remix-i18next'
 import Backend from 'i18next-fs-backend'
-import { resolve } from 'node:path'
+import { resolve } from 'node:path';
+import {languageIndicator} from '../utils/cookies'
 
 export default new RemixI18Next({
   detection: {
+    // persist language selection in cookie
+    cookie: languageIndicator,
     // This is the list of languages your application supports
     supportedLanguages:['en','el'],
     // This is the language you want to use in case the user language is not
@@ -19,4 +22,5 @@ export default new RemixI18Next({
   // Tip: You could pass `resources` to the `i18next` configuration and avoid
   // a backend here
   backend: Backend,
+
 })

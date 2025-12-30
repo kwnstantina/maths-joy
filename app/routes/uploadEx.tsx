@@ -11,7 +11,7 @@ import {
   LoaderFunction,
   redirect,
 } from "@remix-run/node";
-import { createExersice } from "~/utils/exersices.prisma";
+
 import InternalFunctions from "services/internal/internalFuntions";
 import { validateFile } from "~/utils/validators.server";
 import { getUser } from "~/utils/auth.prisma";
@@ -20,10 +20,13 @@ import UploadFile from "components/uploadExTabs/uploadFile";
 import UploadExercise from "components/uploadExTabs/uploadExercise";
 import { createTrainingExercise } from "~/utils/training.prisma";
 
+
 export const loader: LoaderFunction = async ({ request }) => {
   let user = await getUser(request);
-  return user && user["role"] === "ADMIN" ? json(user) : redirect("/progress");
+  return user && user["role"] === 'admin' ? json(user) : redirect("/progress");
 };
+
+
 export function ErrorBoundary({ error }: any) {
   const navigate = useNavigate();
   return (
@@ -80,15 +83,33 @@ export const action: ActionFunction = async ({ request }) => {
         { status: 400 }
       );
     }
-    return await createExersice({
-      title,
-      category,
-      file,
-      fileContentType,
-      tags,
-      description,
-      exerciseImgUrl,
-    });
+
+  
+    // Upload file to GridFS and get the file ID
+    // return await createExersice({
+    //   title,
+    //   category,
+    //   file,
+    //   fileContentType,
+    //   tags,
+    //   description,
+    //   exerciseImgUrl,
+    // });
+
+    //generate a unique id for the file based the file  name
+   
+    // return await  createExercise({
+    //   title,
+    //   category,
+    //   tags,
+    //   description,
+    //   exerciseImgUrl,
+    //   file: {
+    //     fileContentType: 'pdf',
+    //     name: file["_name"],
+    //     fileId: fileId
+    //   },
+    // })
   }
   if (_action === "uploadTraning") {
     return await createTrainingExercise({
@@ -186,7 +207,7 @@ export default function UploadExcercise(): JSX.Element {
       .catch((err: any) => {
         console.log("error on upload File", err);
       });
-
+    
     setUploadData((form: any) => ({
       ...form,
       [event.target?.name]: data,

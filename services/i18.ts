@@ -9,4 +9,8 @@ export default {
     // Disabling suspense is recommended
     react: {useSuspense: false},
     debug: false,
+     // Set logging level to 'error' to suppress other logs
+     log: {
+        level: 'error',
+      },
 };

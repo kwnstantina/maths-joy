@@ -9,11 +9,12 @@ import supabase from "../../utils/supabase";
 import { arrayOfColors } from "utils/utils";
 
 const sessionSecret = process.env.SESSION_SECRET;
+
 if (!sessionSecret) {
   throw new Error("SESSION_SECRET must be set");
 }
 
-export const storage = createCookieSessionStorage({
+export const sessionStorage = createCookieSessionStorage({
   cookie: {
     name: "gregMaths",
     secure: process.env.NODE_ENV === "production",
@@ -36,22 +37,23 @@ let googleStrategy = new GoogleStrategy(
     const user = await prisma.user.findUnique({
       where: { email: profile.emails[0].value },
     });
-
+ debugger;
     if (!user) {
+  
       const newUser = {
         email: profile.emails[0].value,
         password: "",
         firstName: profile.displayName,
         lastName: profile.name.givenName,
-        profilePicture:profile["_json"].picture
+        profilePicture: profile["_json"].picture,
       };
       let userId = await createUser(newUser);
-      const session = await storage.getSession();
+      const session = await sessionStorage.getSession();
       createUserSession(userId.id, "/");
       session.set("userId", userId);
       return newUser;
     }
-    const session = await storage.getSession();
+    const session = await sessionStorage.getSession();
     createUserSession(user.id, "/");
     session.set("userId", user.id);
     return user;
@@ -68,6 +70,7 @@ export async function register(user: RegisterForm) {
   }
 
   const newUser = await createUser(user);
+
   if (!newUser) {
     return json(
       {
@@ -82,10 +85,9 @@ export async function register(user: RegisterForm) {
 
 // Validate the user on email & password
 export async function login({ email, password }: LoginForm) {
-  
-  if(email == null){
-    throw new Error('Incorrect login')
-  };
+  if (email == null) {
+    throw new Error("Incorrect login");
+  }
   const user = await prisma.user.findUnique({
     where: { email },
   });
@@ -97,12 +99,12 @@ export async function login({ email, password }: LoginForm) {
 }
 
 export async function createUserSession(userId: string, redirectTo: string) {
-  const session = await storage.getSession();
+  const session = await sessionStorage.getSession();
   session.set("userId", userId);
 
   return redirect(redirectTo, {
     headers: {
-      "Set-Cookie": await storage.commitSession(session),
+      "Set-Cookie": await sessionStorage.commitSession(session),
     },
   });
 }
@@ -121,13 +123,13 @@ export async function requireUserId(
 }
 
 export async function getUserSession(request: Request) {
-  return await storage.getSession(request.headers.get("Cookie"));
+  return await sessionStorage.getSession(request.headers.get("Cookie"));
 }
 
 export async function getUserId(request: Request) {
   const session = await getUserSession(request);
   const userId = session.get("userId");
-  if (!userId || typeof userId !== "string") return null;
+  if (!userId || typeof userId !== "string") { return null };
   return userId;
 }
 
@@ -139,9 +141,7 @@ export async function getUserByGoogleAuth(request: Request) {
 
 export async function getUser(request: Request) {
   const userId = await getUserId(request);
-  if (typeof userId !== "string") {
-    return null;
-  }
+  if (typeof userId !== "string") { return null; }
 
   try {
     const user = await prisma.user.findUnique({
@@ -156,27 +156,34 @@ export async function getUser(request: Request) {
 
 export async function logout(request: Request) {
   const session = await getUserSession(request);
-  let user:any = await authenticator.isAuthenticated(request);
-   await  updateUserStatus(user.id,false);
+  let user: any = await authenticator.isAuthenticated(request);
+  await updateUserStatus(user.id, false);
 
   if (user) {
     await authenticator.logout(request, { redirectTo: "/login" });
     return redirect("/", {
       headers: {
-        "Set-Cookie": await storage.destroySession(session),
-        cookie: await storage.destroySession(session),
+        "Set-Cookie": await sessionStorage.destroySession(session),
+        cookie: await sessionStorage.destroySession(session),
       },
     });
   }
 }
 
+/*Remove them later, Thank you supabase */
 export async function chatAuthorization(request: Request) {
   let userByExternalAuth = await getUserByGoogleAuth(request);
   let userByStorage = await getUser(request);
-  let checkIfUserExists = await supabase.from("users").select().eq("email", userByExternalAuth?.email);
-  let checkIfUserStorageExists=await supabase.from("users").select().eq("email",userByStorage?.email);
-  
-  if (userByExternalAuth && checkIfUserExists.data?.length===0) {
+  let checkIfUserExists = await supabase
+    .from("users")
+    .select()
+    .eq("email", userByExternalAuth?.email);
+  let checkIfUserStorageExists = await supabase
+    .from("users")
+    .select()
+    .eq("email", userByStorage?.email);
+
+  if (userByExternalAuth && checkIfUserExists.data?.length === 0) {
     await supabase.from("users").insert({
       provider_id: userByExternalAuth.id,
       email: userByExternalAuth.email,
@@ -187,40 +194,40 @@ export async function chatAuthorization(request: Request) {
       firstName: userByExternalAuth.profile.firstName,
       lastName: userByExternalAuth.profile.lastName,
       isActive: true,
-      profilePicture:userByExternalAuth.profilePicture,
+      profilePicture: userByExternalAuth.profilePicture,
       color: arrayOfColors(),
     });
   }
-  if(userByStorage && checkIfUserStorageExists.data?.length===0){
+  if (userByStorage && checkIfUserStorageExists.data?.length === 0) {
     await supabase.from("users").insert({
       provider_id: userByStorage?.id,
       email: userByStorage?.email,
       role: userByStorage?.role,
-      firstName: userByStorage?.profile.firstName,
-      lastName: userByStorage?.profile.lastName,
+      firstName: userByStorage?.profile?.firstName,
+      lastName: userByStorage?.profile?.lastName,
       isActive: true,
       color: arrayOfColors(),
     });
   }
-  await updateUserStatus(userByExternalAuth?.id || userByStorage?.id,true);
+  await updateUserStatus(userByExternalAuth?.id || userByStorage?.id, true);
   return userByExternalAuth || userByStorage;
 }
 
-export const updateUserStatus=async(userId:string,isActive:boolean)=> {
+export const updateUserStatus = async (userId: string, isActive: boolean) => {
   try {
     const { data, error } = await supabase
-      .from('users')
+      .from("users")
       .update({ isActive: isActive })
-      .eq('provider_id', userId);
+      .eq("provider_id", userId);
 
     if (error) {
-      console.error('Error updating user status:', error);
+      console.error("Error updating user status:", error);
       return;
     }
-    console.log('User status updated successfully');
+    console.log("User status updated successfully");
   } catch (error) {
-    console.error('Error updating user status:', error);
+    console.error("Error updating user status:", error);
   }
-}
+};
 
-export const authenticator = new Authenticator(storage).use(googleStrategy);
+export const authenticator = new Authenticator(sessionStorage).use(googleStrategy);

@@ -1,6 +1,7 @@
 import { LoaderFunction } from "@remix-run/node";
 import { useLoaderData } from "@remix-run/react";
 import { getExersiceById } from "~/utils/exersices.prisma";
+import { getExerciseFile } from "~/utils/exercise.prisma";
 import { Worker, Viewer,RotateDirection } from "@react-pdf-viewer/core";
 import { defaultLayoutPlugin } from "@react-pdf-viewer/default-layout";
 import type { ToolbarProps } from "@react-pdf-viewer/default-layout";
@@ -8,29 +9,37 @@ import React, { useState } from "react";
 import coreCss from "@react-pdf-viewer/core/lib/styles/index.css";
 import layoutCss from "@react-pdf-viewer/default-layout/lib/styles/index.css";
 import { pageNavigationPlugin } from "@react-pdf-viewer/page-navigation";
-import { RenderRotateProps, rotatePlugin } from '@react-pdf-viewer/rotate';
+import {getGridFSBucketContent} from '../../utils/gridfs.server';
 
 
 export const links = () => [
   { rel: "stylesheet", href: coreCss },
   { rel: "stylesheet", href: layoutCss },
 ];
+
 export const loader: LoaderFunction = async ({ request, params }) => {
   const { pdfId } = params;
-  const pdf = await getExersiceById(pdfId);
-  return pdf;
+  //const pdf = await getExersiceById(pdfId);
+  //const pdf = await getExerciseFile(pdfId as string);
+  
+  return await getGridFSBucketContent(pdfId as any);
 };
 
 export default function PdfContainer() {
-  const data = useLoaderData();
+  const {data} = useLoaderData();
   const [isDisabled, setIsDisabled] = useState(true) as any;
   const [pageNumber, setPageNumber] = useState<number>(1);
+
+  const fileDataUrl = `data:application/pdf;base64,${data}`;
+
+  console.log(data,'data');
+  console.log(fileDataUrl,'fileDataUrl');
+
 
   const pageNavigationPluginInstance = pageNavigationPlugin();
 
   const renderToolbar = (
-    Toolbar: (props: ToolbarProps) => React.ReactElement
-  ) => (
+    Toolbar: (props: ToolbarProps) => React.ReactElement ) => (
     <>
       <Toolbar>
         {(toolbarSlot) => {
@@ -54,20 +63,14 @@ export default function PdfContainer() {
               </div>
               <div className="mr-8">
               <EnterFullScreen />   
-              </div>
-
-             
-            
+              </div>        
               <ZoomOut />   
               <CurrentScale />
               <div className="mr-8">
               <ZoomIn />
               </div>
-              
               <Rotate direction={RotateDirection.Backward}/>
               <Rotate direction={RotateDirection.Forward}/>
-             
-
               <GoToPreviousPage />
               <CurrentPageInput />
               <NumberOfPages />
@@ -99,29 +102,31 @@ export default function PdfContainer() {
           );
         }}
       </Toolbar>
-    </>
-  );
+    </>);
+
   const defaultLayoutPluginInstance = defaultLayoutPlugin({
     renderToolbar,
   });
+ // <h2 className="text-center pb-10">
+ // <strong>{data.title}</strong>{" "}
+//</h2> 
 
   return (
     <div className="container mx-auto px-6 text-center pb-52 mt-10">
-      <h2 className="text-center pb-10">
-        <strong>{data.title}</strong>{" "}
-      </h2>
-      <Worker workerUrl="https://unpkg.com/pdfjs-dist@2.16.105/build/pdf.worker.min.js">
-        <div style={{ height: "90rem" }}>
+  
+       <Worker workerUrl="https://unpkg.com/pdfjs-dist@2.16.105/build/pdf.worker.min.js"> 
+         <div style={{ height: "90rem" }}>
           <Viewer
-            fileUrl={data?.fileContentType}
+           //fileUrl={data?.fileContentType}
+           fileUrl={data}
             plugins={[
               pageNavigationPluginInstance,
               defaultLayoutPluginInstance,
             ]}
             initialPage={pageNumber}
           />
-        </div>
-      </Worker>
+        </div> 
+       </Worker> 
     </div>
   );
 }

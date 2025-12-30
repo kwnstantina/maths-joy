@@ -1,21 +1,22 @@
 import { useRef, useState } from "react";
-import { MenuIcon, XIcon } from "@heroicons/react/outline";
+import { MenuIcon, XIcon} from "@heroicons/react/outline";
 import { NavLink } from "@remix-run/react";
 import UserSettings from "./userSettings";
 import logo from "../../app/assets/logoD.png";
 import useDetectOutside from "hooks/useDetectOutside";
 import {
-
   UserIcon,
   LoginIcon,
   LogoutIcon,
-
 } from "@heroicons/react/solid";
 
 import LanguageIndicator from "components/languageIndicator/languageIndicator";
 import { useTranslation } from "react-i18next";
 
-const Navbar = () => {
+interface NavbarProps{
+  lang:string;
+}
+const Navbar :React.FC<NavbarProps> = ({lang}) => {
   const { t } = useTranslation();
   const [nav, setNav] = useState(false);
   const handleClick = () => setNav(!nav);
@@ -39,40 +40,40 @@ const Navbar = () => {
         <div className="mr-32">
           <ul className="hidden md:flex z-index-100">
             <li>
-              <NavLink
+              {/* <NavLink
                 to="exercises"
                 className="hover:bg-orange-600 text-black block px-3 py-2 rounded-md text-base font-medium"
                 style={({ isActive }) => (isActive ? activeStyle : undefined)}
               >
                 {t("exersice")}
-              </NavLink>
+              </NavLink> */}
             </li>
             <li>
-              <NavLink
+              {/* <NavLink
                 to="tutorial"
                 className="hover:bg-orange-600 text-black block px-3 py-2 rounded-md text-base font-medium"
                 style={({ isActive }) => (isActive ? activeStyle : undefined)}
               >
                 {t("topic")}
-              </NavLink>
+              </NavLink> */}
             </li>
             <li>
-              <NavLink
+              {/* <NavLink
                 to="chat"
                 className="hover:bg-orange-600 text-black block px-3 py-2 rounded-md text-base font-medium"
                 style={({ isActive }) => (isActive ? activeStyle : undefined)}
               >
                 Chat
-              </NavLink>
+              </NavLink> */}
             </li>
             <li>
-              <NavLink
+              {/* <NavLink
                 to="testYourself"
                 className="hover:bg-orange-600 text-black block px-3 py-2 rounded-md text-base font-medium"
                 style={({ isActive }) => (isActive ? activeStyle : undefined)}
               >
                 {t("training")}
-              </NavLink>
+              </NavLink> */}
             </li>
             <li>
               <UserSettings />
@@ -82,54 +83,53 @@ const Navbar = () => {
     
         <div className="md:hidden mr-4" onClick={handleClick}>
           {!nav ? <MenuIcon className="w-8" /> : <XIcon className="w-8" />}
-  
         </div>
         <div >
-        <LanguageIndicator />
+        <LanguageIndicator initialLanguage={lang} />
         </div>
       </div>
       <ul
         className={!nav ? "hidden" : "absolute bg-orange-600 w-3/4 px-8 z-100"}
       >
         <li className="border-b-2 border-orange-300 w-full">
-          <NavLink
+          {/* <NavLink
             to="exercises"
             className="hover:bg-orange-400 text-white block px-3 py-2 rounded-md text-base font-medium"
             style={({ isActive }) => (isActive ? activeStyle : undefined)}
             onClick={handleClick}
           >
             {t("exersice")}
-          </NavLink>
+          </NavLink> */}
         </li>
         <li className="border-b-2 border-orange-300 w-full">
-          <NavLink
+          {/* <NavLink
             to="tutorial"
             className="hover:bg-orange-400 text-white block px-3 py-2 rounded-md text-base font-medium"
             style={({ isActive }) => (isActive ? activeStyle : undefined)}
             onClick={handleClick}
           >
             {t("topic")}
-          </NavLink>
+          </NavLink> */}
         </li>
         <li className="border-b-2 border-orange-300 w-full">
-          <NavLink
+          {/* <NavLink
             to="chat"
             className="hover:bg-orange-300 text-white block px-3 py-2 rounded-md text-base font-medium"
             style={({ isActive }) => (isActive ? activeStyle : undefined)}
             onClick={handleClick}
           >
             Chat
-          </NavLink>
+          </NavLink> */}
         </li>
         <li className="border-b-2 border-orange-300 w-full">
-          <NavLink
+          {/* <NavLink
             to="testYourself"
             className="hover:bg-orange-400 text-white block px-3 py-2 rounded-md text-base font-medium"
             style={({ isActive }) => (isActive ? activeStyle : undefined)}
             onClick={handleClick}
           >
             {t("training")}
-          </NavLink>
+          </NavLink> */}
         </li>
 
         <li className="border-b-2 border-orange-300 w-full">

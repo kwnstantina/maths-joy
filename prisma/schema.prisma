@@ -7,61 +7,213 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-type UserProfile {
+enum AccessLevel {
+  public
+  book_owners
+  specific_users
+}
+
+enum Role {
+  user
+  admin
+}
+
+model UserProfile {
+  id             String  @id @default(auto()) @map("_id") @db.ObjectId
   firstName      String
   lastName       String
   profilePicture String?
+  user           User    @relation(fields: [userId], references: [id])
+  userId         String  @unique @db.ObjectId
 }
 
-model Exersice {
-  id              String   @id @default(auto()) @map("_id") @db.ObjectId
-  category        String
-  createdAt       DateTime @db.Date
-  description     String?
-  exerciseImgUrl  String?
-  fileContentType String
-  fileName        String
-  tags            String
-  title           String
-  updatedAt       DateTime @db.Date
-  translation     Json?
+model Category {
+  id        String     @id @default(auto()) @map("_id") @db.ObjectId
+  name      String     @unique
+  exercises Exercise[]
+  trainings Training[]
+}
+
+model Exercise {
+  id             String               @id @default(auto()) @map("_id") @db.ObjectId
+  title          String
+  content        String
+  bookId         String?              @db.ObjectId
+  book           Book?                @relation(fields: [bookId], references: [id])
+  fileUrl        String?
+  accessLevel    AccessLevel          @default(book_owners)
+  comments       Comment[]
+  createdAt      DateTime             @default(now()) @db.Timestamp
+  updatedAt      DateTime             @updatedAt @db.Timestamp
+  description    String?
+  translationId  String?              @unique @db.ObjectId
+  translation    Translation?         @relation(fields: [translationId], references: [id])
+  exerciseImgUrl String?
+  categoryId     String?              @db.ObjectId
+  category       Category?            @relation(fields: [categoryId], references: [id])
+  mediaFileId    String?              @unique @db.ObjectId
+  mediaFile      MediaFile?           @relation(fields: [mediaFileId], references: [id])
+  exerciseTags   ExerciseTag[] // many-to-many via join
+  userAccess     UserExerciseAccess[] // many-to-many via join
+}
+
+model Book {
+  id            String             @id @default(auto()) @map("_id") @db.ObjectId
+  title         String
+  description   String
+  price         Float
+  coverImage    String
+  fileUrl       String
+  createdAt     DateTime           @default(now()) @db.Timestamp
+  updatedAt     DateTime           @updatedAt @db.Timestamp
+  mediaFileId   String?            @unique @db.ObjectId
+  mediaFile     MediaFile?         @relation(fields: [mediaFileId], references: [id])
+  exercises     Exercise[] // one-to-many
+  userPurchases UserBookPurchase[] // many-to-many via join
+  translationId String?            @unique @db.ObjectId
+  translation   Translation?       @relation(fields: [translationId], references: [id])
 }
 
 model Training {
-  id              String   @id @default(auto()) @map("_id") @db.ObjectId
-  category        String
+  id              String         @id @default(auto()) @map("_id") @db.ObjectId
   content         String
   contentImage    String
-  createdAt       DateTime @db.Date
+  createdAt       DateTime       @default(now()) @db.Timestamp
+  updatedAt       DateTime       @updatedAt @db.Timestamp
   searchableTitle String
   solution        String
   solutionImage   String
-  tags            String
   title           String
-  updatedAt       DateTime @db.Date
-  translation     Json?
-}
-
-model User {
-  id        String      @id @default(auto()) @map("_id") @db.ObjectId
-  createdAt DateTime    @db.Date
-  email     String      @unique
-  password  String
-  profile   UserProfile
-  role      String
-  updatedAt DateTime    @db.Date
-  isActive  Boolean     @default(false)
+  translationId   String?        @unique @db.ObjectId
+  translation     Translation?   @relation(fields: [translationId], references: [id])
+  categoryId      String?        @db.ObjectId
+  category        Category?      @relation(fields: [categoryId], references: [id])
+  trainingTags    TrainingTag[] // many-to-many via join
+  TrainingTags    TrainingTags[]
 }
 
 model Video {
-  id          String   @id @default(auto()) @map("_id") @db.ObjectId
-  createdAt   DateTime @db.Date
-  creatorName String
-  description String
-  tags        String[]
-  title       String
-  updatedAt   DateTime @db.Date
-  url         String
-  translation  Json?
+  id            String       @id @default(auto()) @map("_id") @db.ObjectId
+  createdAt     DateTime     @default(now()) @db.Timestamp
+  updatedAt     DateTime     @updatedAt @db.Timestamp
+  creatorName   String
+  description   String
+  title         String
+  url           String
+  translationId String?      @unique @db.ObjectId
+  translation   Translation? @relation(fields: [translationId], references: [id])
+  videoTags     VideoTag[] // many-to-many via join
+  VideoTags     VideoTags[]
 }
 
+model Tag {
+  id           String         @id @default(auto()) @map("_id") @db.ObjectId
+  name         String         @unique
+  exerciseTags ExerciseTag[]
+  trainingTags TrainingTag[]
+  videoTags    VideoTag[]
+  TrainingTags TrainingTags[]
+  VideoTags    VideoTags[]
+}
+
+model Comment {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  exerciseId String   @db.ObjectId
+  exercise   Exercise @relation(fields: [exerciseId], references: [id])
+  userId     String   @db.ObjectId
+  user       User     @relation(fields: [userId], references: [id])
+  content    String
+  createdAt  DateTime @default(now()) @db.Timestamp
+  updatedAt  DateTime @updatedAt @db.Timestamp
+}
+
+model User {
+  id                 String               @id @default(auto()) @map("_id") @db.ObjectId
+  createdAt          DateTime             @default(now()) @db.Timestamp
+  updatedAt          DateTime             @updatedAt @db.Timestamp
+  email              String               @unique
+  password           String
+  profile            UserProfile?
+  role               Role                 @default(user)
+  isActive           Boolean              @default(false)
+  comments           Comment[]
+  userBookPurchases  UserBookPurchase[]
+  userExerciseAccess UserExerciseAccess[]
+}
+
+model Translation {
+  id       String    @id @default(auto()) @map("_id") @db.ObjectId
+  en       String
+  el       String
+  exercise Exercise?
+  training Training?
+  book     Book?
+  video    Video?
+}
+
+model MediaFile {
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
+  fileName    String
+  contentType String
+  url         String
+  exercise    Exercise?
+  book        Book?
+}
+
+// 🟡 JOIN TABLES for Many-to-Many relations:
+
+model ExerciseTag {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  exerciseId String   @db.ObjectId
+  tagId      String   @db.ObjectId
+  exercise   Exercise @relation(fields: [exerciseId], references: [id])
+  tag        Tag      @relation(fields: [tagId], references: [id])
+}
+
+model TrainingTag {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  trainingId String   @db.ObjectId
+  tagId      String   @db.ObjectId
+  training   Training @relation(fields: [trainingId], references: [id])
+  tag        Tag      @relation(fields: [tagId], references: [id])
+}
+
+model VideoTag {
+  id      String @id @default(auto()) @map("_id") @db.ObjectId
+  videoId String @db.ObjectId
+  tagId   String @db.ObjectId
+  video   Video  @relation(fields: [videoId], references: [id])
+  tag     Tag    @relation(fields: [tagId], references: [id])
+}
+
+model UserBookPurchase {
+  id     String @id @default(auto()) @map("_id") @db.ObjectId
+  userId String @db.ObjectId
+  bookId String @db.ObjectId
+  user   User   @relation(fields: [userId], references: [id])
+  book   Book   @relation(fields: [bookId], references: [id])
+}
+
+model UserExerciseAccess {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId     String   @db.ObjectId
+  exerciseId String   @db.ObjectId
+  user       User     @relation(fields: [userId], references: [id])
+  exercise   Exercise @relation(fields: [exerciseId], references: [id])
+}
+
+model TrainingTags {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  trainingId String   @db.ObjectId
+  tagId      String   @db.ObjectId
+  training   Training @relation(fields: [trainingId], references: [id])
+  tag        Tag      @relation(fields: [tagId], references: [id])
+}
+
+model VideoTags {
+  id      String @id @default(auto()) @map("_id") @db.ObjectId
+  videoId String @db.ObjectId
+  tagId   String @db.ObjectId
+  video   Video  @relation(fields: [videoId], references: [id])
+  tag     Tag    @relation(fields: [tagId], references: [id])
+}

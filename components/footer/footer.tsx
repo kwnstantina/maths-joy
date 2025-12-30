@@ -1,14 +1,16 @@
 import SocialIcons from "./socialIcons";
 import { Link } from "@remix-run/react";
 import { PhoneIcon, MailIcon } from "@heroicons/react/solid";
+import { useTranslation } from "react-i18next";
 
 const Footer = () => {
+  const { t } = useTranslation();
   return (
     <footer className="bg-gray-700 text-white">
       <div className="container mx-auto pt-12 pb-10 flex flex-col md:flex-row md:grid md:grid-cols-2 md:gap-8">
         <div className="flex flex-col items-baseline sm:pl-0 xs:pl-0  md:pl-8">
           <p className=" mb-8  font-light text-gray-500  md:mb-12 sm:text-xl">
-            Επικοινωνία
+            {t("communicationHeader")}
           </p>
           <div className="flex flex-row justify-start items-baseline gap-5">
             <PhoneIcon
@@ -30,12 +32,12 @@ const Footer = () => {
         <div className="flex flex-col justify-start items-baseline gap-8">
           <nav className="flex flex-col justify-start space-y-3 items-baseline">
             <p className=" mb-8 font-light text-gray-500 md:mb-12 sm:text-xl">
-              Παροχές
+            {t("benefits")}
             </p>
-            <Link to="/exercises">Ασκησεις</Link>{" "}
-            <Link to="/tutorials"> Διδακτικό υλικό</Link>{" "}
+            <Link to="/exercises"> {t("exersice")}</Link>{" "}
+            <Link to="/tutorials"> {t("topic")}</Link>{" "}
             <Link to="/chat">Chat</Link>
-            <Link to="/testYourself">Εξάσκηση</Link>
+            <Link to="/testYourself"> {t("training")}</Link>
           </nav>
           <nav className="flex flex-col space-y-3">
             <Link to="/terms">Terms</Link>

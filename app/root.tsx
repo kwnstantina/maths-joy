@@ -13,26 +13,32 @@ import Footer from "components/footer/footer";
 import NavList from "components/navs/navList";
 import styles from "./styles/app.css";
 import LoadingPage from "components/loadingPage/loadingPage";
-import { useEffect, useState } from "react";
+import { Suspense, useState } from "react";
 import usePrevious from "hooks/usePrevious";
 import { Analytics } from "@vercel/analytics/react";
 import ErrorPage from "components/errorPage/errorPage";
-import logo from './assets/mathsLogo.png';
+import logo from "./assets/mathsLogo.png";
 import { useTranslation } from "react-i18next";
 import i18next from "~/i18next.server";
-import { i18nCookie } from '../services/cookies/cookies';
 import useScrollToTop from "hooks/useScrollToTop";
-
+import { languageCookie } from "utils/cookies";
 
 export async function loader({ request }: LoaderArgs) {
   let locale = await i18next.getLocale(request);
-  return json({
-    locale: locale,
-    ENV: {
-    VERCEL_ANALYTICS_ID: process.env.VERCEL_ANALYTICS_ID,
-  }},{
- // headers: {"Set-Cookie": await i18nCookie.serialize(locale)}
-  })
+  let cookieHeader = request.headers.get("Cookie");
+  let language = await languageCookie.parse(cookieHeader);
+
+  return json(
+    {
+      locale: locale,
+      ENV: {
+        VERCEL_ANALYTICS_ID: process.env.VERCEL_ANALYTICS_ID,
+      },
+    },
+    {
+      headers: {"Set-Cookie": await languageCookie.serialize(locale)}
+    }
+  );
 }
 
 export let handle = {
@@ -46,7 +52,7 @@ export let handle = {
 export function links() {
   return [{ rel: "stylesheet", href: styles }];
 }
-  
+
 export const meta: MetaFunction = () => ({
   charset: "utf-8",
   title: "Gregory Kirtsias",
@@ -56,34 +62,39 @@ export const meta: MetaFunction = () => ({
 export default function App() {
   return (
     <Document>
-      <Layout>
-        <Outlet />
-      </Layout>
+      <Suspense fallback={<LoadingPage />}>
+        <Layout>
+          <Outlet />
+        </Layout>
+      </Suspense>
     </Document>
   );
 }
 
 function Document({ children }: any) {
-  const { ENV ,locale} = useLoaderData<typeof loader>();
+  const { ENV, locale } = useLoaderData<typeof loader>();
   let { i18n } = useTranslation();
-  return (
-    <html lang={locale as any} dir={i18n.dir()}>
+  return(
+    <html
+      lang={locale}
+      dir={i18n.dir()}
+    >
       <head>
-      <title>GregKyrMaths</title>
+        <title>GregKyrMaths</title>
         <Meta />
         <Links />
-        <link rel="icon" type="image/x-icon" href={logo}/>
+        <link rel="icon" type="image/x-icon" href={logo} />
       </head>
       <body className="font-mono">
         {children}
         <ScrollRestoration />
         <Scripts />
         {/* <Analytics /> */}
-        <script
+        {/* <script
           dangerouslySetInnerHTML={{
             __html: `window.ENV = ${JSON.stringify(ENV)}`,
           }}
-        />
+        /> */}
         {process.env.NODE_ENV === "development" && <LiveReload />}
       </body>
     </html>
@@ -91,25 +102,19 @@ function Document({ children }: any) {
 }
 
 export function Layout({ children }: any) {
+  const { locale } = useLoaderData<typeof loader>();
   const location = useLocation();
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const prevPath:string |any = usePrevious(location.pathname);
-  useScrollToTop({location,prevPath});
-  
-  // useEffect(() => {
-  //   let timeoutId: NodeJS.Timeout;
-  //   if (location.pathname !== prevPath && location.pathname !== "/") {
-  //     setIsLoading(true);
-  //     timeoutId = setTimeout(() => {
-  //       setIsLoading(false);
-  //     }, 1000);
-  //   }
-  //   return () => clearTimeout(timeoutId);
-  // }, [location.pathname, prevPath]);  
+  const prevPath: string | any = usePrevious(location.pathname);
+  useScrollToTop({ location, prevPath });
+  const { t, ready, i18n } = useTranslation("common");
+  if (!ready) {
+    return <LoadingPage />;
+  }
 
   return (
     <div className="h-screen min-h-screen flex flex-col justify-start ">
-      <NavList />
+      <NavList lang={i18n.language} />
       {isLoading ? <LoadingPage /> : children}
       <Footer />
     </div>
@@ -117,7 +122,9 @@ export function Layout({ children }: any) {
 }
 
 export function ErrorBoundary({ error: error }: { error: Error }) {
-  console.error('error',error);
+  console.error("error", error);
+  const { locale } = useLoaderData<typeof loader>();
+
   return (
     <html>
       <head>
@@ -127,7 +134,7 @@ export function ErrorBoundary({ error: error }: { error: Error }) {
       </head>
       <body>
         <div className="h-screen min-h-screen flex flex-col justify-start ">
-          <NavList />
+          <NavList lang={locale} />
           <ErrorPage />
           <Footer />
         </div>

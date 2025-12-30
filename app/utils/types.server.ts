@@ -29,3 +29,17 @@ export type CreateTrainingExersice = {
   solution:string;
   searchableTitle:string | any;
 }
+
+
+export type CreateExercise = {
+  title:string;
+  category:string;
+  tags:string;
+  description:string;
+  exerciseImgUrl:string;
+  file:{
+    fileContentType: string;
+    name: string;
+    fileId:string;
+  }
+}

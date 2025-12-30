@@ -3,25 +3,36 @@ import type { RegisterForm } from "./types.server";
 import { prisma } from "./prisma.server";
 
 export const createUser = async (user: RegisterForm) => {
-  const passwordHash = await bcrypt.hash(user.password, 10);
-  const newUser = await prisma.user.create({
-    data: {
-      email: user.email,
-      password: passwordHash,
-      profile: {
-        firstName: user.firstName,
-        lastName: user.lastName,
-        profilePicture: user.profilePicture,
+  try {
+    const passwordHash = await bcrypt.hash(user.password, 10);
+    const newUser = await prisma.user.create({
+      data: {
+        email: user.email,
+        password: passwordHash,
+        isActive: true,
+        profile: {
+          create: {
+            firstName: user.firstName,
+            lastName: user.lastName,
+            profilePicture: user.profilePicture,
+          },
+        },
       },
-    } as any,
-  });
-  return { id: newUser.id, email: user.email };
+    });
+    return { id: newUser.id, email: user.email };
+  } catch (error) {
+    console.error("Error creating user:", error);
+    throw new Error("Failed to create user");
+  }
 };
 
 export const getOtherUsers = async (userId: string) => {
   return await prisma.user.findMany({
     where: {
       id: { not: userId },
+    },
+    include: {
+      profile: true,
     },
     orderBy: {
       profile: {
@@ -36,10 +47,23 @@ export const getUserById = async (userId: string) => {
     where: {
       id: userId,
     },
+    include: {
+      profile: true,
+      userBookPurchases: {
+        include: {
+          book: true,
+        },
+      },
+      userExerciseAccess: {
+        include: {
+          exercise: true,
+        },
+      },
+    },
   });
 };
 
-export const updateUser = async (userId: string, profile: Partial<any> ) => {
+export const updateUser = async (userId: string, profile: Partial<any>) => {
   await prisma.user.update({
     where: {
       id: userId,
@@ -53,5 +77,12 @@ export const updateUser = async (userId: string, profile: Partial<any> ) => {
 };
 
 export const deleteUser = async (id: string) => {
-  await prisma.user.delete({ where: { id } });
+  try {
+    await prisma.user.delete({
+      where: { id },
+    });
+  } catch (error) {
+    console.error("Error deleting user:", error);
+    throw new Error("Failed to delete user");
+  }
 };

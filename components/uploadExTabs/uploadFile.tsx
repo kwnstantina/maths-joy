@@ -23,8 +23,8 @@ const UploadFile = (props: Props) => {
   } = props;
   return (
     <>
-      <div className="mx-auto w-full max-w-md p-5 h-94 mt-5 mb-4 bg-gray-100 mb-20 rounded py-94">
-        <Form onSubmit={handleSubmit}  className="space-y-6">
+      <div className="mx-auto w-full max-w-md p-5 h-94 mt-5 bg-gray-100 mb-20 rounded py-94">
+        <Form onSubmit={handleSubmit}  className="space-y-6" >
           <FormField
             htmlFor={"title"}
             label={"Επιλογή τάξης"}
@@ -74,7 +74,7 @@ const UploadFile = (props: Props) => {
             accept=".pdf"
             onChange={(event) => fileUploadHandler(event)}
           />
-              <FormField
+          <FormField
             htmlFor={"description"}
             label={"Περιγραφή"}
             value={uploadData.description}

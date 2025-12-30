@@ -14,7 +14,7 @@ export const validateEmail = (email: string): string | undefined => {
   };
   
   export const validateName = (name: string): string | undefined => {
-    if (!name.length) return `Please enter a value`;
+    if (name?.length===0){ return `Please enter a value`; }
   };
 
   export const validateFile =(file:File | string | any):string | undefined =>{

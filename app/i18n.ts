@@ -10,6 +10,6 @@ export default {
     whitelist: ["el", "en"],
     // Disabling suspense is recommended
     react: { useSuspense: false },
-    debug: process.env.NODE_ENV !== 'production',
+    debug: false,
    // preload: ["el"],
   };

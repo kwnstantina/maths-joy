@@ -33,5 +33,7 @@
     "typeOfExercise":"Type of Exercise",
     "filter":"Filters",
     "searchPlaceholder":"Producers, Integrals...",
-    "level":"Level"
+    "level":"Level",
+    "communicationHeader":"Communication",
+    "benefits":"Benefits"
   }

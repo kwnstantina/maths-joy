@@ -7,110 +7,84 @@ import {
   getAllExcersices,
   getExersiceBySearch,
 } from "../../utils/exersices.prisma";
+import {
+  getAllExcercices
+} from "../../utils/exercise.prisma";
 import { TAGS, Category, Type } from "../../../services/models/models";
 import { useTranslation } from "react-i18next";
 import LoadingPage from "components/loadingPage/loadingPage";
+import { languageCookie } from "utils/cookies";
+import i18next from "~/i18next.server";
 
 export const loader: LoaderFunction = async ({ request }) => {
-  let exersisesAll = await getAllExcersices();
+  let locale = await i18next.getLocale(request);
+  let cookieHeader = request.headers.get("Cookie");
+  let language = await languageCookie.parse(cookieHeader);
+
+  let exersisesAll = await getAllExcercices();
   const url = new URL(request.url);
   const filters = {
     category: url.searchParams.get("category"),
     tags: url.searchParams.get("tags"),
     input: url.searchParams.get("input"),
     title: url.searchParams.get("title"),
-    lang: url.searchParams.get("lang"),
+  //  lang: url.searchParams.get("lang"),
+    lang: language,
   };
 
-  const whereClause: any = {};
+  // const whereClause: any = {};
 
-  // Apply filters based on the 'filters' object.
-  if (filters.lang === "el") {
-    if (filters.category) {
-      whereClause.category = filters.category;
-    }
-    if (filters.title) {
-      whereClause.title = filters.title;
-    }
-    if (filters.input) {
-      whereClause.description = {
-        contains: filters.input,
-      };
-    }
-    if (filters.tags) {
-      whereClause.tags = {
-        contains: filters.tags,
-      };
-    }
-    exersisesAll = await getExersiceBySearch(whereClause);
-  } else if (filters.lang === "en") {
+  // // Apply filters based on the 'filters' object.
+  // if (filters.lang === "el") {
+  //   if (filters.category) {
+  //     whereClause.category = filters.category;
+  //   }
+  //   if (filters.title) {
+  //     whereClause.title = filters.title;
+  //   }
+  //   if (filters.input) {
+  //     whereClause.description = {
+  //       contains: filters.input,
+  //     };
+  //   }
+  //   if (filters.tags) {
+  //     whereClause.tags = {
+  //       contains: filters.tags,
+  //     };
+  //   }
+  //   exersisesAll = await getExersiceBySearch(whereClause);
+  // } else if (filters.lang === "en") {
     
-    whereClause.translation = {
-      not: {
-        equals: null,
-      },
-    };
+  //   whereClause.translation = {
+  //     not: {
+  //       equals: null,
+  //     },
+  //   };
   
     //after the search we need to parse the translation and queries the db again
     //to get the english translation
     
 
-   exersisesAll = await getExersiceBySearch(whereClause);
-    exersisesAll = exersisesAll.map((exercise: any) => {
-      if (exercise.translation) {
-        try {
-          const translation = JSON.parse(exercise.translation); // Assuming translation is a string, otherwise skip this line
-          if (translation.en) {
-            return {
-              ...exercise,
-              title: translation.en.title,
-              description: translation.en.description,
-              category: translation.en.category,
-              tags: translation.en.tags,
-            };
-          }
-        } catch (err) {
-          console.error("Error parsing JSON:", err);
-        }
-      }
-      return exercise; // If no English translation, return original
-    });  
-  }
-
-  // if (Object.values(filters).filter(Boolean).length > 0) {
-  //   const where = {
-  //     ...(filters.searchItem
-  //       ? {
-  //           OR: [
-  //             {
-  //               description: {
-  //                 contains: filters.searchItem,
-  //                 mode: "insensitive",
-  //               },
-  //             },
-  //           ],
+  //  exersisesAll = await getExersiceBySearch(whereClause);
+  //   exersisesAll = exersisesAll.map((exercise: any) => {
+  //     if (exercise.translation) {
+  //       try {
+  //         const translation = JSON.parse(exercise.translation); // Assuming translation is a string, otherwise skip this line
+  //         if (translation.en) {
+  //           return {
+  //             ...exercise,
+  //             title: translation.en.title,
+  //             description: translation.en.description,
+  //             category: translation.en.category,
+  //             tags: translation.en.tags,
+  //           };
   //         }
-  //       : {}),
-  //     ...(filters.tags || filters.category
-  //       ? {
-  //           AND: [
-  //             {
-  //               tags: {
-  //                 contains: filters.tags || "",
-  //                 mode: "insensitive",
-  //               },
-  //             },
-  //             {
-  //               category: {
-  //                 contains: filters.category || "",
-  //                 mode: "insensitive",
-  //               },
-  //             },
-  //           ],
-  //         }
-  //       : {}),
-  //   };
-  //   exersisesAll = await getExersiceBySearch(where);
+  //       } catch (err) {
+  //         console.error("Error parsing JSON:", err);
+  //       }
+  //     }
+  //     return exercise; // If no English translation, return original
+  //   });  
   // }
 
   return json(exersisesAll) ?? [];
@@ -126,9 +100,8 @@ const Exersices = () => {
     title: Object.values(Type.byId)[0].name,
     input: "",
     tags: Object.values(TAGS.byId)[0].name,
-    lang: i18n.language,
+    //lang: i18n.language,
   });
-  console.log('i18n.language', i18n.language)
 
   const clearFilters = () => {
     setSearchParams({});
@@ -137,7 +110,7 @@ const Exersices = () => {
       title: Object.values(Type.byId)[0].name,
       input: "",
       tags: Object.values(TAGS.byId)[0].name, 
-      lang: i18n.language,
+     // lang: i18n.language,
     });
   };
   const handleCategorySearch = useCallback(() => {
@@ -153,13 +126,14 @@ const Exersices = () => {
       return setFilters((filter: any) => ({
         ...filter,
         [evt?.title]: evt?.name,
-        ["lang"]: i18n.language,
+        //["lang"]: i18n.language,
       }));
     },
     [filters,i18n.language]
   );
 
-  console.log("data", data);
+  console.log(data);
+
   if(!data || data?.length===0) return <LoadingPage />
   return (
     <div className="container px-6 text-center pb-52 my-20">

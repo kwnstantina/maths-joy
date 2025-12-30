@@ -35,7 +35,10 @@ export const dateTimeFormat = (dateTime: string) => {
 };
 
 export const starterLetters = (firstName: string, lastName: string) => {
-  return firstName[0] + "" + lastName[0] ?? "A";
+  if(!firstName && !lastName){
+    return "A";
+  }
+  return (firstName[0] + "" + lastName[0]) as string;
 };
 
 export const separateLatterMaths = (str: string) => {

@@ -1,17 +1,15 @@
-import { PassThrough } from "stream";
 import type { EntryContext } from "@remix-run/node";
 import { Response } from "@remix-run/node";
 import { RemixServer } from "@remix-run/react";
-import isbot from "isbot";
-import { renderToPipeableStream } from "react-dom/server";
 import { createInstance } from "i18next";
-import i18next from "./i18next.server";
+import i18n from "./i18next.server";
 import { I18nextProvider, initReactI18next } from "react-i18next";
 import Backend from "i18next-fs-backend";
-import i18n from "./i18n"; // your i18n configuration file
+import i18nextOptions  from "./i18n"; // your i18n configuration file
 import { resolve } from "node:path";
+import { languageCookie } from "../utils/cookies";
+import { renderToString } from 'react-dom/server'
 
-const ABORT_DELAY = 5000;
 
 export default async function handleRequest(
   request: Request,
@@ -19,58 +17,40 @@ export default async function handleRequest(
   responseHeaders: Headers,
   remixContext: EntryContext
 ) {
-  let callbackName = isbot(request.headers.get("user-agent"))
-    ? "onAllReady"
-    : "onShellReady";
+  // First, we create a new instance of i18next so every request will have a
+  // completely unique instance and not share any state
+  const instance = createInstance()
 
-  let instance = createInstance();
-  let lng = await i18next.getLocale(request);
-  let ns = i18next.getRouteNamespaces(remixContext);
+  // Then we could detect locale from the request
+  const lng = await i18n.getLocale(request)
+  // And here we detect what namespaces the routes about to render want to use
+  const ns = i18n.getRouteNamespaces(remixContext)
+
+  // First, we create a new instance of i18next so every request will have a
+  // completely unique instance and not share any state.
   await instance
-  .use(initReactI18next) // Tell our instance to use react-i18next
-  .use(Backend) // Setup our backend
-  .init({
-    ...i18n, // Spread the i18n configuration
-    lng:'el', // The locale we detected above
-    fallbackLng: 'en', // The fallback locale we detected above
-    ns, // The namespaces the routes about to render wants to use
-    backend: { loadPath: process.env.NODE_ENV === 'development'? resolve("./public/locales/{{lng}}/{{ns}}.json") :  resolve('./locales/{{lng}}/{{ns}}.json')},
-  });
+    .use(initReactI18next) // Tell our instance to use react-i18next
+    .use(Backend) // Setup our backend.init({
+    .init({
+      ...i18nextOptions, // use the same configuration as in your client side.
+      lng, // The locale we detected above
+      ns, // The namespaces the routes about to render want to use
+     
+    backend: { loadPath: process.env.NODE_ENV === 'development' ? resolve("./public/locales/{{lng}}/{{ns}}.json") : resolve('./locales/{{lng}}/{{ns}}.json') },
+    })
 
+  // Then you can render your app wrapped in the I18nextProvider as in the
+  // entry.client file
+  const markup = renderToString(
+    <I18nextProvider i18n={instance}>
+      <RemixServer context={remixContext} url={request.url} />
+    </I18nextProvider>
+  );
 
-  return new Promise((resolve, reject) => {
-    let didError = false;
+  responseHeaders.set("Content-Type", "text/html");
 
-    let { pipe, abort } = renderToPipeableStream(
-      <I18nextProvider i18n={instance}>
-        <RemixServer context={remixContext} url={request.url} />
-      </I18nextProvider>,
-      {
-        [callbackName]: () => {
-          let body = new PassThrough();
-
-          responseHeaders.set("Content-Type", "text/html");
-
-          resolve(
-            new Response(body, {
-              headers: responseHeaders,
-              status: didError ? 500 : responseStatusCode,
-            })
-          );
-
-          pipe(body);
-        },
-        onShellError(error: unknown) {
-          reject(error);
-        },
-        onError(error: unknown) {
-          didError = true;
-
-          console.error(error);
-        },
-      }
-    );
-
-    setTimeout(abort, ABORT_DELAY);
-  });
+  return new Response("<!DOCTYPE html>" + markup, {
+    status: responseStatusCode,
+    headers: responseHeaders,
+  })
 }

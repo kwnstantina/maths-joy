@@ -28,6 +28,17 @@ export const validateName = (name: string): string | undefined => {
 };
 
 /**
+ * Validates a required field
+ * @param value - Field value
+ * @param fieldName - Name of the field for error message
+ */
+export const validateRequiredField = (value: string | null | undefined, fieldName: string): string | undefined => {
+  if (!value || !value.trim().length) {
+    return `${fieldName} is required`;
+  }
+};
+
+/**
  * Validates a file for upload
  * @param file - File object or filename string
  * @param allowedTypes - Type of files allowed ('pdf' | 'image')

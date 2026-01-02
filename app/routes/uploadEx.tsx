@@ -8,7 +8,7 @@ import {
 } from "@remix-run/react";
 import {
   ActionFunction,
-  json,
+  data,
   LoaderFunction,
   redirect,
 } from "@remix-run/node";
@@ -16,6 +16,7 @@ import { createExersice } from "~/utils/exersices.prisma";
 import InternalFunctions from "services/internal/internalFuntions";
 import { validateFile } from "~/utils/validators.server";
 import { getUser } from "~/utils/auth.prisma";
+import { isAdmin } from "~/utils/roles";
 import { Tab } from "@headlessui/react";
 import UploadFile from "components/uploadExTabs/uploadFile";
 import UploadExercise from "components/uploadExTabs/uploadExercise";
@@ -42,9 +43,10 @@ interface FilterEvent {
 type ActionType = "uploadExercise" | "uploadTraning";
 
 export const loader: LoaderFunction = async ({ request }) => {
-  let user = await getUser(request);
-  return user && user["role"] === "ADMIN" ? json(user) : redirect("/progress");
+  const user = await getUser(request);
+  return isAdmin(user) ? data({ user }) : redirect("/progress");
 };
+
 export function ErrorBoundary() {
   const error = useRouteError();
   const navigate = useNavigate();
@@ -93,7 +95,7 @@ export const action: ActionFunction = async ({ request }) => {
     };
 
     if (errors.file || !title || !category) {
-      return json(
+      return data(
         {
           errors,
           fields: { file, title, category },

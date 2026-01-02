@@ -39,14 +39,14 @@ export const getUserById = async (userId: string) => {
   });
 };
 
-export const updateUser = async (userId: string, profile: Partial<any> ) => {
+export const updateUser = async (userId: string, profile: Partial<{ firstName: string; lastName: string; profilePicture?: string }> ) => {
   await prisma.user.update({
     where: {
       id: userId,
     },
     data: {
       profile: {
-        update: profile,
+        set: profile as { firstName: string; lastName: string; profilePicture?: string },
       },
     },
   });

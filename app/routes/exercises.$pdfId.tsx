@@ -120,7 +120,7 @@ export default function PdfContainer() {
       <h2 className="text-center pb-10">
         <strong>{data.title}</strong>{" "}
       </h2>
-      <Worker workerUrl="https://unpkg.com/pdfjs-dist@2.16.105/build/pdf.worker.min.js">
+      <Worker workerUrl="https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.worker.min.js">
         <div style={{ height: "90rem" }}>
           {pdfUrl ? (
             <Viewer

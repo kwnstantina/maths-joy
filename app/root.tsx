@@ -23,11 +23,39 @@ import { useTranslation } from "react-i18next";
 import i18next from "~/i18next.server";
 import { i18nCookie } from "../services/cookies/cookies";
 import useScrollToTop from "hooks/useScrollToTop";
+import { getUser } from "~/utils/auth.prisma";
+
+export interface RootUser {
+  id: string;
+  email: string;
+  role: string;
+  profile: { firstName: string; lastName: string } | null;
+}
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const locale = await i18next.getLocale(request);
+  let user: RootUser | null = null;
+
+  try {
+    const dbUser = await getUser(request);
+    if (dbUser) {
+      user = {
+        id: dbUser.id,
+        email: dbUser.email,
+        role: dbUser.role,
+        profile: dbUser.profile
+      };
+    }
+  } catch {
+    // User not logged in or session expired
+  }
+
   return data(
-    { locale, ENV: { VERCEL_ANALYTICS_ID: process.env.VERCEL_ANALYTICS_ID } },
+    {
+      locale,
+      ENV: { VERCEL_ANALYTICS_ID: process.env.VERCEL_ANALYTICS_ID },
+      user
+    },
     { headers: { "Set-Cookie": await i18nCookie.serialize(locale) } }
   );
 }
@@ -95,13 +123,14 @@ interface AppLayoutProps {
 
 export function AppLayout({ children }: AppLayoutProps) {
   const location = useLocation();
+  const rootData = useLoaderData<typeof loader>();
   const [isLoading] = useState<boolean>(false);
   const prevPath = usePrevious(location.pathname);
   useScrollToTop({ location, prevPath: prevPath ?? "" });
 
   return (
     <div className="h-screen min-h-screen flex flex-col justify-start">
-      <NavList />
+      <NavList user={rootData?.user ?? null} />
       {isLoading ? <LoadingPage /> : children}
       <Footer />
     </div>
@@ -132,7 +161,7 @@ export function ErrorBoundary() {
       </head>
       <body className="font-mono">
         <div className="h-screen min-h-screen flex flex-col justify-start">
-          <NavList />
+          <NavList user={null} />
           <ErrorPage />
           <Footer />
         </div>

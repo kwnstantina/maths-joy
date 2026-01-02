@@ -51,7 +51,7 @@ export const loader: LoaderFunction = async ({ request }) => {
     locale,
     categories: mergedCategories,
     popularTags,
-    user: { id: user.id, profile: user.profile },
+    user: { id: user.id, profile: user.profile ?? { firstName: '', lastName: '' } },
   });
 };
 
@@ -101,7 +101,7 @@ export const action: ActionFunction = async ({ request }) => {
       category,
       tags,
       authorId: user.id,
-      authorName: `${user.profile.firstName} ${user.profile.lastName}`,
+      authorName: `${user.profile?.firstName ?? ''} ${user.profile?.lastName ?? ''}`.trim() || user.email,
     });
 
     return redirect(`/qa/${question.id}`);

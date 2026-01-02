@@ -16,7 +16,6 @@ const usePrevious = (value:Props) => {
     }
 
     return ref.current.prev;
-};
+}; 
 
- 
-  export default usePrevious;
+export default usePrevious;

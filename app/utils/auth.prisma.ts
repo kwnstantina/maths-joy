@@ -36,7 +36,7 @@ interface DbUser {
   profile: {
     firstName: string;
     lastName: string;
-  };
+  } | null;
 }
 
 // Google Strategy config type
@@ -231,8 +231,8 @@ export async function chatAuthorization(request: Request) {
       createdAt: userByExternalAuth.createdAt,
       updatedAt: userByExternalAuth.updatedAt,
       role: userByExternalAuth.role,
-      firstName: userByExternalAuth.profile.firstName,
-      lastName: userByExternalAuth.profile.lastName,
+      firstName: userByExternalAuth.profile?.firstName ?? '',
+      lastName: userByExternalAuth.profile?.lastName ?? '',
       isActive: true,
       profilePicture:userByExternalAuth.profilePicture,
       color: arrayOfColors(),
@@ -243,8 +243,8 @@ export async function chatAuthorization(request: Request) {
       provider_id: userByStorage?.id,
       email: userByStorage?.email,
       role: userByStorage?.role,
-      firstName: userByStorage?.profile.firstName,
-      lastName: userByStorage?.profile.lastName,
+      firstName: userByStorage?.profile?.firstName ?? '',
+      lastName: userByStorage?.profile?.lastName ?? '',
       isActive: true,
       color: arrayOfColors(),
     });

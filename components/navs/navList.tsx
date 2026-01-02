@@ -8,13 +8,28 @@ import {
   UserIcon,
   ArrowRightOnRectangleIcon,
   ArrowLeftOnRectangleIcon,
+  Cog6ToothIcon,
 } from "@heroicons/react/24/solid";
 
 import LanguageIndicator from "components/languageIndicator/languageIndicator";
 import { useTranslation } from "react-i18next";
+import { isAdmin } from "~/utils/roles";
 
-const Navbar = () => {
+interface NavbarUser {
+  id: string;
+  email: string;
+  role: string;
+  profile: { firstName: string; lastName: string } | null;
+}
+
+interface NavbarProps {
+  user: NavbarUser | null;
+}
+
+const Navbar = ({ user }: NavbarProps) => {
   const { t } = useTranslation();
+  const isLoggedIn = !!user;
+  const userIsAdmin = isAdmin(user);
   const [nav, setNav] = useState(false);
   const handleClick = () => setNav(!nav);
   const closeModal = () => setNav(false);
@@ -73,7 +88,7 @@ const Navbar = () => {
               </NavLink>
             </li>
             <li>
-              <UserSettings />
+              <UserSettings user={user} />
             </li>
           </ul>
         </div>
@@ -130,42 +145,69 @@ const Navbar = () => {
           </NavLink>
         </li>
 
-        <li className="border-b-2 border-orange-300 w-full">
-          <NavLink
-            to="uploadEx"
-            className="hover:bg-orange-300 text-white block px-3 py-2 rounded-md text-base font-medium"
-            style={({ isActive }) => (isActive ? activeStyle : undefined)}
-            onClick={handleClick}
-          >
-            <span className="flex align-center justify-center">
-            <UserIcon className="mr-2 h-5 w-5" aria-hidden="true" /> {t("user")}
-            </span> 
-          </NavLink>
-        </li>
-        <li className="border-b-2 border-orange-300 w-full">
-          <NavLink
-            to="login"
-            className="hover:bg-orange-300 text-white block px-3 py-2 rounded-md text-base font-medium"
-            style={({ isActive }) => (isActive ? activeStyle : undefined)}
-            onClick={handleClick}
-          >
-            <span className="flex align-center justify-center">
-            <ArrowRightOnRectangleIcon className="mr-2 h-5 w-5" aria-hidden="true" /> Login in
-            </span>
-          </NavLink>
-        </li>
-        <li className="border-b-2 border-orange-300 w-full">
-          <NavLink
-            className="hover:bg-orange-300 text-white block px-3 py-2 rounded-md text-base font-medium"
-            style={({ isActive }) => (isActive ? activeStyle : undefined)}
-            onClick={handleClick}
-            to={"logout"}
-          >
-            <span className="flex align-center justify-center">
-            <ArrowLeftOnRectangleIcon className="mr-2 h-5 w-5" aria-hidden="true" /> Logout
-            </span>
-          </NavLink>
-        </li>
+        {/* Admin link - only visible to admins */}
+        {userIsAdmin && (
+          <li className="border-b-2 border-orange-300 w-full">
+            <NavLink
+              to="uploadEx"
+              className="hover:bg-orange-300 text-white block px-3 py-2 rounded-md text-base font-medium"
+              style={({ isActive }) => (isActive ? activeStyle : undefined)}
+              onClick={handleClick}
+            >
+              <span className="flex align-center justify-center">
+                <Cog6ToothIcon className="mr-2 h-5 w-5" aria-hidden="true" /> Admin
+              </span>
+            </NavLink>
+          </li>
+        )}
+
+        {/* User profile link - visible to logged in users */}
+        {isLoggedIn && (
+          <li className="border-b-2 border-orange-300 w-full">
+            <NavLink
+              to="progress"
+              className="hover:bg-orange-300 text-white block px-3 py-2 rounded-md text-base font-medium"
+              style={({ isActive }) => (isActive ? activeStyle : undefined)}
+              onClick={handleClick}
+            >
+              <span className="flex align-center justify-center">
+                <UserIcon className="mr-2 h-5 w-5" aria-hidden="true" /> {t("user")}
+              </span>
+            </NavLink>
+          </li>
+        )}
+
+        {/* Login - only visible when not logged in */}
+        {!isLoggedIn && (
+          <li className="border-b-2 border-orange-300 w-full">
+            <NavLink
+              to="login"
+              className="hover:bg-orange-300 text-white block px-3 py-2 rounded-md text-base font-medium"
+              style={({ isActive }) => (isActive ? activeStyle : undefined)}
+              onClick={handleClick}
+            >
+              <span className="flex align-center justify-center">
+                <ArrowRightOnRectangleIcon className="mr-2 h-5 w-5" aria-hidden="true" /> {t("nav.login")}
+              </span>
+            </NavLink>
+          </li>
+        )}
+
+        {/* Logout - only visible when logged in */}
+        {isLoggedIn && (
+          <li className="border-b-2 border-orange-300 w-full">
+            <NavLink
+              className="hover:bg-orange-300 text-white block px-3 py-2 rounded-md text-base font-medium"
+              style={({ isActive }) => (isActive ? activeStyle : undefined)}
+              onClick={handleClick}
+              to={"logout"}
+            >
+              <span className="flex align-center justify-center">
+                <ArrowLeftOnRectangleIcon className="mr-2 h-5 w-5" aria-hidden="true" /> {t("nav.logout")}
+              </span>
+            </NavLink>
+          </li>
+        )}
       </ul>
     </div>
   );

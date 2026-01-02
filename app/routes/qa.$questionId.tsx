@@ -108,7 +108,7 @@ export const action: ActionFunction = async ({ request, params }) => {
           questionId,
           body: body.trim(),
           authorId: user.id,
-          authorName: `${user.profile.firstName} ${user.profile.lastName}`,
+          authorName: `${user.profile?.firstName ?? ''} ${user.profile?.lastName ?? ''}`.trim() || user.email,
         });
         return json<ActionData>({ success: true });
       }

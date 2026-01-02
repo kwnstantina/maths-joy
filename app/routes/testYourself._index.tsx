@@ -1,4 +1,4 @@
-import { json, LoaderFunction } from "@remix-run/node";
+import { data, LoaderFunction } from "@remix-run/node";
 import { getTraingingExerciseByTitle } from "~/utils/training.prisma";
 import { useLoaderData } from "@remix-run/react";
 import { useState } from "react";
@@ -8,7 +8,7 @@ export const loader: LoaderFunction = async ({ request }) => {
   const url = new URL(request.url);
   const searchableTitle=url.searchParams.get("searchableTitle")
   let exercises = await getTraingingExerciseByTitle(searchableTitle);
-  return json(exercises);
+  return data(exercises);
 };
   
 const TestYourself = () => {

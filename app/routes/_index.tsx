@@ -4,16 +4,17 @@ import AboutUsHoc from "components/aboutUs/aboutUs";
 import Intro from "components/intro/intro";
 import Box from "components/box/box";
 import NewsLetter from "components/newsletter/newsletter";
-import { ActionFunction, json } from "@remix-run/node";
+import type { ActionFunction } from "@remix-run/node";
+import { data } from "@remix-run/node";
 import { useFetcher } from "@remix-run/react";
-import { validateEmail } from "utils/utils";
+import { validateEmail } from "~/utils/validators.server";
 import { useTranslation } from "react-i18next";
 
 export const action: ActionFunction = async ({ request }) => {
   const form = await request.formData();
  const email = form.get("email") as string;
   if (!email || !validateEmail(email)) {
-    return json(
+    return data(
       {
         error: "Παρακαλώ εισάγετε ένα έγκυρο email"
       },

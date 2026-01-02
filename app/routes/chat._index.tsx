@@ -1,15 +1,47 @@
-import { useLoaderData, useTransition, useCatch, Link } from "@remix-run/react";
-import supabase from "../../../utils/supabase";
-import { LoaderFunction, redirect, json, ActionArgs } from "@remix-run/node";
-import { useEffect, useMemo, useState } from "react";
+import { useLoaderData, useNavigation, Link, useRouteError, isRouteErrorResponse } from "@remix-run/react";
+import supabase from "utils/supabase";
+import type { LoaderFunction, ActionFunctionArgs } from "@remix-run/node";
+import { redirect, data } from "@remix-run/node";
+import { useEffect, useState } from "react";
 import { chatAuthorization } from "~/utils/auth.prisma";
 import { Form } from "@remix-run/react";
-import { createBrowserClient } from "@supabase/auth-helpers-remix";
+import { createClient } from "@supabase/supabase-js";
 import ChatContent from "components/chat/chatContent/chatContent";
 import UserContent from "components/chat/chatContent/userContent";
 import dataEmojie from "@emoji-mart/data";
 import Picker from "@emoji-mart/react";
 import xss from "xss";
+
+// Type definitions
+interface ChatUser {
+  id: string;
+  email: string;
+  firstName?: string;
+  lastName?: string;
+  profilePicture?: string;
+  color?: string;
+  isActive?: boolean;
+  provider_id?: string;
+}
+
+interface ChatMessage {
+  id: string;
+  content: string;
+  user_id: string;
+  created_at: string;
+  user?: ChatUser;
+}
+
+interface LoaderData {
+  messagesWithUserInfo: ChatMessage[];
+  users: { data: ChatUser[] };
+  env: { SUPABASE_URL: string; SUPABASE_ANON_KEY: string };
+  user: ChatUser & { profile?: { firstName: string; lastName: string } };
+}
+
+interface EmojiData {
+  native: string;
+}
 
 export const loader: LoaderFunction = async ({ request }) => {
   let user = await chatAuthorization(request);
@@ -21,84 +53,94 @@ export const loader: LoaderFunction = async ({ request }) => {
   if (!user) {
     return redirect("/login");
   }
-  const messages: any = await supabase.from("messages").select();
-  const users: any = await supabase.from("users").select();
 
+  // Fetch messages and users with error handling
+  const { data: messagesData, error: messagesError } = await supabase.from("messages").select();
+  const { data: usersData, error: usersError } = await supabase.from("users").select();
+
+  if (messagesError) {
+    console.error("Error fetching messages:", messagesError);
+  }
+  if (usersError) {
+    console.error("Error fetching users:", usersError);
+  }
 
   // Create a new object with nested user information
-  const messagesWithUserInfo = messages?.data?.map((message: any) => {
+  const messagesWithUserInfo = (messagesData || []).map((message: ChatMessage) => {
     const userId = message.user_id;
-    const user = users.data.find((user: any) => user.id === userId);
+    const messageUser = (usersData || []).find((u: ChatUser) => u.id === userId);
     return {
       ...message,
-      user: user,
+      user: messageUser,
     };
   });
-  const userId = await supabase
+
+  const { data: userIdData } = await supabase
     .from("users")
     .select()
     .eq("provider_id", user.id);
 
   user = {
     ...user,
-    id: userId?.data?.find((item) => item.id)?.id,
+    id: userIdData?.find((item: ChatUser) => item.id)?.id,
     isActive: true,
   };
 
-  return json({ messagesWithUserInfo, users, env, user });
+  return data({ messagesWithUserInfo, users: { data: usersData || [] }, env, user });
 };
 
-export const action = async ({ request }: ActionArgs) => {
+export const action = async ({ request }: ActionFunctionArgs) => {
   const response = new Response();
-  let user = await chatAuthorization(request);
-  const userId = await supabase
+  const user = await chatAuthorization(request);
+  const { data: userIdData } = await supabase
     .from("users")
     .select()
     .eq("provider_id", user.id);
   const { message } = Object.fromEntries(await request.formData());
-  const { messageToDom } = (await supabase.from("messages").insert([
+
+  await supabase.from("messages").insert([
     {
       content: xss(String(message)),
-      user_id: userId.data?.find((item) => item.id)?.id,
+      user_id: userIdData?.find((item: ChatUser) => item.id)?.id,
     },
-  ])) as any;
+  ]);
 
-  return json(null, { headers: response.headers });
+  return data(null, { headers: response.headers });
 };
 
 const Chat = () => {
-  const data: any = useLoaderData();
-  const transition = useTransition();
+  const data = useLoaderData<LoaderData>();
+  const navigation = useNavigation();
   const [supabaseClient] = useState(() =>
-    createBrowserClient(data.env.SUPABASE_URL, data.env.SUPABASE_ANON_KEY)
+    createClient(data.env.SUPABASE_URL, data.env.SUPABASE_ANON_KEY)
   );
-  const [messages, setMessages] = useState<any>(data.messagesWithUserInfo);
+  const [messages, setMessages] = useState<ChatMessage[]>(data.messagesWithUserInfo);
   const [showEmojiPicker, setShowEmojiPicker] = useState<boolean>(false);
   const [message, setMessage] = useState<string>("");
-  const [showButton, setShowButton] = useState(false);
 
-  const isPosting = transition.state === "submitting";
+  const isPosting = navigation.state === "submitting";
 
+  // Fix memory leak: use functional setState and remove messages from dependencies
   useEffect(() => {
     const channel = supabaseClient
       .channel("*")
       .on(
         "postgres_changes",
         { event: "INSERT", schema: "public", table: "messages" },
-        (payload) => {
+        (payload: { new: ChatMessage }) => {
           const newMessage = payload.new;
           const senderId = newMessage.user_id;
-          const user = data.users.data.find(
-            (user: any) => user.id === senderId
+          const messageUser = data.users.data.find(
+            (u: ChatUser) => u.id === senderId
           );
-          const newUserMessage = { ...newMessage, user: user };
-          if (
-            !messages.find(
-              (message: { id: string }) => message.id === newMessage.id
-            )
-          ) {
-            setMessages([...messages, newUserMessage]);
-          }
+          const newUserMessage: ChatMessage = { ...newMessage, user: messageUser };
+          // Use functional update to avoid stale closure
+          setMessages((prevMessages: ChatMessage[]) => {
+            if (prevMessages.find((m) => m.id === newMessage.id)) {
+              return prevMessages; // Message already exists
+            }
+            return [...prevMessages, newUserMessage];
+          });
         }
       )
       .subscribe();
@@ -107,35 +149,9 @@ const Chat = () => {
       supabaseClient.removeChannel(channel);
       setMessage("");
     };
-  }, [supabaseClient, messages, data.users]);
+  }, [supabaseClient, data.users.data]); // Removed messages from deps to fix memory leak
 
-  useEffect(() => {
-    const handleScroll = () => {
-      const { scrollTop, clientHeight, scrollHeight } = document.documentElement;
-      setShowButton(scrollTop > clientHeight);
-
-      if (scrollTop + clientHeight === scrollHeight) {
-        // User has scrolled to the bottom
-        // Add logic to display a button or perform an action
-      }
-    };
-
-    window.addEventListener('scroll', handleScroll);
-
-    return () => {
-      window.removeEventListener('scroll', handleScroll);
-    };
-  }, []);
-  
-  const scrollToTop = () => {
-    window.scrollTo({
-      top: 0,
-      behavior: 'smooth',
-    });
-  };
-  
-
-  const handleEmojiClick = (emoji: any) => {
+  const handleEmojiClick = (emoji: EmojiData) => {
     const emojiCode = emoji.native;
     setMessage((prev) => prev + emojiCode);
   };
@@ -225,19 +241,23 @@ const Chat = () => {
     </>
   );
 };
-export function CatchBoundary() {
-  const caught = useCatch();
+export function ErrorBoundary() {
+  const error = useRouteError();
 
-  if (caught.status === 404) {
-    return <div className="text-red-500 h-full">Κάτι πήγε στραβά</div>;
+  if (isRouteErrorResponse(error)) {
+    if (error.status === 404) {
+      return <div className="text-red-500 h-full">Κάτι πήγε στραβά</div>;
+    }
+    return (
+      <div className="text-red-500 h-full">
+        Error {error.status}: {error.statusText}
+      </div>
+    );
   }
-  throw new Error(`Unsupported thrown response status code: ${caught.status}`);
-}
 
-export function ErrorBoundary({ error }: { error: unknown }) {
   if (error instanceof Error) {
     return (
-      <main className="text-center flex justify-center h-full ">
+      <main className="text-center flex justify-center h-full">
         <div className="max-w-lg">
           <div className="text-black-500">
             Κάτι πήγε στραβά! Παρακαλώ επικοινωνήστε με τον διαχειριστή.
@@ -249,6 +269,6 @@ export function ErrorBoundary({ error }: { error: unknown }) {
       </main>
     );
   }
-  return <div className="text-red-500 h-full ">Κάτι πήγε στραβά!</div>;
+  return <div className="text-red-500 h-full">Κάτι πήγε στραβά!</div>;
 }
 export default Chat;

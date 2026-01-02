@@ -1,16 +1,16 @@
 import { Outlet, useLoaderData, useSearchParams } from "@remix-run/react";
 import { Disclosure, Transition } from "@headlessui/react";
-import { ChevronUpIcon,ChevronDoubleLeftIcon,ChevronDoubleRightIcon } from "@heroicons/react/solid";
+import { ChevronUpIcon,ChevronDoubleLeftIcon,ChevronDoubleRightIcon } from "@heroicons/react/24/solid";
 import Input from "components/input/input";
 import { useCallback, useState } from "react";
 import "react-cmdk/dist/cmdk.css";
 import Kbar from "components/kbar/kbar";
-import { LoaderFunction, json } from "@remix-run/node";
+import { LoaderFunction, data } from "@remix-run/node";
 import { getTrainingExercises} from "~/utils/training.prisma";
 
 export const loader: LoaderFunction = async ({ request }) => {  
   const exercises = await getTrainingExercises();
-  return json(exercises);
+  return data(exercises);
 };
 
 const TestYourself = () => {

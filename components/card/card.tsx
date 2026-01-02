@@ -1,4 +1,4 @@
-import { EyeIcon } from "@heroicons/react/outline";
+import { EyeIcon } from "@heroicons/react/24/outline";
 import { dateFormat } from "../../utils/utils";
 import { useNavigate } from "@remix-run/react";
 const Card = (props: any) => {

@@ -1,4 +1,4 @@
-import { MailIcon } from "@heroicons/react/outline";
+import { EnvelopeIcon } from "@heroicons/react/24/outline";
 
 const SocialIcons = () => {
   return (
@@ -7,7 +7,7 @@ const SocialIcons = () => {
         className="p-2 cursor-pointer inline-flex items-center
         rounded-full bg-gray-300 mx-1.5 text-xl hover:text-blue-100 hover:bg-teal-500
         duration-300">
-       <MailIcon className='w-6'/>
+       <EnvelopeIcon className='w-6'/>
       </span>
     </div>
   );

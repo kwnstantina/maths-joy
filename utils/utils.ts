@@ -15,7 +15,7 @@ export const dateFormat = (date: string) => {
 export const dateTimeFormat = (dateTime: string) => {
   let currentdate = new Date(dateTime);
   let hours = currentdate.getHours();
-  let minutes = currentdate.getMinutes() as any;
+  let minutes: number | string = currentdate.getMinutes();
   let ampm = hours >= 12 ? "pm" : "am";
   hours = hours % 12;
   hours = hours ? hours : 12; // the hour '0' should be '12'
@@ -35,7 +35,9 @@ export const dateTimeFormat = (dateTime: string) => {
 };
 
 export const starterLetters = (firstName: string, lastName: string) => {
-  return firstName[0] + "" + lastName[0] ?? "A";
+  const first = firstName?.[0] ?? "A";
+  const last = lastName?.[0] ?? "";
+  return first + last;
 };
 
 export const separateLatterMaths = (str: string) => {
@@ -45,20 +47,23 @@ export const separateLatterMaths = (str: string) => {
   return isLetter;
 };
 
-export const groupBy = (array: Array<any>, keyFunc: CallableFunction) => {
-  return array.reduce((result, item) => {
+export const groupBy = <T extends Record<string, unknown>>(
+  array: T[],
+  keyFunc: (item: T) => string
+): Record<string, T[]> => {
+  return array.reduce((result: Record<string, T[]>, item) => {
     const key = keyFunc(item);
     if (!result[key]) {
       result[key] = [];
     }
-    if (!result[key].some((i: any) => isEqual(i, item))) {
+    if (!result[key].some((i) => isEqual(i, item))) {
       result[key].push(item);
     }
     return result;
   }, {});
 };
 
-export const isEqual = (a: any, b: any) => {
+export const isEqual = (a: Record<string, unknown>, b: Record<string, unknown>) => {
   const aKeys = Object.keys(a);
   const bKeys = Object.keys(b);
   if (aKeys.length !== bKeys.length) {
@@ -72,13 +77,9 @@ export const isEqual = (a: any, b: any) => {
   return true;
 };
 
+// NOTE: validateEmail is available in ~/utils/validators.server.ts for server-side validation
 
-export const validateEmail = (email: string) => {
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  return emailRegex.test(email);
-}
-
-export const arrayOfColors =()=>{
+export const arrayOfColors = () => {
 const colors= ["#ff643e","#fc35a0","#f96e77",'#f5d300','#7777ff','#08f7fe'];
 const randomIndex = Math.floor(Math.random() * colors.length);
 return colors[randomIndex];

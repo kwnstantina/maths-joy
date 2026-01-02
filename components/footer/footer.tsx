@@ -1,6 +1,6 @@
 import SocialIcons from "./socialIcons";
 import { Link } from "@remix-run/react";
-import { PhoneIcon, MailIcon } from "@heroicons/react/solid";
+import { PhoneIcon, EnvelopeIcon } from "@heroicons/react/24/solid";
 
 const Footer = () => {
   return (
@@ -19,7 +19,7 @@ const Footer = () => {
           </div>
 
           <div className="flex flex-row justify-start items-baseline gap-5">
-            <MailIcon
+            <EnvelopeIcon
               className="ml-2 -mr-1 h-5 w-5 text-white hover:text-orange-300"
               aria-hidden="true"
             />

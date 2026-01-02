@@ -3,7 +3,8 @@ import {
   useActionData,
   useSubmit,
   useNavigate,
-  useTransition,
+  useNavigation,
+  useRouteError,
 } from "@remix-run/react";
 import {
   ActionFunction,
@@ -20,11 +21,32 @@ import UploadFile from "components/uploadExTabs/uploadFile";
 import UploadExercise from "components/uploadExTabs/uploadExercise";
 import { createTrainingExercise } from "~/utils/training.prisma";
 
+// Type definitions
+interface UploadFormData {
+  title: string;
+  file: string | { fileContentType: string };
+  tags: string;
+  category: string;
+  exercise: string | { fileContentType: string };
+  solution: string | { fileContentType: string };
+  searchableTitle: string;
+  description: string;
+  exerciseImgUrl: string;
+}
+
+interface FilterEvent {
+  title: string;
+  name: string;
+}
+
+type ActionType = "uploadExercise" | "uploadTraning";
+
 export const loader: LoaderFunction = async ({ request }) => {
   let user = await getUser(request);
   return user && user["role"] === "ADMIN" ? json(user) : redirect("/progress");
 };
-export function ErrorBoundary({ error }: any) {
+export function ErrorBoundary() {
+  const error = useRouteError();
   const navigate = useNavigate();
   return (
     <div
@@ -102,12 +124,12 @@ export const action: ActionFunction = async ({ request }) => {
   }
 };
 
-export default function UploadExcercise(): JSX.Element {
+export default function UploadExcercise(): React.ReactElement {
   const actionData = useActionData();
-  const transition = useTransition();
+  const navigation = useNavigation();
   const submit = useSubmit();
-  const [action, setAction] = useState("uploadExercise") as any;
-  const [uploadData, setUploadData] = useState({
+  const [action, setAction] = useState<ActionType>("uploadExercise");
+  const [uploadData, setUploadData] = useState<UploadFormData>({
     title: "",
     file: "",
     tags: "",
@@ -115,9 +137,9 @@ export default function UploadExcercise(): JSX.Element {
     exercise: "",
     solution: "",
     searchableTitle: "",
-    description:"",
-    exerciseImgUrl:""
-  } as any);
+    description: "",
+    exerciseImgUrl: ""
+  });
 
   const [categories] = useState([
     "Ανέβασμα Αρχείου",
@@ -139,78 +161,71 @@ export default function UploadExcercise(): JSX.Element {
       exerciseImgUrl:""
     });
 
-    setAction(() => {
-      if (tabIndex === 0) {
-        return "uploadExercise";
-      } else if (tabIndex === 1) {
-        return "uploadTraning";
-      }
-    });
+    setAction(tabIndex === 0 ? "uploadExercise" : "uploadTraning");
   }, [tabIndex]);
 
   const onChangeHandler = useCallback(
-    (evt: any) => {
-      if (evt && evt.target && evt.target.value) {
-        return setUploadData((form: any) => ({
+    (evt: React.ChangeEvent<HTMLInputElement> | FilterEvent) => {
+      if ('target' in evt && evt.target && evt.target.value) {
+        return setUploadData((form: UploadFormData) => ({
           ...form,
-          [evt?.target.name]: evt?.target.value,
+          [evt.target.name]: evt.target.value,
         }));
-      } else {
-        return setUploadData((form: any) => ({
+      } else if ('title' in evt) {
+        return setUploadData((form: UploadFormData) => ({
           ...form,
-          [evt?.title]: evt?.name,
+          [evt.title]: evt.name,
         }));
       }
     },
-    [uploadData]
+    []
   );
 
-  const classNames = (...classes: any) => {
+  const classNames = (...classes: (string | boolean | undefined)[]) => {
     return classes.filter(Boolean).join(" ");
   };
   const buttonState =
-    transition.state === "submitting"
+    navigation.state === "submitting"
       ? "Saving..."
-      : transition.state === "loading"
+      : navigation.state === "loading"
       ? "Saved!"
       : "Δημημιουργία Ασκησης";
 
   const fileUploadHandler = async (
-    event: React.ChangeEvent<HTMLInputElement> | any
+    event: React.ChangeEvent<HTMLInputElement>
   ) => {
-    const file: any = event?.target?.files;
-    const data = await InternalFunctions.getBase64(file[0])
-      .then((result: any) => {
-        return result;
-      })
-      .catch((err: any) => {
-        console.log("error on upload File", err);
-      });
+    const files = event?.target?.files;
+    if (!files || files.length === 0) return;
 
-    setUploadData((form: any) => ({
-      ...form,
-      [event.target?.name]: data,
-    }));
+    try {
+      const data = await InternalFunctions.getBase64(files[0]);
+      setUploadData((form: UploadFormData) => ({
+        ...form,
+        [event.target.name]: data,
+      }));
+    } catch (err) {
+      console.error("Error on upload file:", err);
+    }
   };
 
   const handleSubmit = (
-    event: React.FormEvent<HTMLFormElement | any> | any
+    event: React.FormEvent<HTMLFormElement>
   ) => {
     let $form = event.currentTarget;
-    let formData = new FormData(event.target);
+    let formData = new FormData($form);
     formData.set("tags", uploadData.tags);
     formData.set("category", uploadData.category);
     formData.set("title", uploadData.title);
     formData.set("_action", action);
     if (action === "uploadExercise") {
-      formData.set(
-        "fileContentType",
-        uploadData.file["fileContentType"] as any
-      );
+      const fileContent = typeof uploadData.file === 'object' ? uploadData.file.fileContentType : '';
+      formData.set("fileContentType", fileContent);
     }
     if (action === "uploadTraning") {
-      formData.set("exercise", uploadData.exercise["fileContentType"]);
-      formData.set("solution", uploadData.solution["fileContentType"]);
+      const exerciseContent = typeof uploadData.exercise === 'object' ? uploadData.exercise.fileContentType : '';
+      const solutionContent = typeof uploadData.solution === 'object' ? uploadData.solution.fileContentType : '';
+      formData.set("exercise", exerciseContent);
+      formData.set("solution", solutionContent);
       formData.set("searchableTitle", uploadData.searchableTitle);
       formData.set("description", uploadData.description);
       formData.set("exerciseImgUrl", uploadData.exerciseImgUrl);
@@ -225,15 +240,15 @@ export default function UploadExcercise(): JSX.Element {
   return (
     <div className="lg:w-8/12 sm:w-10/12 px-2 py-16 mx-6">
       <Tab.Group
-        onChange={(index) => {
+        onChange={(index: number) => {
           setTabIndex(index);
         }}
       >
         <Tab.List className="flex space-x-1 rounded-xl bg-orange-600 p-1">
-          {categories.map((category) => (
+          {categories.map((category: string) => (
             <Tab
               key={category}
-              className={({ selected }) =>
+              className={({ selected }: { selected: boolean }) =>
                 classNames(
                   "w-full rounded-lg py-2.5 text-sm font-medium leading-5 text-orange-700 ring-white ring-opacity-60 ring-offset-2 ring-offset-orange-400 focus:outline-none focus:ring-2",
                   selected

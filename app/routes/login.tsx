@@ -1,14 +1,24 @@
 import React, { useState } from "react";
 import { Form, Link, useActionData, useSearchParams } from "@remix-run/react";
 import { validateEmail, validatePassword } from "~/utils/validators.server";
-import { ActionFunction, json } from "@remix-run/node";
+import { ActionFunction, data } from "@remix-run/node";
 import { login } from "~/utils/auth.prisma";
 import Alerts from "components/alerts/alerts";
 
-// export const loader: LoaderFunction = async ({ request }) => {
-//   // If there's already a user in the session, redirect to the home page
-//   return (await getUser(request)) ? redirect("/") : null;
-// };
+interface ActionData {
+  errors?: {
+    email?: string;
+    password?: string;
+  };
+  error?: string;
+  fields?: {
+    email: string;
+    password: string;
+    firstName: FormDataEntryValue | null;
+    lastName: FormDataEntryValue | null;
+  };
+  form?: string;
+}
 
 export const action: ActionFunction = async ({ request }) => {
   const form = await request.formData();
@@ -24,7 +34,7 @@ export const action: ActionFunction = async ({ request }) => {
     typeof email !== "string" ||
     typeof password !== "string"
   ) {
-    return json({ error: `Invalid Form Data`, form: action }, { status: 400 });
+    return data({ error: `Invalid Form Data`, form: action }, { status: 400 });
   }
 
   // Validate email & password
@@ -35,7 +45,7 @@ export const action: ActionFunction = async ({ request }) => {
 
   //  If there were any errors, return them
   if (Object.values(errors).some(Boolean))
-    return json(
+    return data(
       {
         errors,
         fields: { email, password, firstName, lastName },
@@ -49,7 +59,7 @@ export const action: ActionFunction = async ({ request }) => {
 export default function LoginPage(): JSX.Element {
   const [searchParams] = useSearchParams();
   const redirectTo = searchParams.get("redirectTo") || "/";
-  const actionData = useActionData();
+  const actionData = useActionData<ActionData>();
   const [loginData, setLoginData] = useState({
     email: "",
     password: "",
@@ -90,7 +100,7 @@ export default function LoginPage(): JSX.Element {
                     className="w-full rounded border border-gray-500 px-2 py-1 text-lg"
                     onChange={(evt) => onChangeHandler(evt)}
                   />
-                  {actionData?.error?.email && (
+                  {actionData?.errors?.email && (
                     <div className="pt-1 text-red-700" id="email-error">
                       {actionData.errors.email}
                     </div>

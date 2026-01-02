@@ -1,6 +1,6 @@
 import { Menu, Transition } from '@headlessui/react';
 import { Fragment } from 'react';
-import { ChevronDownIcon,ViewListIcon,UserIcon,LoginIcon,LogoutIcon,InboxIcon,UserCircleIcon } from '@heroicons/react/solid';
+import { ChevronDownIcon,Bars4Icon,UserIcon,ArrowRightOnRectangleIcon,ArrowLeftOnRectangleIcon,InboxIcon,UserCircleIcon } from '@heroicons/react/24/solid';
 import {Link} from "@remix-run/react";
 import { useTranslation } from 'react-i18next';
 
@@ -83,14 +83,14 @@ const  UserSettings=()=> {
                     className={`${active ? 'bg-orange-500 text-white' : 'text-gray-900'} group flex w-full items-center rounded-md px-2 py-2 text-sm`} 
                     to={'login'}                  >
                     {active ? (
-                      <LoginIcon
+                      <ArrowRightOnRectangleIcon
                         className="mr-2 h-5 w-5"
                         aria-hidden="true"
                       />
                     ) : (
-                      <LoginIcon
+                      <ArrowRightOnRectangleIcon
                         className="mr-2 h-5 w-5"
-                        aria-hidden="true"                 
+                        aria-hidden="true"
                       />
                     )}
                     Log in
@@ -103,14 +103,14 @@ const  UserSettings=()=> {
                   className={`${active ? 'bg-orange-500 text-white' : 'text-gray-900'} group flex w-full items-center rounded-md px-2 py-2 text-sm`} 
                   to={'logout'}                  >
                   {active ? (
-                    <LogoutIcon
+                    <ArrowLeftOnRectangleIcon
                       className="mr-2 h-5 w-5"
                       aria-hidden="true"
                     />
                   ) : (
-                    <LogoutIcon
+                    <ArrowLeftOnRectangleIcon
                       className="mr-2 h-5 w-5"
-                      aria-hidden="true"                 
+                      aria-hidden="true"
                     />
                   )}
                   Log out

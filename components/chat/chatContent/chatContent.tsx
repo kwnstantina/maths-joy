@@ -2,12 +2,14 @@ import { Key } from "react";
 import { dateTimeFormat,starterLetters } from "../../../utils/utils";
 import {decode} from 'html-entities';
 type Message = {
-  user: any;
+  user?: {
+    profilePicture?: string;
+    color?: string;
+  };
   id: Key;
   user_id: string;
   content: string;
   created_at: string;
-  profilePicture:string;
 };
 type Props = {
   messages: Array<Message>;
@@ -79,10 +81,6 @@ const ChatContent = (props: Props) => {
           <div className="w-3 h-3 bg-orange-400 rounded-full animate-[wiggle_3s_ease-in-out_infinite]"></div>
         </div>
       )}
-      {/* <div className="inline-flex items-center justify-center w-full">
-       <hr className="w-64 h-px my-8 bg-orange-200 border-0 dark:bg-gray-700"/>
-     <span className="absolute px-3 font-medium text-gray-900 -translate-x-1/2  left-1/2 dark:text-white dark:bg-gray-900">{"10:09"}</span>
-     </div> */}
     </div>
     <div>
             <button className="fixed bottom-4 right-4 p-4 bg-blue-500 text-white rounded" onClick={()=>console.log('s')}>

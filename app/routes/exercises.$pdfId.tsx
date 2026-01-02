@@ -1,30 +1,43 @@
-import { LoaderFunction } from "@remix-run/node";
+import { LoaderFunction, data } from "@remix-run/node";
 import { useLoaderData } from "@remix-run/react";
 import { getExersiceById } from "~/utils/exersices.prisma";
-import { Worker, Viewer,RotateDirection } from "@react-pdf-viewer/core";
+import { Worker, Viewer, RotateDirection } from "@react-pdf-viewer/core";
 import { defaultLayoutPlugin } from "@react-pdf-viewer/default-layout";
 import type { ToolbarProps } from "@react-pdf-viewer/default-layout";
 import React, { useState } from "react";
-import coreCss from "@react-pdf-viewer/core/lib/styles/index.css";
-import layoutCss from "@react-pdf-viewer/default-layout/lib/styles/index.css";
+import "@react-pdf-viewer/core/lib/styles/index.css";
+import "@react-pdf-viewer/default-layout/lib/styles/index.css";
 import { pageNavigationPlugin } from "@react-pdf-viewer/page-navigation";
-import { RenderRotateProps, rotatePlugin } from '@react-pdf-viewer/rotate';
+
+// Type for PDF data
+interface PdfData {
+  title: string;
+  fileContentType?: string | null;
+  cloudinaryUrl?: string | null;
+  cloudinaryPublicId?: string | null;
+  fileSize?: number | null;
+  translation?: unknown;
+}
 
 
-export const links = () => [
-  { rel: "stylesheet", href: coreCss },
-  { rel: "stylesheet", href: layoutCss },
-];
-export const loader: LoaderFunction = async ({ request, params }) => {
+export const loader: LoaderFunction = async ({ params }) => {
   const { pdfId } = params;
   const pdf = await getExersiceById(pdfId);
-  return pdf;
+
+  if (!pdf) {
+    throw new Response("PDF not found", { status: 404 });
+  }
+
+  return data(pdf);
 };
 
 export default function PdfContainer() {
-  const data = useLoaderData();
-  const [isDisabled, setIsDisabled] = useState(true) as any;
-  const [pageNumber, setPageNumber] = useState<number>(1);
+  const data = useLoaderData<PdfData>();
+  const [isDisabled] = useState(true);
+  const [pageNumber] = useState<number>(1);
+
+  // Use Cloudinary URL if available, otherwise fall back to base64
+  const pdfUrl = data.cloudinaryUrl || data.fileContentType || '';
 
   const pageNavigationPluginInstance = pageNavigationPlugin();
 
@@ -74,9 +87,7 @@ export default function PdfContainer() {
               <GoToNextPage />
                      
               <Download>
-                {(
-                  props:any
-                ) => (
+                {(props: { onClick: () => void }) => (
                   <button
                     style={{
                       backgroundColor: isDisabled ? "#96ccff" : "#357edd",
@@ -90,10 +101,9 @@ export default function PdfContainer() {
                     disabled={isDisabled}
                     onClick={props.onClick}
                   >
-                    Download 
+                    Download
                   </button>
-                  )
-                }
+                )}
               </Download>     
             </>
           );
@@ -112,14 +122,20 @@ export default function PdfContainer() {
       </h2>
       <Worker workerUrl="https://unpkg.com/pdfjs-dist@2.16.105/build/pdf.worker.min.js">
         <div style={{ height: "90rem" }}>
-          <Viewer
-            fileUrl={data?.fileContentType}
-            plugins={[
-              pageNavigationPluginInstance,
-              defaultLayoutPluginInstance,
-            ]}
-            initialPage={pageNumber}
-          />
+          {pdfUrl ? (
+            <Viewer
+              fileUrl={pdfUrl}
+              plugins={[
+                pageNavigationPluginInstance,
+                defaultLayoutPluginInstance,
+              ]}
+              initialPage={pageNumber}
+            />
+          ) : (
+            <div className="text-center text-red-500 py-10">
+              PDF not available
+            </div>
+          )}
         </div>
       </Worker>
     </div>

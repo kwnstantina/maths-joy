@@ -14,17 +14,57 @@ type UserProfile {
 }
 
 model Exersice {
+  id                 String   @id @default(auto()) @map("_id") @db.ObjectId
+  category           String
+  createdAt          DateTime @db.Date
+  description        String?
+  exerciseImgUrl     String?
+  fileContentType    String?  // Legacy: Base64 encoded file (deprecated)
+  fileName           String
+  tags               String
+  title              String
+  updatedAt          DateTime @db.Date
+  translation        Json?
+  // Cloudinary fields (new)
+  cloudinaryPublicId String?
+  cloudinaryUrl      String?
+  fileSize           Int?
+}
+
+// Book model for e-commerce
+model Book {
+  id                 String   @id @default(auto()) @map("_id") @db.ObjectId
+  title              String
+  description        String
+  price              Float
+  currency           String   @default("EUR")
+  cloudinaryPublicId String
+  cloudinaryUrl      String
+  thumbnailUrl       String?
+  stripePriceId      String?
+  stripeProductId    String?
+  isActive           Boolean  @default(true)
+  category           String
+  tags               String[]
+  translation        Json?
+  createdAt          DateTime @db.Date
+  updatedAt          DateTime @db.Date
+}
+
+// Purchase model for tracking book purchases
+model Purchase {
   id              String   @id @default(auto()) @map("_id") @db.ObjectId
-  category        String
+  userId          String   @db.ObjectId
+  bookId          String   @db.ObjectId
+  stripeSessionId String?
+  stripePaymentId String?
+  amount          Float
+  currency        String
+  status          String   @default("pending") // pending, completed, failed, refunded
+  downloadToken   String?  @unique
+  downloadCount   Int      @default(0)
   createdAt       DateTime @db.Date
-  description     String?
-  exerciseImgUrl  String?
-  fileContentType String
-  fileName        String
-  tags            String
-  title           String
   updatedAt       DateTime @db.Date
-  translation     Json?
 }
 
 model Training {
@@ -63,5 +103,55 @@ model Video {
   updatedAt   DateTime @db.Date
   url         String
   translation  Json?
+}
+
+// Q&A System models
+model Question {
+  id              String   @id @default(auto()) @map("_id") @db.ObjectId
+  title           String
+  body            String
+  category        String
+  tags            String[]
+  authorId        String   @db.ObjectId
+  authorName      String
+  voteCount       Int      @default(0)
+  answerCount     Int      @default(0)
+  viewCount       Int      @default(0)
+  acceptedAnswerId String? @db.ObjectId
+  isResolved      Boolean  @default(false)
+  createdAt       DateTime @db.Date
+  updatedAt       DateTime @db.Date
+}
+
+model Answer {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  questionId  String   @db.ObjectId
+  body        String
+  authorId    String   @db.ObjectId
+  authorName  String
+  voteCount   Int      @default(0)
+  isAccepted  Boolean  @default(false)
+  createdAt   DateTime @db.Date
+  updatedAt   DateTime @db.Date
+}
+
+model QuestionVote {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  questionId String   @db.ObjectId
+  userId     String   @db.ObjectId
+  value      Int      // 1 for upvote, -1 for downvote
+  createdAt  DateTime @db.Date
+
+  @@unique([questionId, userId])
+}
+
+model AnswerVote {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  answerId  String   @db.ObjectId
+  userId    String   @db.ObjectId
+  value     Int      // 1 for upvote, -1 for downvote
+  createdAt DateTime @db.Date
+
+  @@unique([answerId, userId])
 }
 

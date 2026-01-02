@@ -8,6 +8,44 @@ import { Authenticator } from "remix-auth";
 import supabase from "../../utils/supabase";
 import { arrayOfColors } from "utils/utils";
 
+// Google OAuth profile type
+interface GoogleProfile {
+  id: string;
+  displayName: string;
+  name: {
+    givenName: string;
+    familyName: string;
+  };
+  emails: Array<{ value: string }>;
+  photos?: Array<{ value: string }>;
+  _json: {
+    picture?: string;
+    email?: string;
+  };
+}
+
+// User type from database
+interface DbUser {
+  id: string;
+  email: string;
+  password: string;
+  createdAt: Date;
+  updatedAt: Date;
+  role: string;
+  profilePicture?: string | null;
+  profile: {
+    firstName: string;
+    lastName: string;
+  };
+}
+
+// Google Strategy config type
+interface GoogleStrategyConfig {
+  clientID: string;
+  clientSecret: string;
+  callbackURL: string;
+}
+
 const sessionSecret = process.env.SESSION_SECRET;
 if (!sessionSecret) {
   throw new Error("SESSION_SECRET must be set");
@@ -25,13 +63,15 @@ export const storage = createCookieSessionStorage({
   },
 });
 
+const googleStrategyConfig: GoogleStrategyConfig = {
+  clientID: process.env.GOOGLE_CLIENT_ID || "",
+  clientSecret: process.env.GOOGLE_CLIENT_SECRET || "",
+  callbackURL: process.env.GOOGLE_CALLBACK_URL || "http://localhost:3000/auth/callback",
+};
+
 let googleStrategy = new GoogleStrategy(
-  {
-    clientID: process.env.GOOGLE_CLIENT_ID,
-    clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-    callbackURL: "http://localhost:3000/auth/callback",
-  } as any,
-  async ({ accessToken, refreshToken, extraParams, profile }) => {
+  googleStrategyConfig,
+  async ({ profile }: { profile: GoogleProfile }) => {
     // Get the user data from your DB or API using the tokens and profile
     const user = await prisma.user.findUnique({
       where: { email: profile.emails[0].value },
@@ -62,7 +102,7 @@ export async function register(user: RegisterForm) {
   const exists = await prisma.user.count({ where: { email: user.email } });
   if (exists) {
     return json(
-      { error: `User already exists with that email` },
+      { error: `errors.userExists` },
       { status: 400 }
     );
   }
@@ -71,8 +111,8 @@ export async function register(user: RegisterForm) {
   if (!newUser) {
     return json(
       {
-        error: `Something went wrong trying to create a new user.`,
-        fields: { email: user.email, password: user.password },
+        error: `errors.createUserFailed`,
+        fields: { email: user.email }, // Never include password in error responses
       },
       { status: 400 }
     );
@@ -82,16 +122,21 @@ export async function register(user: RegisterForm) {
 
 // Validate the user on email & password
 export async function login({ email, password }: LoginForm) {
-  
-  if(email == null){
-    throw new Error('Incorrect login')
-  };
+  // Use generic error message to prevent user enumeration
+  const genericError = { error: `errors.invalidCredentials` };
+
+  if (email == null || password == null) {
+    return json(genericError, { status: 400 });
+  }
+
   const user = await prisma.user.findUnique({
     where: { email },
   });
 
-  if (!user || !(await bcrypt.compare(password, user.password)))
-    return json({ error: `Incorrect login` }, { status: 400 });
+  // Use same error for "user not found" and "wrong password" to prevent enumeration
+  if (!user || !(await bcrypt.compare(password, user.password))) {
+    return json(genericError, { status: 400 });
+  }
 
   return createUserSession(user.id, "/");
 }
@@ -156,8 +201,10 @@ export async function getUser(request: Request) {
 
 export async function logout(request: Request) {
   const session = await getUserSession(request);
-  let user:any = await authenticator.isAuthenticated(request);
-   await  updateUserStatus(user.id,false);
+  const user = await authenticator.isAuthenticated(request) as DbUser | null;
+  if (user?.id) {
+    await updateUserStatus(user.id, false);
+  }
 
   if (user) {
     await authenticator.logout(request, { redirectTo: "/login" });

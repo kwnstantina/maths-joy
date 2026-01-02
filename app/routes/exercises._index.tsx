@@ -1,18 +1,51 @@
-import SearchInput from "../../../components/search/searchInput";
-import Card from "../../../components/card/card";
+import SearchInput from "components/search/searchInput";
+import Card from "components/card/card";
 import { useLoaderData, useSearchParams } from "@remix-run/react";
-import { LoaderFunction, json } from "@remix-run/node";
+import { LoaderFunction, data } from "@remix-run/node";
 import { useState, useCallback } from "react";
 import {
   getAllExcersices,
   getExersiceBySearch,
-} from "../../utils/exersices.prisma";
-import { TAGS, Category, Type } from "../../../services/models/models";
+} from "~/utils/exersices.prisma";
+import { TAGS, Category, Type } from "services/models/models";
 import { useTranslation } from "react-i18next";
 import LoadingPage from "components/loadingPage/loadingPage";
 
+import type { JsonValue } from "@prisma/client/runtime/library";
+
+// Type definitions
+interface Exercise {
+  id: string;
+  title: string;
+  description?: string | null;
+  category: string;
+  tags?: string;
+  translation?: JsonValue;
+}
+
+interface ExerciseFilters {
+  category: string;
+  title: string;
+  input: string;
+  tags: string;
+  lang: string;
+}
+
+interface FilterEvent {
+  title: string;
+  name: string;
+}
+
+interface WhereClause {
+  category?: string;
+  title?: string;
+  description?: { contains: string };
+  tags?: { contains: string };
+  translation?: { not: { equals: null } };
+}
+
 export const loader: LoaderFunction = async ({ request }) => {
-  let exersisesAll = await getAllExcersices();
+  let exersisesAll: Exercise[] = await getAllExcersices();
   const url = new URL(request.url);
   const filters = {
     category: url.searchParams.get("category"),
@@ -22,7 +55,7 @@ export const loader: LoaderFunction = async ({ request }) => {
     lang: url.searchParams.get("lang"),
   };
 
-  const whereClause: any = {};
+  const whereClause: WhereClause = {};
 
   // Apply filters based on the 'filters' object.
   if (filters.lang === "el") {
@@ -44,29 +77,30 @@ export const loader: LoaderFunction = async ({ request }) => {
     }
     exersisesAll = await getExersiceBySearch(whereClause);
   } else if (filters.lang === "en") {
-    
     whereClause.translation = {
       not: {
         equals: null,
       },
     };
-  
-    //after the search we need to parse the translation and queries the db again
-    //to get the english translation
-    
 
-   exersisesAll = await getExersiceBySearch(whereClause);
-    exersisesAll = exersisesAll.map((exercise: any) => {
+    // After the search we need to parse the translation and query the db again
+    // to get the english translation
+    exersisesAll = await getExersiceBySearch(whereClause);
+    exersisesAll = exersisesAll.map((exercise: Exercise) => {
       if (exercise.translation) {
         try {
-          const translation = JSON.parse(exercise.translation); // Assuming translation is a string, otherwise skip this line
-          if (translation.en) {
+          // Handle both string and already-parsed JSON
+          const translation = typeof exercise.translation === 'string'
+            ? JSON.parse(exercise.translation)
+            : exercise.translation;
+          if (translation && typeof translation === 'object' && 'en' in translation) {
+            const enTranslation = (translation as { en: { title?: string; description?: string; category?: string; tags?: string } }).en;
             return {
               ...exercise,
-              title: translation.en.title,
-              description: translation.en.description,
-              category: translation.en.category,
-              tags: translation.en.tags,
+              title: enTranslation.title ?? exercise.title,
+              description: enTranslation.description ?? exercise.description,
+              category: enTranslation.category ?? exercise.category,
+              tags: enTranslation.tags ?? exercise.tags,
             };
           }
         } catch (err) {
@@ -74,61 +108,24 @@ export const loader: LoaderFunction = async ({ request }) => {
         }
       }
       return exercise; // If no English translation, return original
-    });  
+    });
   }
 
-  // if (Object.values(filters).filter(Boolean).length > 0) {
-  //   const where = {
-  //     ...(filters.searchItem
-  //       ? {
-  //           OR: [
-  //             {
-  //               description: {
-  //                 contains: filters.searchItem,
-  //                 mode: "insensitive",
-  //               },
-  //             },
-  //           ],
-  //         }
-  //       : {}),
-  //     ...(filters.tags || filters.category
-  //       ? {
-  //           AND: [
-  //             {
-  //               tags: {
-  //                 contains: filters.tags || "",
-  //                 mode: "insensitive",
-  //               },
-  //             },
-  //             {
-  //               category: {
-  //                 contains: filters.category || "",
-  //                 mode: "insensitive",
-  //               },
-  //             },
-  //           ],
-  //         }
-  //       : {}),
-  //   };
-  //   exersisesAll = await getExersiceBySearch(where);
-  // }
-
-  return json(exersisesAll) ?? [];
+  return data(exersisesAll) ?? [];
 };
 
 const Exersices = () => {
-  const data = useLoaderData<typeof loader>();
+  const data = useLoaderData<Exercise[]>();
   const { i18n } = useTranslation();
-  const [_, setSearchParams] = useSearchParams();
+  const [, setSearchParams] = useSearchParams();
 
-  const [filters, setFilters] = useState<any>({
+  const [filters, setFilters] = useState<ExerciseFilters>({
     category: Object.values(Category.byId)[0].name,
     title: Object.values(Type.byId)[0].name,
     input: "",
     tags: Object.values(TAGS.byId)[0].name,
     lang: i18n.language,
   });
-  console.log('i18n.language', i18n.language)
 
   const clearFilters = () => {
     setSearchParams({});
@@ -136,31 +133,31 @@ const Exersices = () => {
       category: Object.values(Category.byId)[0].name,
       title: Object.values(Type.byId)[0].name,
       input: "",
-      tags: Object.values(TAGS.byId)[0].name, 
+      tags: Object.values(TAGS.byId)[0].name,
       lang: i18n.language,
     });
   };
+
   const handleCategorySearch = useCallback(() => {
     const entries = Object.entries(filters)
-      .filter(([_, value]) => value)
+      .filter(([, value]) => value)
       .filter((item) => item !== undefined);
-    const filteredSearchParams = Object.fromEntries(entries) as any;
+    const filteredSearchParams = Object.fromEntries(entries) as Record<string, string>;
     setSearchParams(filteredSearchParams);
-  }, [filters]);
+  }, [filters, setSearchParams]);
 
   const setFiltersHandler = useCallback(
-    (evt: { title: string; name: string } | any) => {
-      return setFilters((filter: any) => ({
+    (evt: FilterEvent) => {
+      return setFilters((filter: ExerciseFilters) => ({
         ...filter,
-        [evt?.title]: evt?.name,
-        ["lang"]: i18n.language,
+        [evt.title]: evt.name,
+        lang: i18n.language,
       }));
     },
-    [filters,i18n.language]
+    [i18n.language]
   );
 
-  console.log("data", data);
-  if(!data || data?.length===0) return <LoadingPage />
+  if (!data || data?.length === 0) return <LoadingPage />
   return (
     <div className="container px-6 text-center pb-52 my-20">
       <SearchInput
@@ -170,7 +167,7 @@ const Exersices = () => {
         filters={filters}
       />
       <div className="container flex flex-wrap gap-3 mb-5 mt-10">
-        {data?.map((item: any) => {
+        {data?.map((item: Exercise) => {
           return <Card key={item.id} item={item} />;
         })}
       </div>

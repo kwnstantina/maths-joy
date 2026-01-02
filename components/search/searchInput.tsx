@@ -1,7 +1,7 @@
 import List from "components/lists/lists";
 import { TAGS, Category, Type, Category_En, Type_En, TAGS_En } from "../../services/models/models";
 import { useTranslation } from "react-i18next";
-import { SearchIcon} from "@heroicons/react/outline";
+import { MagnifyingGlassIcon} from "@heroicons/react/24/outline";
 
 type Props = {
   setFiltersHandler: any;
@@ -45,7 +45,7 @@ const SearchInput = (props: Props) => {
           className={buttonStyles}
         >
           {/* {t("search")} */}
-          <SearchIcon className="w-5 inline-block " />
+          <MagnifyingGlassIcon className="w-5 inline-block " />
         </button>
       </div>
 

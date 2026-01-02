@@ -1,6 +1,6 @@
 import "react-cmdk/dist/cmdk.css";
 import CommandPalette, { filterItems, getItemIndex } from "react-cmdk";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "@remix-run/react";
 
 import { useState } from "react";
 type Props={
@@ -74,9 +74,6 @@ const Kbar = (props:Props) => {
         )}
       </CommandPalette.Page>
 
-      <CommandPalette.Page id="projects">
-        {/* Projects page */}
-      </CommandPalette.Page>
     </CommandPalette>
   );
 };

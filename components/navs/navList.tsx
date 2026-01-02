@@ -1,16 +1,14 @@
 import { useRef, useState } from "react";
-import { MenuIcon, XIcon } from "@heroicons/react/outline";
+import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
 import { NavLink } from "@remix-run/react";
 import UserSettings from "./userSettings";
 import logo from "../../app/assets/logoD.png";
 import useDetectOutside from "hooks/useDetectOutside";
 import {
-
   UserIcon,
-  LoginIcon,
-  LogoutIcon,
-
-} from "@heroicons/react/solid";
+  ArrowRightOnRectangleIcon,
+  ArrowLeftOnRectangleIcon,
+} from "@heroicons/react/24/solid";
 
 import LanguageIndicator from "components/languageIndicator/languageIndicator";
 import { useTranslation } from "react-i18next";
@@ -81,7 +79,7 @@ const Navbar = () => {
         </div>
     
         <div className="md:hidden mr-4" onClick={handleClick}>
-          {!nav ? <MenuIcon className="w-8" /> : <XIcon className="w-8" />}
+          {!nav ? <Bars3Icon className="w-8" /> : <XMarkIcon className="w-8" />}
   
         </div>
         <div >
@@ -152,7 +150,7 @@ const Navbar = () => {
             onClick={handleClick}
           >
             <span className="flex align-center justify-center">
-            <LoginIcon className="mr-2 h-5 w-5" aria-hidden="true" /> Login in 
+            <ArrowRightOnRectangleIcon className="mr-2 h-5 w-5" aria-hidden="true" /> Login in
             </span>
           </NavLink>
         </li>
@@ -164,7 +162,7 @@ const Navbar = () => {
             to={"logout"}
           >
             <span className="flex align-center justify-center">
-            <LogoutIcon className="mr-2 h-5 w-5" aria-hidden="true" /> Logout
+            <ArrowLeftOnRectangleIcon className="mr-2 h-5 w-5" aria-hidden="true" /> Logout
             </span>
           </NavLink>
         </li>

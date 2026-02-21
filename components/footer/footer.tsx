@@ -51,11 +51,17 @@ const Footer = () => {
             <Link to="/tutorial" className="hover:text-orange-300 transition-colors">
               {t('footer.tutorials')}
             </Link>
-            <Link to="/qa" className="hover:text-orange-300 transition-colors">
-              {t('footer.chat')}
+            <Link to="/books" className="hover:text-orange-300 transition-colors">
+              {t('footer.books')}
             </Link>
             <Link to="/testYourself" className="hover:text-orange-300 transition-colors">
               {t('footer.training')}
+            </Link>
+            <Link to="/qa" className="hover:text-orange-300 transition-colors">
+              {t('footer.chat')}
+            </Link>
+            <Link to="/chat" className="hover:text-orange-300 transition-colors">
+              {t('footer.chatLink')}
             </Link>
           </nav>
         </div>

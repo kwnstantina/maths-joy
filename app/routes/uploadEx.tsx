@@ -20,7 +20,12 @@ import { isAdmin } from "~/utils/roles";
 import { Tab } from "@headlessui/react";
 import UploadFile from "components/uploadExTabs/uploadFile";
 import UploadExercise from "components/uploadExTabs/uploadExercise";
+import UploadTutorial from "components/uploadExTabs/uploadTutorial";
+import UploadBook from "components/uploadExTabs/uploadBook";
 import { createTrainingExercise } from "~/utils/training.prisma";
+import { createVideo } from "~/utils/video.prisma";
+import { createBook } from "~/utils/books.prisma";
+import { useTranslation } from "react-i18next";
 
 // Type definitions
 interface UploadFormData {
@@ -33,6 +38,15 @@ interface UploadFormData {
   searchableTitle: string;
   description: string;
   exerciseImgUrl: string;
+  // Tutorial fields
+  url: string;
+  creatorName: string;
+  // Book fields
+  price: string;
+  currency: string;
+  pdfFile: string;
+  thumbnailFile: string;
+  isActive: boolean;
 }
 
 interface FilterEvent {
@@ -40,7 +54,7 @@ interface FilterEvent {
   name: string;
 }
 
-type ActionType = "uploadExercise" | "uploadTraning";
+type ActionType = "uploadExercise" | "uploadTraning" | "uploadTutorial" | "uploadBook";
 
 export const loader: LoaderFunction = async ({ request }) => {
   const user = await getUser(request);
@@ -124,12 +138,85 @@ export const action: ActionFunction = async ({ request }) => {
       searchableTitle,
     });
   }
+
+  if (_action === "uploadTutorial") {
+    const url = form.get("url") as string;
+    const creatorName = form.get("creatorName") as string;
+
+    if (!title || !url || !creatorName) {
+      return data(
+        {
+          errors: { general: "All fields are required" },
+        },
+        { status: 400 }
+      );
+    }
+
+    try {
+      await createVideo({
+        title,
+        url,
+        description: description || "",
+        creatorName,
+        tags: tags ? [tags] : [],
+      });
+      return data({ success: true });
+    } catch (error) {
+      return data(
+        {
+          errors: { general: "Failed to create tutorial" },
+        },
+        { status: 500 }
+      );
+    }
+  }
+
+  if (_action === "uploadBook") {
+    const price = form.get("price") as string;
+    const currency = form.get("currency") as string;
+    const pdfFile = form.get("pdfFile") as string;
+    const thumbnailFile = form.get("thumbnailFile") as string;
+    const isActive = form.get("isActive") === "true";
+
+    if (!title || !description || !price || !pdfFile || !category) {
+      return data(
+        {
+          errors: { general: "All required fields must be filled" },
+        },
+        { status: 400 }
+      );
+    }
+
+    try {
+      await createBook({
+        title,
+        description,
+        price: parseFloat(price),
+        currency: currency || "EUR",
+        category,
+        tags: tags ? [tags] : [],
+        pdfBase64: pdfFile,
+        thumbnailBase64: thumbnailFile || undefined,
+        isActive,
+      });
+      return data({ success: true });
+    } catch (error) {
+      console.error("Error creating book:", error);
+      return data(
+        {
+          errors: { general: "Failed to create book" },
+        },
+        { status: 500 }
+      );
+    }
+  }
 };
 
 export default function UploadExcercise(): React.ReactElement {
   const actionData = useActionData();
   const navigation = useNavigation();
   const submit = useSubmit();
+  const { t } = useTranslation();
   const [action, setAction] = useState<ActionType>("uploadExercise");
   const [uploadData, setUploadData] = useState<UploadFormData>({
     title: "",
@@ -140,13 +227,21 @@ export default function UploadExcercise(): React.ReactElement {
     solution: "",
     searchableTitle: "",
     description: "",
-    exerciseImgUrl: ""
+    exerciseImgUrl: "",
+    url: "",
+    creatorName: "",
+    price: "",
+    currency: "EUR",
+    pdfFile: "",
+    thumbnailFile: "",
+    isActive: true,
   });
 
   const [categories] = useState([
-    "Ανέβασμα Αρχείου",
-    "Ανέβασμα Ασκησης",
-    "Προφίλ",
+    t("admin.tabs.exercises"),
+    t("admin.tabs.training"),
+    t("admin.tabs.tutorials"),
+    t("admin.tabs.books"),
   ]);
   const [tabIndex, setTabIndex] = useState(0);
 
@@ -159,11 +254,26 @@ export default function UploadExcercise(): React.ReactElement {
       exercise: "",
       solution: "",
       searchableTitle: "",
-      description:"",
-      exerciseImgUrl:""
+      description: "",
+      exerciseImgUrl: "",
+      url: "",
+      creatorName: "",
+      price: "",
+      currency: "EUR",
+      pdfFile: "",
+      thumbnailFile: "",
+      isActive: true,
     });
 
-    setAction(tabIndex === 0 ? "uploadExercise" : "uploadTraning");
+    if (tabIndex === 0) {
+      setAction("uploadExercise");
+    } else if (tabIndex === 1) {
+      setAction("uploadTraning");
+    } else if (tabIndex === 2) {
+      setAction("uploadTutorial");
+    } else if (tabIndex === 3) {
+      setAction("uploadBook");
+    }
   }, [tabIndex]);
 
   const onChangeHandler = useCallback(
@@ -232,6 +342,19 @@ export default function UploadExcercise(): React.ReactElement {
       formData.set("description", uploadData.description);
       formData.set("exerciseImgUrl", uploadData.exerciseImgUrl);
     }
+    if (action === "uploadTutorial") {
+      formData.set("url", uploadData.url);
+      formData.set("creatorName", uploadData.creatorName);
+      formData.set("description", uploadData.description);
+    }
+    if (action === "uploadBook") {
+      formData.set("price", uploadData.price);
+      formData.set("currency", uploadData.currency);
+      formData.set("pdfFile", uploadData.pdfFile);
+      formData.set("thumbnailFile", uploadData.thumbnailFile);
+      formData.set("isActive", uploadData.isActive.toString());
+      formData.set("description", uploadData.description);
+    }
     submit(formData, {
       method: "post",
       action: $form.getAttribute("action") ?? $form.action,
@@ -285,7 +408,23 @@ export default function UploadExcercise(): React.ReactElement {
             />
           )}
           {tabIndex === 2 && (
-            <div className="h-screen mx-auto w-full max-w-md"></div>
+            <UploadTutorial
+              handleSubmit={handleSubmit}
+              onChangeHandler={onChangeHandler}
+              uploadData={uploadData}
+              actionData={actionData}
+              buttonState={buttonState}
+            />
+          )}
+          {tabIndex === 3 && (
+            <UploadBook
+              handleSubmit={handleSubmit}
+              onChangeHandler={onChangeHandler}
+              uploadData={uploadData}
+              actionData={actionData}
+              buttonState={buttonState}
+              fileUploadHandler={fileUploadHandler}
+            />
           )}
         </Tab.Panels>
       </Tab.Group>

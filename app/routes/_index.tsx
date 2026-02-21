@@ -1,32 +1,29 @@
 import chat from "../assets/chat.png";
-import { useRef, useEffect, useState, useTransition } from "react";
+import { useState } from "react";
 import AboutUsHoc from "components/aboutUs/aboutUs";
 import Intro from "components/intro/intro";
-import Box from "components/box/box";
 import NewsLetter from "components/newsletter/newsletter";
 import type { ActionFunction } from "@remix-run/node";
 import { data } from "@remix-run/node";
-import { useFetcher } from "@remix-run/react";
+import { useFetcher, Link } from "@remix-run/react";
 import { validateEmail } from "~/utils/validators.server";
 import { useTranslation } from "react-i18next";
 
 export const action: ActionFunction = async ({ request }) => {
   const form = await request.formData();
- const email = form.get("email") as string;
+  const email = form.get("email") as string;
   if (!email || !validateEmail(email)) {
-    return data(
-      {
-        error: "Παρακαλώ εισάγετε ένα έγκυρο email"
-      },
-    );
+    return data({
+      error: "Παρακαλώ εισάγετε ένα έγκυρο email"
+    });
   }
-  const convertApiKit =  process.env.CONVERTKIT_API_KEY;
-  const converFormId =  process.env.CONVERT_API_TEMPLATE_ID;
-  const res= await fetch(`https://api.convertkit.com/v3/forms/${converFormId}/subscribe`, {
+  const convertApiKit = process.env.CONVERTKIT_API_KEY;
+  const converFormId = process.env.CONVERT_API_TEMPLATE_ID;
+  const res = await fetch(`https://api.convertkit.com/v3/forms/${converFormId}/subscribe`, {
     method: 'POST',
     body: JSON.stringify({
       api_key: convertApiKit,
-      email:email,
+      email: email,
     }),
     headers: {
       'Content-Type': 'application/json; charset=utf-8',
@@ -36,205 +33,187 @@ export const action: ActionFunction = async ({ request }) => {
   return await res.json();
 };
 
+// Feature Section Component
+interface FeatureSectionProps {
+  titleKey: string;
+  descriptionKey: string;
+  linkKey: string;
+  linkTo: string;
+  accentColor: string;
+  reversed?: boolean;
+  imageSrc?: string;
+}
+
+function FeatureSection({
+  titleKey,
+  descriptionKey,
+  linkKey,
+  linkTo,
+  accentColor,
+  reversed = false,
+  imageSrc
+}: FeatureSectionProps): JSX.Element {
+  const { t } = useTranslation();
+
+  const bgColors: Record<string, string> = {
+    orange: "bg-orange-500",
+    pink: "bg-pink-500",
+    blue: "bg-blue-500",
+    teal: "bg-teal-500",
+    purple: "bg-purple-500",
+    green: "bg-green-500",
+  };
+
+  const hoverColors: Record<string, string> = {
+    orange: "hover:text-orange-600",
+    pink: "hover:text-pink-600",
+    blue: "hover:text-blue-600",
+    teal: "hover:text-teal-600",
+    purple: "hover:text-purple-600",
+    green: "hover:text-green-600",
+  };
+
+  const bgColor = bgColors[accentColor] || "bg-orange-500";
+  const hoverColor = hoverColors[accentColor] || "hover:text-orange-600";
+  const flexDirection = reversed ? "md:flex-row-reverse" : "md:flex-row";
+
+  return (
+    <section className="py-16 md:py-20">
+      <div className={`max-w-6xl mx-auto px-6 flex flex-col ${flexDirection} items-center gap-8 md:gap-12`}>
+        {/* Content Side */}
+        <div className="flex-1 space-y-5">
+          <div className={`w-12 h-1 ${bgColor}`} />
+          <h2 className="text-2xl md:text-3xl font-bold text-gray-900">
+            {t(titleKey)}
+          </h2>
+          <p className="text-base md:text-lg text-gray-600 leading-relaxed">
+            {t(descriptionKey)}
+          </p>
+          <Link
+            to={linkTo}
+            className={`inline-flex items-center text-gray-900 font-medium ${hoverColor} transition-colors`}
+          >
+            {t(linkKey)}
+            <svg className="w-5 h-5 ml-2" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M12.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd" />
+            </svg>
+          </Link>
+        </div>
+
+        {/* Image Side */}
+        {imageSrc ? (
+          <div className="flex-1 flex justify-center">
+            <img
+              src={imageSrc}
+              alt=""
+              className="w-full max-w-sm rounded-lg"
+            />
+          </div>
+        ) : (
+          <div className="flex-1 hidden md:block" />
+        )}
+      </div>
+    </section>
+  );
+}
+
 export default function Index() {
   const [newsletterEmail, setNewsletterEmail] = useState("");
   const fetcher = useFetcher();
-  const {t} = useTranslation();
 
-
-  const getFadeLeftStyles = (isfadeLeftInViewPort: any) => ({
-    transition: "all 1s ease-in",
-    opacity: isfadeLeftInViewPort ? "1" : "0",
-    transform: isfadeLeftInViewPort ? "" : "translateX(-100%)",
-  });
-
-  const getFadeRightStyles = (isfadeRightInViewPort: any) => ({
-    transition: "all 1s ease-in",
-    opacity: isfadeRightInViewPort ? "1" : "0",
-  });
-  const [animatedView, setAnimatedView] = useState({
-    section1: false,
-    section2: false,
-    section3: false,
-  });
-  const ourRef = useRef(null),
-    anotherRef = useRef(null),
-    refThree = useRef(null);
-
-  useEffect(() => {
-    const topPos = (element: any) => element?.getBoundingClientRect()?.top;
-    const div1Pos = topPos(ourRef.current),
-      div2Pos = topPos(anotherRef.current),
-      div3Pos = topPos(refThree.current);
-
-    const onScroll = () => {
-      const scrollPos = window.scrollY + window.innerHeight;
-      if (div1Pos < scrollPos) {
-        setAnimatedView((state) => ({ ...state, section1: true }));
-      } else if (div2Pos < scrollPos) {
-        setAnimatedView((state) => ({ ...state, section2: true }));
-      } else if (div3Pos < scrollPos) {
-        setAnimatedView((state) => ({ ...state, section3: true }));
-      }
-    };
-
-    window.addEventListener("scroll", onScroll);
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
-
-  const subscribe = (email:string) => {
+  const subscribe = (email: string) => {
     setNewsletterEmail(email);
   };
+
   const handleSubmit = (
     event: React.FormEvent<HTMLFormElement | any> | any
   ) => {
     event.preventDefault();
-    fetcher.submit({ email:newsletterEmail}, { method: "post" });
+    fetcher.submit({ email: newsletterEmail }, { method: "post" });
   };
-
 
   return (
     <>
+      {/* Hero Section */}
       <section className="px-6 text-center pb-8 flex justify-center align-center">
         <Intro />
       </section>
-      <section className="my-20 flex items-start flex-col  bg-gray-50  mx-8">
-        <div className="w-94 pl-10 pt-10">
-        </div>
-        <div
-          className="px-6 pb-32 pt-24 flex items-start xs:flex-col sm:flex-col md:flex-col lg:flex-row xl:flex-row 2xl:flex-row"
-          ref={refThree}
-           style={getFadeLeftStyles(animatedView.section3)}
-        >
-          <div className="h-8 relative px-2">
-            <div className="absolute left-0 top-0 h-full w-1 bg-gradient-to-b from-orange-500 to-orange-800" />
-          </div>
-          <Box
-              title={t("mathsExersice")}
-              content={t("mathsExerciseContent")}
-            >
-              <a
-                href="/exercises"
-                className="mb-6 inline-flex items-center font-medium  hover:underline text-gray-800"
-              >
-               {t("mathsLink")}
-                <svg
-                  aria-hidden="true"
-                  className="w-5 h-5 ml-1"
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M12.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-2.293-2.293a1 1 0 010-1.414z"
-                    clipRule="evenodd"
-                  ></path>
-                </svg>
-              </a>
-          </Box>
-            <div className="h-8 relative px-2">
-            <div className="absolute left-0 top-0 h-full w-1 bg-gradient-to-b from-teal-500 to-teal-700" />
-          </div>
-          <Box
-             title={t("mathsTopic")}
-             content={t("mathsTopicContent")}
-            >
-              <a
-                href="/testYourself"
-                className="mb-6 inline-flex items-center font-medium  hover:underline text-gray-800"
-              >
-                {t("mathsTopicLink")}
-                <svg
-                  aria-hidden="true"
-                  className="w-5 h-5 ml-1"
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M12.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-2.293-2.293a1 1 0 010-1.414z"
-                    clipRule="evenodd"
-                  ></path>
-                </svg>
-              </a>
-            </Box>
-            <div className="h-8 relative px-2">
-            <div className="absolute left-0 top-0 h-full w-1 bg-gradient-to-b from-pink-500 to-pink-800" />
-          </div>
-          <Box
-              title={t("mathsTraining")}    
-              content={t("mathsTrainingContent")}   
-            >
-              <a
-                href="/tutorial"
-                className="mb-6 inline-flex items-center font-medium  hover:underline text-gray-800"
-              > 
-               {t("mathsTrainingLink")}
-                <svg
-                  aria-hidden="true"
-                  className="w-5 h-5 ml-1"
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M12.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-2.293-2.293a1 1 0 010-1.414z"
-                    clipRule="evenodd"
-                  ></path>
-                </svg>
-              </a>
-            </Box>
-          </div>
-      </section>
-      <section className="w-10/12 mx-20 px-6  rounded-t-md">
-        <div className="absolute z-[-1]">
-          <div className="relative  top-30 right-0 bg-gradient-to-br from-orange-600 to-white rounded-full h-96 w-96" />
-        </div>
-        <div
-          ref={anotherRef}
-          style={getFadeRightStyles(animatedView.section2)}
-          className="flex  justify-start items-center flex-wrap"
-        >
-          <div>
-            <h1 className="text-4xl text-center mt-10 font-black">
-              Online chat
-            </h1>
-            <p className="text-xl font-black text-center">
-             {t("onlineChat")}
-            </p>
-          </div>
-          <div className="relative top-[9rem] left-[12rem] z-50">
-            <a
-              href="/chat"
-              className="inline-flex mt-5 h-3 items-center justify-center p-5 bg-orange-200 text-base font-medium text-black-500 rounded-lg hover:text-gray-900 hover:bg-orange-100"
-            >
-              <span className="w-full">Chat</span>
-              <svg
-                aria-hidden="true"
-                className="w-6 h-6 ml-3"
-                fill="currentColor"
-                viewBox="0 0 20 20"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M12.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-2.293-2.293a1 1 0 010-1.414z"
-                  clipRule="evenodd"
-                ></path>
-              </svg>
-            </a>
-          </div>
-          <img src={chat}className="w-72 animate-[wiggle_3s_ease-in-out_infinite]"/>
-        </div>
-      </section>
+
+      {/* Feature Sections - Alternating Layout */}
+      <div className="bg-gray-50">
+        <FeatureSection
+          titleKey="features.exercises.title"
+          descriptionKey="features.exercises.description"
+          linkKey="features.exercises.link"
+          linkTo="/exercises"
+          accentColor="orange"
+          reversed={false}
+        />
+      </div>
+
+      <FeatureSection
+        titleKey="features.tutorials.title"
+        descriptionKey="features.tutorials.description"
+        linkKey="features.tutorials.link"
+        linkTo="/tutorial"
+        accentColor="pink"
+        reversed={true}
+      />
+
+      <div className="bg-gray-50">
+        <FeatureSection
+          titleKey="features.books.title"
+          descriptionKey="features.books.description"
+          linkKey="features.books.link"
+          linkTo="/books"
+          accentColor="blue"
+          reversed={false}
+        />
+      </div>
+
+      <FeatureSection
+        titleKey="features.training.title"
+        descriptionKey="features.training.description"
+        linkKey="features.training.link"
+        linkTo="/testYourself"
+        accentColor="teal"
+        reversed={true}
+      />
+
+      <div className="bg-gray-50">
+        <FeatureSection
+          titleKey="features.qa.title"
+          descriptionKey="features.qa.description"
+          linkKey="features.qa.link"
+          linkTo="/qa"
+          accentColor="purple"
+          reversed={false}
+        />
+      </div>
+
+      <FeatureSection
+        titleKey="features.chat.title"
+        descriptionKey="features.chat.description"
+        linkKey="features.chat.link"
+        linkTo="/chat"
+        accentColor="green"
+        reversed={true}
+        imageSrc={chat}
+      />
+
+      {/* About Us Section */}
       <section>
         <AboutUsHoc />
       </section>
+
+      {/* Newsletter Section */}
       <section className="bg-white my-20">
-        <NewsLetter subscribe={subscribe} newsletterEmail={newsletterEmail} handleSubmit={handleSubmit} fetcher={fetcher}/>
+        <NewsLetter
+          subscribe={subscribe}
+          newsletterEmail={newsletterEmail}
+          handleSubmit={handleSubmit}
+          fetcher={fetcher}
+        />
       </section>
     </>
   );

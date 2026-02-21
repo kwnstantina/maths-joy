@@ -71,11 +71,11 @@ const Navbar = ({ user }: NavbarProps) => {
             </li>
             <li>
               <NavLink
-                to="chat"
+                to="books"
                 className="hover:bg-orange-600 text-black block px-3 py-2 rounded-md text-base font-medium"
                 style={({ isActive }) => (isActive ? activeStyle : undefined)}
               >
-                Chat
+                {t("nav.books")}
               </NavLink>
             </li>
             <li>
@@ -85,6 +85,15 @@ const Navbar = ({ user }: NavbarProps) => {
                 style={({ isActive }) => (isActive ? activeStyle : undefined)}
               >
                 {t("training")}
+              </NavLink>
+            </li>
+            <li>
+              <NavLink
+                to="qa"
+                className="hover:bg-orange-600 text-black block px-3 py-2 rounded-md text-base font-medium"
+                style={({ isActive }) => (isActive ? activeStyle : undefined)}
+              >
+                {t("nav.qa")}
               </NavLink>
             </li>
             <li>
@@ -126,12 +135,12 @@ const Navbar = ({ user }: NavbarProps) => {
         </li>
         <li className="border-b-2 border-orange-300 w-full">
           <NavLink
-            to="chat"
-            className="hover:bg-orange-300 text-white block px-3 py-2 rounded-md text-base font-medium"
+            to="books"
+            className="hover:bg-orange-400 text-white block px-3 py-2 rounded-md text-base font-medium"
             style={({ isActive }) => (isActive ? activeStyle : undefined)}
             onClick={handleClick}
           >
-            Chat
+            {t("nav.books")}
           </NavLink>
         </li>
         <li className="border-b-2 border-orange-300 w-full">
@@ -142,6 +151,26 @@ const Navbar = ({ user }: NavbarProps) => {
             onClick={handleClick}
           >
             {t("training")}
+          </NavLink>
+        </li>
+        <li className="border-b-2 border-orange-300 w-full">
+          <NavLink
+            to="qa"
+            className="hover:bg-orange-400 text-white block px-3 py-2 rounded-md text-base font-medium"
+            style={({ isActive }) => (isActive ? activeStyle : undefined)}
+            onClick={handleClick}
+          >
+            {t("nav.qa")}
+          </NavLink>
+        </li>
+        <li className="border-b-2 border-orange-300 w-full">
+          <NavLink
+            to="chat"
+            className="hover:bg-orange-400 text-white block px-3 py-2 rounded-md text-base font-medium"
+            style={({ isActive }) => (isActive ? activeStyle : undefined)}
+            onClick={handleClick}
+          >
+            {t("nav.chat")}
           </NavLink>
         </li>
 

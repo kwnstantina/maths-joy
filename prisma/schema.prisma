@@ -47,6 +47,14 @@ model Book {
   category           String
   tags               String[]
   translation        Json?
+  authorName         String?
+  pageCount          Int?
+  isbn               String?
+  edition            String?
+  discountPrice      Float?
+  deletedAt          DateTime? @db.Date
+  archivedPdfIds     String[]
+  thumbnailPublicId  String?
   createdAt          DateTime @db.Date
   updatedAt          DateTime @db.Date
 }

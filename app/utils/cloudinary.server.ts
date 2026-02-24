@@ -1,3 +1,4 @@
+import { writeAsyncIterableToWritable } from "@remix-run/node";
 import { v2 as cloudinary } from 'cloudinary';
 
 // Configure Cloudinary
@@ -225,6 +226,51 @@ export async function uploadImageWithTransform(
     console.error('Cloudinary image upload error:', error);
     throw new Error('Failed to upload image to Cloudinary');
   }
+}
+
+/**
+ * Upload a file to Cloudinary using streaming (for large files like 100MB PDFs)
+ * Uses upload_stream and writeAsyncIterableToWritable to avoid loading entire file into memory
+ * @param data - AsyncIterable of file data chunks
+ * @param options - Upload options (folder, resource_type, tags, public_id)
+ * @returns CloudinaryUploadResult
+ */
+export async function uploadStreamToCloudinary(
+  data: AsyncIterable<Uint8Array>,
+  options: {
+    folder: string;
+    resource_type: "raw" | "image";
+    tags?: string[];
+    public_id?: string;
+  }
+): Promise<CloudinaryUploadResult> {
+  return new Promise((resolve, reject) => {
+    const uploadStream = cloudinary.uploader.upload_stream(
+      {
+        folder: options.folder,
+        resource_type: options.resource_type,
+        tags: options.tags,
+        public_id: options.public_id,
+        access_mode: "public",
+      },
+      (error, result) => {
+        if (error) {
+          console.error("Cloudinary stream upload error:", error);
+          reject(new Error(`Cloudinary upload failed: ${error.message}`));
+        } else if (result) {
+          resolve({
+            public_id: result.public_id,
+            secure_url: result.secure_url,
+            bytes: result.bytes,
+            format: result.format,
+            resource_type: result.resource_type,
+            created_at: result.created_at,
+          });
+        }
+      }
+    );
+    writeAsyncIterableToWritable(data, uploadStream).catch(reject);
+  });
 }
 
 // Export cloudinary instance for advanced usage

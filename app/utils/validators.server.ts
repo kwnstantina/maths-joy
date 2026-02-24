@@ -86,3 +86,86 @@ export const validateRedirectUrl = (url: string | null): string => {
   }
   return url;
 };
+
+// Book-specific validation constants
+const BOOK_PDF_MAX_SIZE_MB = 100;
+const BOOK_THUMBNAIL_MAX_SIZE_MB = 10;
+
+/**
+ * Validates a book PDF file
+ * @param file - File object to validate
+ * @returns Error key string if invalid, undefined if valid
+ */
+export const validateBookPdf = (file: File): string | undefined => {
+  if (file.type !== 'application/pdf') {
+    return 'errors.pdfOnly';
+  }
+
+  const maxSize = BOOK_PDF_MAX_SIZE_MB * 1024 * 1024;
+  if (file.size > maxSize) {
+    return 'errors.fileTooLarge';
+  }
+};
+
+/**
+ * Validates a book thumbnail image file
+ * @param file - File object to validate
+ * @returns Error key string if invalid, undefined if valid
+ */
+export const validateBookThumbnail = (file: File): string | undefined => {
+  if (file.type !== 'image/jpeg' && file.type !== 'image/png') {
+    return 'errors.invalidFileType';
+  }
+
+  const maxSize = BOOK_THUMBNAIL_MAX_SIZE_MB * 1024 * 1024;
+  if (file.size > maxSize) {
+    return 'errors.fileTooLarge';
+  }
+};
+
+/**
+ * Validates a book price string
+ * @param price - Price string to validate
+ * @returns Error key string if invalid, undefined if valid
+ */
+export const validateBookPrice = (price: string): string | undefined => {
+  const num = parseFloat(price);
+  if (isNaN(num) || num <= 0) {
+    return 'errors.invalidPrice';
+  }
+
+  // Max 2 decimal places
+  const parts = price.split('.');
+  if (parts[1] && parts[1].length > 2) {
+    return 'errors.invalidPrice';
+  }
+};
+
+/**
+ * Validates all required book fields are non-empty
+ * @param fields - Object with title, description, price, category
+ * @returns Object of field-name-to-error-key pairs if invalid, null if valid
+ */
+export const validateBookFields = (fields: {
+  title: string;
+  description: string;
+  price: string;
+  category: string;
+}): Record<string, string> | null => {
+  const errors: Record<string, string> = {};
+
+  if (!fields.title?.trim()) {
+    errors.title = 'errors.requiredField';
+  }
+  if (!fields.description?.trim()) {
+    errors.description = 'errors.requiredField';
+  }
+  if (!fields.price?.trim()) {
+    errors.price = 'errors.requiredField';
+  }
+  if (!fields.category?.trim()) {
+    errors.category = 'errors.requiredField';
+  }
+
+  return Object.keys(errors).length > 0 ? errors : null;
+};

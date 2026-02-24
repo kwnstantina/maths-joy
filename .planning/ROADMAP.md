@@ -34,7 +34,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 **Plans**: 2 plans
 
 Plans:
-- [ ] 01-01-PLAN.md -- Schema extension, streaming Cloudinary upload, book data layer refactor (soft delete, archive)
+- [x] 01-01-PLAN.md -- Schema extension, streaming Cloudinary upload, book data layer refactor (soft delete, archive)
 - [ ] 01-02-PLAN.md -- Admin book management route, upload form, card grid with inline editing, i18n
 
 ### Phase 2: Book Commerce

@@ -178,7 +178,7 @@ const Navbar = ({ user }: NavbarProps) => {
         {userIsAdmin && (
           <li className="border-b-2 border-orange-300 w-full">
             <NavLink
-              to="uploadEx"
+              to="admin"
               className="hover:bg-orange-300 text-white block px-3 py-2 rounded-md text-base font-medium"
               style={({ isActive }) => (isActive ? activeStyle : undefined)}
               onClick={handleClick}

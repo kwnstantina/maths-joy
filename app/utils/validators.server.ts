@@ -169,3 +169,68 @@ export const validateBookFields = (fields: {
 
   return Object.keys(errors).length > 0 ? errors : null;
 };
+
+/**
+ * Validates required exercise fields
+ */
+export const validateExerciseFields = (fields: {
+  title: string;
+  category: string;
+}): Record<string, string> | null => {
+  const errors: Record<string, string> = {};
+
+  if (!fields.title?.trim()) {
+    errors.title = 'errors.requiredField';
+  }
+  if (!fields.category?.trim()) {
+    errors.category = 'errors.requiredField';
+  }
+
+  return Object.keys(errors).length > 0 ? errors : null;
+};
+
+/**
+ * Validates required training fields
+ */
+export const validateTrainingFields = (fields: {
+  title: string;
+  category: string;
+  searchableTitle: string;
+}): Record<string, string> | null => {
+  const errors: Record<string, string> = {};
+
+  if (!fields.title?.trim()) {
+    errors.title = 'errors.requiredField';
+  }
+  if (!fields.category?.trim()) {
+    errors.category = 'errors.requiredField';
+  }
+  if (!fields.searchableTitle?.trim()) {
+    errors.searchableTitle = 'errors.requiredField';
+  }
+
+  return Object.keys(errors).length > 0 ? errors : null;
+};
+
+/**
+ * Validates required video fields
+ */
+export const validateVideoFields = (fields: {
+  title: string;
+  url: string;
+  creatorName: string;
+}): Record<string, string> | null => {
+  const errors: Record<string, string> = {};
+
+  if (!fields.title?.trim()) {
+    errors.title = 'errors.requiredField';
+  }
+  if (!fields.url?.trim()) {
+    errors.url = 'errors.requiredField';
+  }
+  if (!fields.creatorName?.trim()) {
+    errors.creatorName = 'errors.requiredField';
+  }
+
+  return Object.keys(errors).length > 0 ? errors : null;
+};

@@ -166,6 +166,26 @@ export async function getAllBooks(activeOnly = false) {
 }
 
 /**
+ * Get paginated books, excluding soft-deleted by default.
+ */
+export async function getPaginatedBooks(page = 1, limit = 12) {
+  const skip = (page - 1) * limit;
+  const where = { deletedAt: null };
+
+  const [books, total] = await Promise.all([
+    prisma.book.findMany({
+      where,
+      orderBy: { createdAt: "desc" },
+      skip,
+      take: limit,
+    }),
+    prisma.book.count({ where }),
+  ]);
+
+  return { books, total, page, totalPages: Math.ceil(total / limit) };
+}
+
+/**
  * Toggle a book's active status (isActive flag)
  */
 export async function toggleBookActive(id: string) {

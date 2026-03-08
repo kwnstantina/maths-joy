@@ -305,6 +305,7 @@ export default function BookCard({ book, csrfToken }: BookCardProps) {
         <img
           src={book.thumbnailUrl}
           alt={book.title}
+          loading="lazy"
           className="w-full h-48 object-cover"
         />
       ) : (

@@ -1,3 +1,4 @@
+import type { Prisma } from "@prisma/client";
 import { prisma } from "./prisma.server";
 
 interface VideoInput {
@@ -6,7 +7,7 @@ interface VideoInput {
   description: string;
   creatorName: string;
   tags: string[];
-  translation?: Record<string, unknown>;
+  translation?: Prisma.InputJsonValue;
 }
 
 export async function createVideo(data: VideoInput) {
@@ -45,4 +46,22 @@ export async function getAllVideos() {
   return prisma.video.findMany({
     orderBy: { createdAt: "desc" },
   });
+}
+
+/**
+ * Get paginated videos for admin
+ */
+export async function getPaginatedVideos(page = 1, limit = 12) {
+  const skip = (page - 1) * limit;
+
+  const [videos, total] = await Promise.all([
+    prisma.video.findMany({
+      orderBy: { createdAt: "desc" },
+      skip,
+      take: limit,
+    }),
+    prisma.video.count(),
+  ]);
+
+  return { videos, total, page, totalPages: Math.ceil(total / limit) };
 }

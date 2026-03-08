@@ -1,3 +1,4 @@
+import type { Prisma } from "@prisma/client";
 import { prisma } from "./prisma.server";
 import { UploadExersiceForm } from "./types.server";
 import { uploadToCloudinary } from "./cloudinary.server";
@@ -89,6 +90,106 @@ export const getExersiceById = async (id: string | undefined) => {
     where: { id },
   });
   return exersice;
+}
+
+/**
+ * Get paginated exercises with optional filters
+ */
+export async function getPaginatedExercises(page = 1, limit = 12, filters?: { category?: string; tags?: string }) {
+  const skip = (page - 1) * limit;
+  const where: Record<string, unknown> = {};
+  if (filters?.category) where.category = filters.category;
+  if (filters?.tags) where.tags = { contains: filters.tags };
+
+  const [exercises, total] = await Promise.all([
+    prisma.exersice.findMany({
+      where,
+      select: {
+        id: true,
+        title: true,
+        category: true,
+        createdAt: true,
+        tags: true,
+        description: true,
+        exerciseImgUrl: true,
+        translation: true,
+        cloudinaryPublicId: true,
+        cloudinaryUrl: true,
+      },
+      orderBy: { createdAt: "desc" },
+      skip,
+      take: limit,
+    }),
+    prisma.exersice.count({ where }),
+  ]);
+
+  return { exercises, total, page, totalPages: Math.ceil(total / limit) };
+}
+
+interface StreamingExerciseInput {
+  title: string;
+  category: string;
+  tags: string;
+  description?: string;
+  exerciseImgUrl?: string;
+  fileName: string;
+  cloudinaryPublicId?: string;
+  cloudinaryUrl?: string;
+  fileSize?: number;
+  translation?: Prisma.InputJsonValue;
+}
+
+/**
+ * Create an exercise from streaming upload results (decoupled from Cloudinary upload)
+ */
+export async function createExerciseFromStream(data: StreamingExerciseInput) {
+  return prisma.exersice.create({
+    data: {
+      title: data.title,
+      category: data.category,
+      tags: data.tags,
+      description: data.description ?? null,
+      exerciseImgUrl: data.exerciseImgUrl ?? null,
+      fileName: data.fileName,
+      cloudinaryPublicId: data.cloudinaryPublicId ?? null,
+      cloudinaryUrl: data.cloudinaryUrl ?? null,
+      fileSize: data.fileSize ?? null,
+      translation: data.translation ?? undefined,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    },
+  });
+}
+
+/**
+ * Update an existing exercise
+ */
+export async function updateExercise(id: string, data: Partial<StreamingExerciseInput>) {
+  const existing = await prisma.exersice.findUnique({ where: { id } });
+  if (!existing) throw new Error("Exercise not found");
+
+  const updateData: Prisma.ExersiceUpdateInput = { updatedAt: new Date() };
+  if (data.title !== undefined) updateData.title = data.title;
+  if (data.category !== undefined) updateData.category = data.category;
+  if (data.tags !== undefined) updateData.tags = data.tags;
+  if (data.description !== undefined) updateData.description = data.description;
+  if (data.exerciseImgUrl !== undefined) updateData.exerciseImgUrl = data.exerciseImgUrl;
+  if (data.cloudinaryPublicId !== undefined) updateData.cloudinaryPublicId = data.cloudinaryPublicId;
+  if (data.cloudinaryUrl !== undefined) updateData.cloudinaryUrl = data.cloudinaryUrl;
+  if (data.fileSize !== undefined) updateData.fileSize = data.fileSize;
+  if (data.translation !== undefined) updateData.translation = data.translation;
+
+  return prisma.exersice.update({ where: { id }, data: updateData });
+}
+
+/**
+ * Hard delete an exercise
+ */
+export async function deleteExercise(id: string) {
+  const exercise = await prisma.exersice.findUnique({ where: { id } });
+  if (!exercise) throw new Error("Exercise not found");
+  await prisma.exersice.delete({ where: { id } });
+  return exercise;
 }
 
 export const getExersiceBySearch = async(filters:any) =>{

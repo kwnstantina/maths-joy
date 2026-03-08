@@ -1,8 +1,8 @@
 import { prisma } from "~/utils/prisma.server";
 import type { Prisma } from "@prisma/client";
 
-export type AuditAction = "upload" | "download" | "purchase" | "login" | "logout";
-export type AuditResource = "exercise" | "book" | "training" | "user" | "question" | "answer";
+export type AuditAction = "upload" | "download" | "purchase" | "login" | "logout" | "update" | "delete";
+export type AuditResource = "exercise" | "book" | "training" | "video" | "user" | "question" | "answer";
 
 interface AuditEventParams {
   userId: string;

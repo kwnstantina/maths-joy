@@ -24,7 +24,7 @@ import {
 import type { CloudinaryUploadResult } from "~/utils/cloudinary.server";
 import {
   createBook,
-  getAllBooks,
+  getPaginatedBooks,
   updateBook,
   toggleBookActive,
   softDeleteBook,
@@ -34,6 +34,8 @@ import { createTranslation } from "~/utils/i18n.server";
 import { logAuditEvent, getClientInfo } from "~/utils/audit.server";
 import BookUploadForm from "components/admin/BookUploadForm";
 import BookCard from "components/admin/BookCard";
+import AdminPageHeader from "components/admin/AdminPageHeader";
+import Pagination from "components/admin/Pagination";
 
 export const handle = { i18n: ["common"] };
 
@@ -41,9 +43,13 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
   const user = await getUser(request);
   if (!isAdmin(user)) throw redirect("/progress");
 
+  const url = new URL(request.url);
+  const page = Math.max(1, parseInt(url.searchParams.get("page") || "1", 10));
+  const limit = Math.max(1, Math.min(50, parseInt(url.searchParams.get("limit") || "12", 10)));
+
   const { token, headers } = await getCSRFToken(request);
-  const books = await getAllBooks();
-  return data({ books, csrfToken: token, user }, { headers });
+  const { books, total, totalPages } = await getPaginatedBooks(page, limit);
+  return data({ books, total, page, totalPages, csrfToken: token, user }, { headers });
 };
 
 export const action = async ({ request }: ActionFunctionArgs) => {
@@ -377,22 +383,15 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 };
 
 export default function AdminBooks() {
-  const { books, csrfToken } = useLoaderData<typeof loader>();
+  const { books, total, page, totalPages, csrfToken } = useLoaderData<typeof loader>();
   const actionData = useActionData<typeof action>();
   const navigation = useNavigation();
   const { t } = useTranslation();
   const isSubmitting = navigation.state === "submitting";
 
-  // Filter out soft-deleted books for display
-  const visibleBooks = books.filter(
-    (book) => !book.deletedAt
-  );
-
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8">
-      <h1 className="text-2xl font-bold text-gray-800 mb-6">
-        {t("admin.books.pageTitle")}
-      </h1>
+    <div className="max-w-7xl mx-auto">
+      <AdminPageHeader titleKey="admin.books.pageTitle" count={total} />
 
       <BookUploadForm
         csrfToken={csrfToken}
@@ -401,17 +400,13 @@ export default function AdminBooks() {
       />
 
       <div className="mt-8">
-        <h2 className="text-xl font-semibold text-gray-700 mb-4">
-          {t("admin.books.bookCount")} ({visibleBooks.length})
-        </h2>
-
-        {visibleBooks.length === 0 ? (
+        {books.length === 0 ? (
           <p className="text-gray-500 text-center py-8">
             {t("admin.books.noBooks")}
           </p>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {visibleBooks.map((book) => (
+            {books.map((book) => (
               <BookCard
                 key={book.id}
                 book={{
@@ -438,6 +433,8 @@ export default function AdminBooks() {
             ))}
           </div>
         )}
+
+        <Pagination page={page} totalPages={totalPages} total={total} />
       </div>
     </div>
   );

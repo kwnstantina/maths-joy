@@ -12,7 +12,7 @@ This roadmap extends an existing Remix + MongoDB platform (exercises, auth, chat
 
 Decimal phases appear between their surrounding integers in numeric order.
 
-- [ ] **Phase 1: Book Upload** - Admin can upload book PDFs with thumbnails, pricing, and metadata
+- [x] **Phase 1: Book Upload** - Admin can upload book PDFs with thumbnails, pricing, and metadata
 - [ ] **Phase 2: Book Commerce** - Students browse, purchase, and download books via Stripe
 - [ ] **Phase 3: Q&A Core** - Students ask questions, post answers, vote, and accept best answers
 - [ ] **Phase 4: Q&A Discovery** - Students search and filter questions by category, tags, and text
@@ -35,7 +35,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 Plans:
 - [x] 01-01-PLAN.md -- Schema extension, streaming Cloudinary upload, book data layer refactor (soft delete, archive)
-- [ ] 01-02-PLAN.md -- Admin book management route, upload form, card grid with inline editing, i18n
+- [x] 01-02-PLAN.md -- Admin book management route, upload form, card grid with inline editing, i18n
 
 ### Phase 2: Book Commerce
 **Goal**: Students can find, purchase, and download math books through a complete Stripe payment flow
@@ -121,7 +121,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Book Upload | 0/2 | Planning complete | - |
+| 1. Book Upload | 2/2 | Complete | 2026-03-08 |
 | 2. Book Commerce | 0/TBD | Not started | - |
 | 3. Q&A Core | 0/TBD | Not started | - |
 | 4. Q&A Discovery | 0/TBD | Not started | - |

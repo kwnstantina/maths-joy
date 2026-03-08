@@ -1,3 +1,4 @@
+import type { Prisma } from "@prisma/client";
 import type { ActionFunctionArgs, LoaderFunctionArgs } from "@remix-run/node";
 import {
   data,
@@ -11,17 +12,13 @@ import {
   useLoaderData,
   useNavigation,
 } from "@remix-run/react";
-import type { Prisma } from "@prisma/client";
 import { useTranslation } from "react-i18next";
+import AdminPageHeader from "components/admin/AdminPageHeader";
+import BookCard from "components/admin/BookCard";
+import BookUploadForm from "components/admin/BookUploadForm";
+import Pagination from "components/admin/Pagination";
+import { logAuditEvent, getClientInfo } from "~/utils/audit.server";
 import { getUser, requireUserId } from "~/utils/auth.prisma";
-import { isAdmin } from "~/utils/roles";
-import { getCSRFToken, validateCSRFToken } from "~/utils/csrf.server";
-import { applyRateLimit } from "~/utils/ratelimit.server";
-import {
-  uploadStreamToCloudinary,
-  deleteFromCloudinary,
-} from "~/utils/cloudinary.server";
-import type { CloudinaryUploadResult } from "~/utils/cloudinary.server";
 import {
   createBook,
   getPaginatedBooks,
@@ -29,13 +26,16 @@ import {
   toggleBookActive,
   softDeleteBook,
 } from "~/utils/books.prisma";
-import { validateBookFields, validateBookPrice } from "~/utils/validators.server";
+import type { CloudinaryUploadResult } from "~/utils/cloudinary.server";
+import {
+  uploadStreamToCloudinary,
+  deleteFromCloudinary,
+} from "~/utils/cloudinary.server";
+import { getCSRFToken, validateCSRFToken } from "~/utils/csrf.server";
 import { createTranslation } from "~/utils/i18n.server";
-import { logAuditEvent, getClientInfo } from "~/utils/audit.server";
-import BookUploadForm from "components/admin/BookUploadForm";
-import BookCard from "components/admin/BookCard";
-import AdminPageHeader from "components/admin/AdminPageHeader";
-import Pagination from "components/admin/Pagination";
+import { applyRateLimit } from "~/utils/ratelimit.server";
+import { isAdmin } from "~/utils/roles";
+import { validateBookFields, validateBookPrice } from "~/utils/validators.server";
 
 export const handle = { i18n: ["common"] };
 
@@ -124,12 +124,12 @@ export const action = async ({ request }: ActionFunctionArgs) => {
           if (chunks.length === 0 || (chunks.length === 1 && chunks[0].length === 0)) {
             return undefined;
           }
-          async function* replayChunks() {
+          const replayPdfChunks = async function* () {
             for (const c of chunks) {
               yield c;
             }
-          }
-          const result = await uploadStreamToCloudinary(replayChunks(), {
+          };
+          const result = await uploadStreamToCloudinary(replayPdfChunks(), {
             folder: "maths-joy/books",
             resource_type: "raw",
           });
@@ -147,12 +147,12 @@ export const action = async ({ request }: ActionFunctionArgs) => {
           if (chunks.length === 0 || (chunks.length === 1 && chunks[0].length === 0)) {
             return undefined;
           }
-          async function* replayChunks() {
+          const replayThumbChunks = async function* () {
             for (const c of chunks) {
               yield c;
             }
-          }
-          const result = await uploadStreamToCloudinary(replayChunks(), {
+          };
+          const result = await uploadStreamToCloudinary(replayThumbChunks(), {
             folder: "maths-joy/book-thumbnails",
             resource_type: "image",
           });

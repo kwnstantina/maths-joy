@@ -1,8 +1,8 @@
-import { useEffect, useState } from "react";
 import { Form } from "@remix-run/react";
-import { Category, TAGS } from "services/models/models";
-import Alerts from "components/alerts/alerts";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import Alerts from "components/alerts/alerts";
+import { Category, TAGS } from "services/models/models";
 
 interface BookUploadFormProps {
   csrfToken: string;

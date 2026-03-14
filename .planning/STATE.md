@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: unknown
-last_updated: "2026-03-14T13:42:00Z"
+last_updated: "2026-03-14T13:55:40Z"
 progress:
   total_phases: 2
-  completed_phases: 1
+  completed_phases: 2
   total_plans: 5
-  completed_plans: 4
+  completed_plans: 5
 ---
 
 # Project State
@@ -22,29 +22,29 @@ See: .planning/PROJECT.md (updated 2026-02-21)
 
 ## Current Position
 
-Phase: 2 of 7 (Book Commerce)
-Plan: 3 of 3 in current phase
-Status: Plan 02-02 complete, ready for Plan 02-03
-Last activity: 2026-03-14 — Completed 02-02-PLAN.md (checkout success page, payment verification, download)
+Phase: 2 of 7 (Book Commerce) -- COMPLETE
+Plan: 3 of 3 in current phase (all complete)
+Status: Phase 02 complete, ready for Phase 03
+Last activity: 2026-03-14 — Completed 02-03-PLAN.md (webhook idempotency, download enforcement, rate limiting)
 
-Progress: [████░░░░░░] ~27%
+Progress: [█████░░░░░] ~33%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 4
+- Total plans completed: 5
 - Average duration: 7min
-- Total execution time: 27min
+- Total execution time: 33min
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 1. Book Upload | 2 | 20min | 10min |
-| 2. Book Commerce | 2 | 7min | 3.5min |
+| 2. Book Commerce | 3 | 13min | 4.3min |
 
 **Recent Trend:**
-- Last 5 plans: 5min, 15min, 4min, 3min
+- Last 5 plans: 5min, 15min, 4min, 3min, 6min
 - Trend: Improving
 
 *Updated after each plan completion*
@@ -70,6 +70,9 @@ Recent decisions affecting current work:
 - [Phase 02]: Used cloudinaryUrl directly (not signed URLs) since books have public access_mode (02-02)
 - [Phase 02]: Download count incremented on URL generation, not click -- acceptable for post-payment flow (02-02)
 - [Phase 02]: useRevalidator polling for webhook completion every 2s with auto-stop (02-02)
+- [Phase 02]: Download enforcement order: status -> count -> expiry -> book active -> increment (02-03)
+- [Phase 02]: Webhook idempotency: check DB before Stripe API call to avoid unnecessary external requests (02-03)
+- [Phase 02]: IP-based rate limiting on download route since it is unauthenticated (token-based) (02-03)
 
 ### Pending Todos
 
@@ -84,5 +87,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-03-14
-Stopped at: Completed 02-02-PLAN.md — Checkout success page with payment verification and download
+Stopped at: Completed 02-03-PLAN.md — Webhook idempotency, download enforcement, rate limiting (Phase 02 complete)
 Resume file: None

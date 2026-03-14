@@ -153,6 +153,16 @@
     "books.processing": "Επεξεργασια...",
     "books.paymentsNotConfigured": "Οι πληρωμες δεν ειναι διαθεσιμες αυτη τη στιγμη",
 
+    "checkout.success": "Η πληρωμή ήταν επιτυχής!",
+    "checkout.verifying": "Επαλήθευση πληρωμής...",
+    "checkout.pleaseWait": "Αυτό συνήθως διαρκεί λίγα δευτερόλεπτα. Παρακαλώ μην κλείσετε αυτή τη σελίδα.",
+    "checkout.paidWith": "Πληρωμή με {{brand}} που λήγει σε {{last4}}",
+    "checkout.downloadBook": "Κατεβάστε το Βιβλίο σας",
+    "checkout.downloadLimitReached": "Το όριο λήψεων εξαντλήθηκε",
+    "checkout.downloadsRemaining": "{{remaining}} από {{max}} λήψεις απομένουν",
+    "checkout.viewPurchases": "Προβολή Αγορών",
+    "checkout.continueBrowsing": "Συνέχεια Περιήγησης",
+
     "purchases.title": "Οι Αγορές μου",
     "purchases.successMessage": "Ευχαριστούμε για την αγορά σας! Η λήψη είναι έτοιμη.",
     "purchases.noPurchases": "Δεν έχετε κάνει ακόμα αγορές",

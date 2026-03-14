@@ -153,6 +153,16 @@
     "books.processing": "Processing...",
     "books.paymentsNotConfigured": "Payments are not currently available",
 
+    "checkout.success": "Payment Successful!",
+    "checkout.verifying": "Verifying your payment...",
+    "checkout.pleaseWait": "This usually takes just a moment. Please don't close this page.",
+    "checkout.paidWith": "Paid with {{brand}} ending in {{last4}}",
+    "checkout.downloadBook": "Download Your Book",
+    "checkout.downloadLimitReached": "Download limit reached",
+    "checkout.downloadsRemaining": "{{remaining}} of {{max}} downloads remaining",
+    "checkout.viewPurchases": "View All Purchases",
+    "checkout.continueBrowsing": "Continue Browsing",
+
     "purchases.title": "My Purchases",
     "purchases.successMessage": "Thank you for your purchase! Your download is ready.",
     "purchases.noPurchases": "You haven't made any purchases yet",

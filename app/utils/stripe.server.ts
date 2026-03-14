@@ -148,6 +148,12 @@ export async function handlePaymentSuccess(
     throw new Error('Stripe is not configured');
   }
 
+  // Idempotency: check if already processed
+  const existingPurchase = await prisma.purchase.findFirst({
+    where: { stripeSessionId: sessionId, status: 'completed' },
+  });
+  if (existingPurchase) return; // Already fulfilled — safe to return
+
   const session = await stripe.checkout.sessions.retrieve(sessionId);
 
   if (session.payment_status !== 'paid') {
@@ -159,12 +165,18 @@ export async function handlePaymentSuccess(
     throw new Error('Purchase ID not found in session metadata');
   }
 
+  // Set token expiration to 365 days from now
+  const tokenExpiresAt = new Date();
+  tokenExpiresAt.setDate(tokenExpiresAt.getDate() + 365);
+
   // Update purchase status
   await prisma.purchase.update({
     where: { id: purchaseId },
     data: {
       status: 'completed',
       stripePaymentId: session.payment_intent as string,
+      tokenExpiresAt,
+      updatedAt: new Date(),
     },
   });
 }
@@ -198,23 +210,37 @@ export async function handlePaymentFailure(
 export async function verifyDownloadToken(
   token: string
 ): Promise<{ bookId: string; cloudinaryUrl: string; title: string } | null> {
+  // 1. Find purchase by token
   const purchase = await prisma.purchase.findUnique({
     where: { downloadToken: token },
   });
 
+  // 2. Check purchase exists and status is 'completed'
   if (!purchase || purchase.status !== 'completed') {
     return null;
   }
 
+  // 3. Check download limit
+  if (purchase.downloadCount >= purchase.maxDownloads) {
+    return null;
+  }
+
+  // 4. Check token expiration
+  if (purchase.tokenExpiresAt && purchase.tokenExpiresAt < new Date()) {
+    return null;
+  }
+
+  // 5. Find book
   const book = await prisma.book.findUnique({
     where: { id: purchase.bookId },
   });
 
-  if (!book) {
+  // 6. Check book exists and isActive
+  if (!book || !book.isActive) {
     return null;
   }
 
-  // Increment download count
+  // 7. Increment download count (only after all checks pass)
   await prisma.purchase.update({
     where: { id: purchase.id },
     data: {
@@ -222,6 +248,7 @@ export async function verifyDownloadToken(
     },
   });
 
+  // 8. Return book info
   return {
     bookId: book.id,
     cloudinaryUrl: book.cloudinaryUrl,

@@ -38,19 +38,23 @@ Plans:
 - [x] 01-02-PLAN.md -- Admin book management route, upload form, card grid with inline editing, i18n
 
 ### Phase 2: Book Commerce
-**Goal**: Students can find, purchase, and download math books through a complete Stripe payment flow
+**Goal**: Students can find, purchase, and download math books through a complete Stripe payment flow with a dedicated checkout success page
 **Depends on**: Phase 1
 **Requirements**: BOOK-02, BOOK-03, BOOK-04, BOOK-05
 **Success Criteria** (what must be TRUE):
   1. Student can browse the book catalog and filter by category
-  2. Student can initiate a Stripe checkout session for a selected book
-  3. After successful payment, a purchase record and download token are created automatically
-  4. Student can download their purchased book PDF (with download count enforcement)
-**Plans**: 2 plans
+  2. Student can initiate a Stripe checkout session with Stripe Tax enabled and metadata (bookId, userId)
+  3. After successful payment, user is redirected to a checkout success page that verifies payment status via backend (Stripe API), not client
+  4. Checkout success page generates a time-limited Cloudinary signed URL for secure PDF download
+  5. Success page uses useRevalidator() to poll for webhook completion if payment is still processing
+  6. Purchase record stores only minimal payment data (last 4 digits, card brand) — no raw card numbers
+  7. Download count enforcement and token expiry work on both success page and purchases page
+**Plans**: 3 plans
 
 Plans:
-- [ ] 02-01-PLAN.md — Catalog category filtering + purchase action security (CSRF, rate limiting, audit)
-- [ ] 02-02-PLAN.md — Webhook idempotency + download enforcement (count limits, token expiry, rate limiting)
+- [ ] 02-01-PLAN.md — Catalog category filtering + purchase action security (CSRF, rate limiting, audit, Stripe Tax, metadata)
+- [ ] 02-02-PLAN.md — Checkout success page with backend payment verification, Cloudinary signed URL, useRevalidator polling
+- [ ] 02-03-PLAN.md — Webhook idempotency + download enforcement (count limits, token expiry, rate limiting)
 
 ### Phase 3: Q&A Core
 **Goal**: Students can participate in a community Q&A where questions get answered and the best answer rises to the top
@@ -122,7 +126,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Book Upload | 2/2 | Complete | 2026-03-08 |
-| 2. Book Commerce | 0/TBD | Not started | - |
+| 2. Book Commerce | 0/3 | Not started | - |
 | 3. Q&A Core | 0/TBD | Not started | - |
 | 4. Q&A Discovery | 0/TBD | Not started | - |
 | 5. Video Upload | 0/TBD | Not started | - |

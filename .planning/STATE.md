@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: unknown
-last_updated: "2026-03-08T14:26:12.576Z"
+last_updated: "2026-03-14T13:42:00Z"
 progress:
   total_phases: 2
   completed_phases: 1
-  total_plans: 4
-  completed_plans: 2
+  total_plans: 5
+  completed_plans: 3
 ---
 
 # Project State
@@ -18,33 +18,34 @@ progress:
 See: .planning/PROJECT.md (updated 2026-02-21)
 
 **Core value:** Students can find, practice, and learn mathematics through exercises, videos, and books
-**Current focus:** Phase 1 - Book Upload
+**Current focus:** Phase 2 - Book Commerce
 
 ## Current Position
 
 Phase: 2 of 7 (Book Commerce)
-Plan: 1 of 2 in current phase
-Status: Phase 1 complete, ready for Phase 2
-Last activity: 2026-03-08 — Completed 01-02-PLAN.md (admin book management route, upload form, card grid, i18n)
+Plan: 2 of 3 in current phase
+Status: Plan 02-01 complete, ready for Plan 02-02
+Last activity: 2026-03-14 — Completed 02-01-PLAN.md (category filtering, purchase hardening, Stripe Tax)
 
-Progress: [██░░░░░░░░] ~14%
+Progress: [███░░░░░░░] ~20%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 2
-- Average duration: 10min
-- Total execution time: 20min
+- Total plans completed: 3
+- Average duration: 8min
+- Total execution time: 24min
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 1. Book Upload | 2 | 20min | 10min |
+| 2. Book Commerce | 1 | 4min | 4min |
 
 **Recent Trend:**
-- Last 5 plans: 5min, 15min
-- Trend: Stable
+- Last 5 plans: 5min, 15min, 4min
+- Trend: Improving
 
 *Updated after each plan completion*
 
@@ -63,6 +64,9 @@ Recent decisions affecting current work:
 - getAllBooks filters by both isActive=true AND deletedAt=null when activeOnly=true (01-01)
 - [Phase 01]: Used multi-action handler pattern (_action field) for create, update, toggle, delete in single route (01-02)
 - [Phase 01]: BookCard inline editing uses useFetcher for seamless UX without page reload (01-02)
+- [Phase 02]: Used Link-based category filter for Remix consistency (02-01)
+- [Phase 02]: Rate limit type 'api' (100/min) for purchase action (02-01)
+- [Phase 02]: Purchase action security order: CSRF -> auth -> rate limit -> audit -> business logic (02-01)
 
 ### Pending Todos
 
@@ -76,6 +80,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-08
-Stopped at: Completed 01-02-PLAN.md — Phase 1 (Book Upload) complete, ready for Phase 2 (Book Commerce)
+Last session: 2026-03-14
+Stopped at: Completed 02-01-PLAN.md — Category filtering, purchase hardening, Stripe Tax complete
 Resume file: None

@@ -10,8 +10,8 @@ Requirements for current milestone. Each maps to roadmap phases.
 ### Books & Payments
 
 - [x] **BOOK-01**: Admin can upload book PDF with thumbnail, title, description, category, tags, price
-- [ ] **BOOK-02**: Student can browse book catalog with categories
-- [ ] **BOOK-03**: Student can purchase book via Stripe checkout
+- [x] **BOOK-02**: Student can browse book catalog with categories
+- [x] **BOOK-03**: Student can purchase book via Stripe checkout
 - [ ] **BOOK-04**: Stripe webhook processes payment and creates purchase record with download token
 - [ ] **BOOK-05**: Student can download purchased book PDF (limited download count)
 
@@ -68,8 +68,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | Requirement | Phase | Status |
 |-------------|-------|--------|
 | BOOK-01 | Phase 1 | Complete |
-| BOOK-02 | Phase 2 | Pending |
-| BOOK-03 | Phase 2 | Pending |
+| BOOK-02 | Phase 2 | Complete |
+| BOOK-03 | Phase 2 | Complete |
 | BOOK-04 | Phase 2 | Pending |
 | BOOK-05 | Phase 2 | Pending |
 | QA-01 | Phase 3 | Pending |

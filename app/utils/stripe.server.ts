@@ -285,6 +285,62 @@ export function verifyWebhookSignature(
 }
 
 /**
+ * Checkout session details for the success page
+ */
+export interface CheckoutSessionDetails {
+  isPaid: boolean;
+  purchaseId: string | null;
+  bookId: string | null;
+  downloadToken: string | null;
+  cardInfo: { last4: string; brand: string } | null;
+}
+
+/**
+ * Retrieve checkout session details from Stripe API (backend truth).
+ * Expands payment_intent.payment_method to get card info.
+ * Only returns minimal payment data (last4, brand) — never raw card numbers.
+ */
+export async function getCheckoutSessionDetails(
+  sessionId: string
+): Promise<CheckoutSessionDetails> {
+  if (!stripe) {
+    throw new Error('Stripe is not configured');
+  }
+
+  const session = await stripe.checkout.sessions.retrieve(sessionId, {
+    expand: ['payment_intent.payment_method'],
+  });
+
+  const isPaid = session.payment_status === 'paid';
+
+  // Extract minimal card info — only last 4 and brand
+  let cardInfo: { last4: string; brand: string } | null = null;
+  const paymentIntent = session.payment_intent;
+  if (
+    paymentIntent &&
+    typeof paymentIntent === 'object' &&
+    'payment_method' in paymentIntent
+  ) {
+    const pm = paymentIntent.payment_method;
+    if (pm && typeof pm === 'object' && 'card' in pm && pm.card) {
+      const card = pm.card as { last4?: string; brand?: string };
+      cardInfo = {
+        last4: card.last4 ?? '',
+        brand: card.brand ?? '',
+      };
+    }
+  }
+
+  return {
+    isPaid,
+    purchaseId: session.metadata?.purchaseId ?? null,
+    bookId: session.metadata?.bookId ?? null,
+    downloadToken: session.metadata?.downloadToken ?? null,
+    cardInfo,
+  };
+}
+
+/**
  * Check if Stripe is configured
  */
 export function isStripeConfigured(): boolean {

@@ -1,12 +1,15 @@
 import type { LoaderFunction, ActionFunction } from "@remix-run/node";
 import { data, redirect } from "@remix-run/node";
-import { useLoaderData, Form, useNavigation, Link } from "@remix-run/react";
-import { prisma } from "~/utils/prisma.server";
-import { getUser } from "~/utils/auth.prisma";
-import { createCheckoutSession, isStripeConfigured } from "~/utils/stripe.server";
+import { useLoaderData, useActionData, Form, useNavigation, Link } from "@remix-run/react";
 import { useTranslation } from "react-i18next";
-import { getLocalizedContent, SupportedLanguage } from "~/utils/i18n.server";
 import i18next from "~/i18next.server";
+import { logAuditEvent, getClientInfo } from "~/utils/audit.server";
+import { getUser } from "~/utils/auth.prisma";
+import { getCSRFToken, requireCSRFToken } from "~/utils/csrf.server";
+import { getLocalizedContent, SupportedLanguage } from "~/utils/i18n.server";
+import { prisma } from "~/utils/prisma.server";
+import { applyRateLimit } from "~/utils/ratelimit.server";
+import { createCheckoutSession, isStripeConfigured } from "~/utils/stripe.server";
 
 interface Book {
   id: string;
@@ -26,6 +29,7 @@ interface LoaderData {
   stripeEnabled: boolean;
   locale: string;
   alreadyPurchased: boolean;
+  csrfToken: string;
 }
 
 export const loader: LoaderFunction = async ({ request, params }) => {
@@ -77,13 +81,19 @@ export const loader: LoaderFunction = async ({ request, params }) => {
     locale as SupportedLanguage
   );
 
-  return data({
-    book: localizedBook as unknown as Book,
-    isLoggedIn,
-    stripeEnabled: isStripeConfigured(),
-    locale,
-    alreadyPurchased,
-  });
+  const { token: csrfToken, headers: csrfHeaders } = await getCSRFToken(request);
+
+  return data(
+    {
+      book: localizedBook as unknown as Book,
+      isLoggedIn,
+      stripeEnabled: isStripeConfigured(),
+      locale,
+      alreadyPurchased,
+      csrfToken,
+    },
+    { headers: csrfHeaders }
+  );
 };
 
 export const action: ActionFunction = async ({ request, params }) => {
@@ -93,10 +103,29 @@ export const action: ActionFunction = async ({ request, params }) => {
     return data({ error: "Book ID required" }, { status: 400 });
   }
 
+  // CSRF validation
+  const csrfError = await requireCSRFToken(request);
+  if (csrfError) return csrfError;
+
   const user = await getUser(request);
   if (!user) {
     return redirect(`/login?redirectTo=/books/${bookId}`);
   }
+
+  // Rate limiting
+  const rateLimitResponse = applyRateLimit(request, "api", user.id);
+  if (rateLimitResponse) return rateLimitResponse;
+
+  // Audit logging
+  const { ipAddress, userAgent } = getClientInfo(request);
+  await logAuditEvent({
+    userId: user.id,
+    action: "purchase",
+    resource: "book",
+    resourceId: bookId,
+    ipAddress: ipAddress ?? undefined,
+    userAgent: userAgent ?? undefined,
+  });
 
   if (!isStripeConfigured()) {
     return data({ error: "Payments are not configured" }, { status: 500 });
@@ -109,7 +138,7 @@ export const action: ActionFunction = async ({ request, params }) => {
     const { url: checkoutUrl } = await createCheckoutSession({
       bookId,
       userId: user.id,
-      successUrl: `${baseUrl}/purchases?success=true`,
+      successUrl: `${baseUrl}/books/checkout-success`,
       cancelUrl: `${baseUrl}/books/${bookId}?canceled=true`,
     });
 
@@ -128,8 +157,9 @@ export const action: ActionFunction = async ({ request, params }) => {
 };
 
 export default function BookDetail() {
-  const { book, isLoggedIn, stripeEnabled, locale, alreadyPurchased } =
+  const { book, isLoggedIn, stripeEnabled, locale, alreadyPurchased, csrfToken } =
     useLoaderData<LoaderData>();
+  const actionData = useActionData<{ error?: string }>();
   const { t } = useTranslation();
   const navigation = useNavigation();
 
@@ -219,25 +249,33 @@ export default function BookDetail() {
                 </Link>
               </div>
             ) : stripeEnabled ? (
-              <Form method="post">
-                {!isLoggedIn && (
-                  <p className="text-sm text-gray-500 mb-4">
-                    {t("books.loginRequired")}
-                  </p>
-                )}
+              <>
+                <Form method="post">
+                  <input type="hidden" name="_csrf" value={csrfToken} />
+                  {!isLoggedIn && (
+                    <p className="text-sm text-gray-500 mb-4">
+                      {t("books.loginRequired")}
+                    </p>
+                  )}
 
-                <button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className={`w-full px-6 py-3 text-white rounded-lg transition-colors ${
-                    isSubmitting
-                      ? "bg-gray-400 cursor-not-allowed"
-                      : "bg-orange-500 hover:bg-orange-600"
-                  }`}
-                >
-                  {isSubmitting ? t("books.processing") : t("books.buy")}
-                </button>
-              </Form>
+                  <button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className={`w-full px-6 py-3 text-white rounded-lg transition-colors ${
+                      isSubmitting
+                        ? "bg-gray-400 cursor-not-allowed"
+                        : "bg-orange-500 hover:bg-orange-600"
+                    }`}
+                  >
+                    {isSubmitting ? t("books.processing") : t("books.buy")}
+                  </button>
+                </Form>
+                {actionData?.error && (
+                  <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+                    <p className="text-red-700 text-sm">{actionData.error}</p>
+                  </div>
+                )}
+              </>
             ) : (
               <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
                 <p className="text-yellow-700">{t("books.paymentsNotConfigured")}</p>

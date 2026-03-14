@@ -147,6 +147,11 @@
     "books.alreadyOwned": "You already own this book",
     "books.goToDownloads": "Go to My Purchases",
     "books.viewDetails": "View Details",
+    "books.allCategories": "All Categories",
+    "books.alreadyPurchased": "You already own this book",
+    "books.loginRequired": "Please log in to purchase",
+    "books.processing": "Processing...",
+    "books.paymentsNotConfigured": "Payments are not currently available",
 
     "purchases.title": "My Purchases",
     "purchases.successMessage": "Thank you for your purchase! Your download is ready.",

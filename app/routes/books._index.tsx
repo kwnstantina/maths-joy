@@ -21,13 +21,22 @@ interface Book {
 interface LoaderData {
   books: Book[];
   locale: string;
+  categories: string[];
+  selectedCategory: string | null;
 }
 
 export const loader: LoaderFunction = async ({ request }) => {
   const locale = await i18next.getLocale(request);
+  const url = new URL(request.url);
+  const category = url.searchParams.get("category");
+
+  const where: { isActive: boolean; category?: string } = { isActive: true };
+  if (category) {
+    where.category = category;
+  }
 
   const books = await prisma.book.findMany({
-    where: { isActive: true },
+    where,
     select: {
       id: true,
       title: true,
@@ -42,17 +51,68 @@ export const loader: LoaderFunction = async ({ request }) => {
     orderBy: { createdAt: "desc" },
   });
 
+  const categories = await prisma.book.findMany({
+    where: { isActive: true },
+    select: { category: true },
+    distinct: ["category"],
+  });
+  const categoryList = categories.map((c) => c.category);
+
   // Apply translations if needed
   const localizedBooks = getLocalizedList(
     books as unknown as Parameters<typeof getLocalizedList>[0],
     locale as SupportedLanguage
   );
 
-  return data({ books: localizedBooks as unknown as Book[], locale });
+  return data({
+    books: localizedBooks as unknown as Book[],
+    locale,
+    categories: categoryList,
+    selectedCategory: category,
+  });
 };
 
+function CategoryFilter({
+  categories,
+  selected,
+  allLabel,
+}: {
+  categories: string[];
+  selected: string | null;
+  allLabel: string;
+}) {
+  return (
+    <div className="flex flex-wrap gap-2 mb-8 justify-center">
+      <Link
+        to="/books"
+        className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+          !selected
+            ? "bg-orange-500 text-white"
+            : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+        }`}
+      >
+        {allLabel}
+      </Link>
+      {categories.map((cat) => (
+        <Link
+          key={cat}
+          to={`/books?category=${encodeURIComponent(cat)}`}
+          className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+            selected === cat
+              ? "bg-orange-500 text-white"
+              : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+          }`}
+        >
+          {cat}
+        </Link>
+      ))}
+    </div>
+  );
+}
+
 export default function BooksIndex() {
-  const { books, locale } = useLoaderData<LoaderData>();
+  const { books, locale, categories, selectedCategory } =
+    useLoaderData<LoaderData>();
   const { t } = useTranslation();
 
   const formatPrice = (price: number, currency: string) => {
@@ -65,6 +125,14 @@ export default function BooksIndex() {
   return (
     <div className="container mx-auto px-6 py-10">
       <h1 className="text-3xl font-bold text-center mb-10">{t("books.title")}</h1>
+
+      {categories.length > 1 && (
+        <CategoryFilter
+          categories={categories}
+          selected={selectedCategory}
+          allLabel={t("books.allCategories")}
+        />
+      )}
 
       {books.length === 0 ? (
         <div className="text-center text-gray-500 py-20">

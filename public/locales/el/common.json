@@ -147,6 +147,11 @@
     "books.alreadyOwned": "Έχετε ήδη αυτό το βιβλίο",
     "books.goToDownloads": "Δείτε τις Αγορές μου",
     "books.viewDetails": "Προβολή Λεπτομερειών",
+    "books.allCategories": "Ολες οι Κατηγοριες",
+    "books.alreadyPurchased": "Εχετε ηδη αγορασει αυτο το βιβλιο",
+    "books.loginRequired": "Παρακαλω συνδεθειτε για αγορα",
+    "books.processing": "Επεξεργασια...",
+    "books.paymentsNotConfigured": "Οι πληρωμες δεν ειναι διαθεσιμες αυτη τη στιγμη",
 
     "purchases.title": "Οι Αγορές μου",
     "purchases.successMessage": "Ευχαριστούμε για την αγορά σας! Η λήψη είναι έτοιμη.",

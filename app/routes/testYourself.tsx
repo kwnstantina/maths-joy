@@ -74,7 +74,7 @@ const TestYourself = () => {
                 leaveTo="opacity-0"
               >
                 <div className="my-5">
-                  {Object.entries(data?.groupedExersices)?.map(
+                  {Object.entries(data?.groupedExersices || {})?.map(
                     ([title, grouped]: any) => {
                       return (
                         <Disclosure key={title}>

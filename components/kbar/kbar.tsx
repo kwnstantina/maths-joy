@@ -20,7 +20,7 @@ const Kbar = (props:Props) => {
         heading: "Ασκήσεις",
         id: "exercises",
         items: [
-          ...data,
+          ...(data || []),
         ],
       },
       {

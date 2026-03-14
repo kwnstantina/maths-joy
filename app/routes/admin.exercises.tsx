@@ -59,245 +59,245 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     return data({ errors: { general: "Unauthorized" } }, { status: 403 });
   }
 
-  // Determine action type from a clone to avoid consuming the body
-  const clonedRequest = request.clone();
-  const peekForm = await clonedRequest.formData();
-  const actionType = peekForm.get("_action") as string;
+  const contentType = request.headers.get("Content-Type") || "";
+  const isMultipart = contentType.includes("multipart/form-data");
 
-  if (actionType === "deleteExercise") {
-    const csrfToken = peekForm.get("_csrf") as string;
-    const isValid = await validateCSRFToken(request, csrfToken);
-    if (!isValid) {
-      return data({ errors: { general: "Invalid CSRF token" } }, { status: 403 });
-    }
-    const exerciseId = peekForm.get("exerciseId") as string;
-    if (!exerciseId) {
-      return data({ errors: { general: "Exercise ID required" }, _action: "deleteExercise" }, { status: 400 });
-    }
-    try {
-      const exercise = await deleteExercise(exerciseId);
+  // Non-multipart requests (e.g. delete) — parse as regular form data
+  if (!isMultipart) {
+    const formData = await request.formData();
+    const actionType = formData.get("_action") as string;
 
-      // Cleanup Cloudinary if the exercise had a file uploaded
-      if (exercise.cloudinaryPublicId) {
-        await deleteFromCloudinary(exercise.cloudinaryPublicId, "raw");
+    if (actionType === "deleteExercise") {
+      const csrfToken = formData.get("_csrf") as string;
+      const isValid = await validateCSRFToken(request, csrfToken);
+      if (!isValid) {
+        return data({ errors: { general: "Invalid CSRF token" } }, { status: 403 });
       }
+      const exerciseId = formData.get("exerciseId") as string;
+      if (!exerciseId) {
+        return data({ errors: { general: "Exercise ID required" }, _action: "deleteExercise" }, { status: 400 });
+      }
+      try {
+        const exercise = await deleteExercise(exerciseId);
+
+        if (exercise.cloudinaryPublicId) {
+          await deleteFromCloudinary(exercise.cloudinaryPublicId, "raw");
+        }
+
+        const { ipAddress, userAgent } = getClientInfo(request);
+        await logAuditEvent({
+          userId,
+          action: "delete",
+          resource: "exercise",
+          resourceId: exerciseId,
+          metadata: { title: exercise.title },
+          ipAddress: ipAddress ?? undefined,
+          userAgent: userAgent ?? undefined,
+        });
+
+        return data({ success: true, _action: "deleteExercise" });
+      } catch (_error) {
+        return data(
+          { errors: { general: "Failed to delete exercise" }, _action: "deleteExercise" },
+          { status: 500 }
+        );
+      }
+    }
+
+    return data({ errors: { general: "Unknown action" } }, { status: 400 });
+  }
+
+  // Multipart requests (create/update) — parse with streaming upload handler
+  const rateLimitResponse = applyRateLimit(request, "upload", userId);
+  if (rateLimitResponse) return rateLimitResponse;
+
+  let pdfResult: CloudinaryUploadResult | null = null;
+
+  const uploadHandler = unstable_composeUploadHandlers(
+    async ({ name, data: fileData, contentType: fieldContentType }) => {
+      if (name === "pdfFile" && fieldContentType === "application/pdf") {
+        const chunks: Uint8Array[] = [];
+        for await (const chunk of fileData) {
+          chunks.push(chunk);
+        }
+        if (chunks.length === 0 || (chunks.length === 1 && chunks[0].length === 0)) {
+          return undefined;
+        }
+        async function* replayChunks() {
+          for (const c of chunks) {
+            yield c;
+          }
+        }
+        const result = await uploadStreamToCloudinary(replayChunks(), {
+          folder: "maths-joy/exercises",
+          resource_type: "raw",
+        });
+        pdfResult = result;
+        return result.public_id;
+      }
+      return undefined;
+    },
+    unstable_createMemoryUploadHandler()
+  );
+
+  let formData: FormData;
+  try {
+    formData = await unstable_parseMultipartFormData(request, uploadHandler);
+  } catch (_error) {
+    console.error("Failed to parse multipart form data:", _error);
+    return data(
+      { errors: { general: "Failed to process upload" }, _action: "createExercise" },
+      { status: 500 }
+    );
+  }
+
+  const actionType = formData.get("_action") as string;
+
+  const csrfToken = formData.get("_csrf") as string;
+  const isValid = await validateCSRFToken(request, csrfToken);
+  if (!isValid) {
+    if (pdfResult) await deleteFromCloudinary((pdfResult as CloudinaryUploadResult).public_id, "raw");
+    return data({ errors: { general: "Invalid CSRF token" }, _action: actionType }, { status: 403 });
+  }
+
+  if (actionType === "createExercise") {
+    const title_el = (formData.get("title_el") as string) || "";
+    const title_en = (formData.get("title_en") as string) || "";
+    const description_el = (formData.get("description_el") as string) || "";
+    const description_en = (formData.get("description_en") as string) || "";
+    const category = (formData.get("category") as string) || "";
+    const tags = (formData.get("tags") as string) || "";
+    const exerciseImgUrl = (formData.get("exerciseImgUrl") as string) || "";
+
+    const fieldErrors = validateExerciseFields({
+      title: title_el,
+      category,
+    });
+    if (fieldErrors) {
+      if (pdfResult) await deleteFromCloudinary((pdfResult as CloudinaryUploadResult).public_id, "raw");
+      return data({ errors: fieldErrors, _action: "createExercise" }, { status: 400 });
+    }
+
+    if (!pdfResult) {
+      return data(
+        { errors: { pdfFile: "PDF file is required" }, _action: "createExercise" },
+        { status: 400 }
+      );
+    }
+
+    const pdfUpload = pdfResult as CloudinaryUploadResult;
+
+    const translation = createTranslation(
+      { title: title_el, description: description_el },
+      title_en || description_en
+        ? { title: title_en || title_el, description: description_en || description_el }
+        : undefined
+    );
+
+    try {
+      const exercise = await createExerciseFromStream({
+        title: title_el,
+        category,
+        tags: tags || "",
+        description: description_el,
+        exerciseImgUrl: exerciseImgUrl || undefined,
+        fileName: "exercise.pdf",
+        cloudinaryPublicId: pdfUpload.public_id,
+        cloudinaryUrl: pdfUpload.secure_url,
+        fileSize: pdfUpload.bytes,
+        translation: translation as unknown as Prisma.InputJsonValue,
+      });
 
       const { ipAddress, userAgent } = getClientInfo(request);
       await logAuditEvent({
         userId,
-        action: "delete",
+        action: "upload",
         resource: "exercise",
-        resourceId: exerciseId,
-        metadata: { title: exercise.title },
+        resourceId: exercise.id,
+        metadata: { title: title_el },
         ipAddress: ipAddress ?? undefined,
         userAgent: userAgent ?? undefined,
       });
 
-      return data({ success: true, _action: "deleteExercise" });
+      return data({ success: true, _action: "createExercise" });
     } catch (_error) {
+      console.error("Error creating exercise:", _error);
+      if (pdfResult) await deleteFromCloudinary((pdfResult as CloudinaryUploadResult).public_id, "raw");
       return data(
-        { errors: { general: "Failed to delete exercise" }, _action: "deleteExercise" },
+        { errors: { general: "Failed to create exercise" }, _action: "createExercise" },
         { status: 500 }
       );
     }
   }
 
-  // For createExercise and updateExercise, we need multipart parsing with streaming
-  if (actionType === "createExercise" || actionType === "updateExercise") {
-    const rateLimitResponse = applyRateLimit(request, "upload", userId);
-    if (rateLimitResponse) return rateLimitResponse;
-
-    let pdfResult: CloudinaryUploadResult | null = null;
-
-    const uploadHandler = unstable_composeUploadHandlers(
-      async ({ name, data: fileData, contentType }) => {
-        if (name === "pdfFile" && contentType === "application/pdf") {
-          const chunks: Uint8Array[] = [];
-          for await (const chunk of fileData) {
-            chunks.push(chunk);
-          }
-          if (chunks.length === 0 || (chunks.length === 1 && chunks[0].length === 0)) {
-            return undefined;
-          }
-          async function* replayChunks() {
-            for (const c of chunks) {
-              yield c;
-            }
-          }
-          const result = await uploadStreamToCloudinary(replayChunks(), {
-            folder: "maths-joy/exercises",
-            resource_type: "raw",
-          });
-          pdfResult = result;
-          return result.public_id;
-        }
-        return undefined;
-      },
-      unstable_createMemoryUploadHandler()
-    );
-
-    let formData: FormData;
-    try {
-      formData = await unstable_parseMultipartFormData(request, uploadHandler);
-    } catch (_error) {
-      console.error("Failed to parse multipart form data:", _error);
+  if (actionType === "updateExercise") {
+    const exerciseId = (formData.get("exerciseId") as string) || "";
+    if (!exerciseId) {
       return data(
-        { errors: { general: "Failed to process upload" }, _action: actionType },
-        { status: 500 }
+        { errors: { general: "Exercise ID required" }, _action: "updateExercise" },
+        { status: 400 }
       );
     }
 
-    const csrfToken = formData.get("_csrf") as string;
-    const isValid = await validateCSRFToken(request, csrfToken);
-    if (!isValid) {
-      // Cleanup orphaned uploads
-      if (pdfResult) await deleteFromCloudinary((pdfResult as CloudinaryUploadResult).public_id, "raw");
-      return data({ errors: { general: "Invalid CSRF token" }, _action: actionType }, { status: 403 });
+    const title_el = formData.get("title_el") as string;
+    const title_en = formData.get("title_en") as string;
+    const description_el = formData.get("description_el") as string;
+    const description_en = formData.get("description_en") as string;
+    const category = formData.get("category") as string;
+    const tags = formData.get("tags") as string;
+    const exerciseImgUrl = formData.get("exerciseImgUrl") as string;
+
+    const updateData: Record<string, unknown> = {};
+    if (title_el) updateData.title = title_el;
+    if (description_el) updateData.description = description_el;
+    if (category) updateData.category = category;
+    if (tags) updateData.tags = tags;
+    if (exerciseImgUrl !== null) updateData.exerciseImgUrl = exerciseImgUrl || undefined;
+
+    if (pdfResult) {
+      const pdfUpload = pdfResult as CloudinaryUploadResult;
+      updateData.cloudinaryPublicId = pdfUpload.public_id;
+      updateData.cloudinaryUrl = pdfUpload.secure_url;
+      updateData.fileSize = pdfUpload.bytes;
     }
 
-    if (actionType === "createExercise") {
-      const title_el = (formData.get("title_el") as string) || "";
-      const title_en = (formData.get("title_en") as string) || "";
-      const description_el = (formData.get("description_el") as string) || "";
-      const description_en = (formData.get("description_en") as string) || "";
-      const category = (formData.get("category") as string) || "";
-      const tags = (formData.get("tags") as string) || "";
-      const exerciseImgUrl = (formData.get("exerciseImgUrl") as string) || "";
-
-      // Validate required fields
-      const fieldErrors = validateExerciseFields({
-        title: title_el,
-        category,
-      });
-      if (fieldErrors) {
-        if (pdfResult) await deleteFromCloudinary((pdfResult as CloudinaryUploadResult).public_id, "raw");
-        return data({ errors: fieldErrors, _action: "createExercise" }, { status: 400 });
-      }
-
-      if (!pdfResult) {
-        return data(
-          { errors: { pdfFile: "PDF file is required" }, _action: "createExercise" },
-          { status: 400 }
-        );
-      }
-
-      const pdfUpload = pdfResult as CloudinaryUploadResult;
-
-      // Build translation object
+    if (title_el || description_el || title_en || description_en) {
       const translation = createTranslation(
-        { title: title_el, description: description_el },
+        {
+          title: title_el || "",
+          description: description_el || "",
+        },
         title_en || description_en
-          ? { title: title_en || title_el, description: description_en || description_el }
+          ? {
+              title: title_en || "",
+              description: description_en || "",
+            }
           : undefined
       );
-
-      try {
-        const exercise = await createExerciseFromStream({
-          title: title_el,
-          category,
-          tags: tags || "",
-          description: description_el,
-          exerciseImgUrl: exerciseImgUrl || undefined,
-          fileName: "exercise.pdf",
-          cloudinaryPublicId: pdfUpload.public_id,
-          cloudinaryUrl: pdfUpload.secure_url,
-          fileSize: pdfUpload.bytes,
-          translation: translation as unknown as Prisma.InputJsonValue,
-        });
-
-        const { ipAddress, userAgent } = getClientInfo(request);
-        await logAuditEvent({
-          userId,
-          action: "upload",
-          resource: "exercise",
-          resourceId: exercise.id,
-          metadata: { title: title_el },
-          ipAddress: ipAddress ?? undefined,
-          userAgent: userAgent ?? undefined,
-        });
-
-        return data({ success: true, _action: "createExercise" });
-      } catch (_error) {
-        console.error("Error creating exercise:", _error);
-        return data(
-          { errors: { general: "Failed to create exercise" }, _action: "createExercise" },
-          { status: 500 }
-        );
-      }
+      updateData.translation = translation as unknown as Prisma.InputJsonValue;
     }
 
-    if (actionType === "updateExercise") {
-      const exerciseId = (formData.get("exerciseId") as string) || "";
-      if (!exerciseId) {
-        return data(
-          { errors: { general: "Exercise ID required" }, _action: "updateExercise" },
-          { status: 400 }
-        );
-      }
+    try {
+      await updateExercise(exerciseId, updateData);
 
-      const title_el = formData.get("title_el") as string;
-      const title_en = formData.get("title_en") as string;
-      const description_el = formData.get("description_el") as string;
-      const description_en = formData.get("description_en") as string;
-      const category = formData.get("category") as string;
-      const tags = formData.get("tags") as string;
-      const exerciseImgUrl = formData.get("exerciseImgUrl") as string;
+      const { ipAddress, userAgent } = getClientInfo(request);
+      await logAuditEvent({
+        userId,
+        action: "update",
+        resource: "exercise",
+        resourceId: exerciseId,
+        metadata: { title: title_el },
+        ipAddress: ipAddress ?? undefined,
+        userAgent: userAgent ?? undefined,
+      });
 
-      // Build update data with only provided fields
-      const updateData: Record<string, unknown> = {};
-      if (title_el) updateData.title = title_el;
-      if (description_el) updateData.description = description_el;
-      if (category) updateData.category = category;
-      if (tags) updateData.tags = tags;
-      if (exerciseImgUrl !== null) updateData.exerciseImgUrl = exerciseImgUrl || undefined;
-
-      // Handle PDF replacement
-      if (pdfResult) {
-        const pdfUpload = pdfResult as CloudinaryUploadResult;
-        updateData.cloudinaryPublicId = pdfUpload.public_id;
-        updateData.cloudinaryUrl = pdfUpload.secure_url;
-        updateData.fileSize = pdfUpload.bytes;
-      }
-
-      // Handle translation update
-      if (title_el || description_el || title_en || description_en) {
-        const translation = createTranslation(
-          {
-            title: title_el || "",
-            description: description_el || "",
-          },
-          title_en || description_en
-            ? {
-                title: title_en || "",
-                description: description_en || "",
-              }
-            : undefined
-        );
-        updateData.translation = translation as unknown as Prisma.InputJsonValue;
-      }
-
-      try {
-        await updateExercise(exerciseId, updateData);
-
-        const { ipAddress, userAgent } = getClientInfo(request);
-        await logAuditEvent({
-          userId,
-          action: "update",
-          resource: "exercise",
-          resourceId: exerciseId,
-          metadata: { title: title_el },
-          ipAddress: ipAddress ?? undefined,
-          userAgent: userAgent ?? undefined,
-        });
-
-        return data({ success: true, _action: "updateExercise" });
-      } catch (_error) {
-        console.error("Error updating exercise:", _error);
-        return data(
-          { errors: { general: "Failed to update exercise" }, _action: "updateExercise" },
-          { status: 500 }
-        );
-      }
+      return data({ success: true, _action: "updateExercise" });
+    } catch (_error) {
+      console.error("Error updating exercise:", _error);
+      return data(
+        { errors: { general: "Failed to update exercise" }, _action: "updateExercise" },
+        { status: 500 }
+      );
     }
   }
 

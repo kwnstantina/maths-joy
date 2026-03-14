@@ -191,7 +191,7 @@ export default function Index() {
         />
       </div>
 
-      <FeatureSection
+      {/* <FeatureSection
         titleKey="features.chat.title"
         descriptionKey="features.chat.description"
         linkKey="features.chat.link"
@@ -199,7 +199,7 @@ export default function Index() {
         accentColor="green"
         reversed={true}
         imageSrc={chat}
-      />
+      /> */}
 
       {/* About Us Section */}
       <section>

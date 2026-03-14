@@ -8,7 +8,7 @@ progress:
   total_phases: 2
   completed_phases: 1
   total_plans: 5
-  completed_plans: 3
+  completed_plans: 4
 ---
 
 # Project State
@@ -23,28 +23,28 @@ See: .planning/PROJECT.md (updated 2026-02-21)
 ## Current Position
 
 Phase: 2 of 7 (Book Commerce)
-Plan: 2 of 3 in current phase
-Status: Plan 02-01 complete, ready for Plan 02-02
-Last activity: 2026-03-14 — Completed 02-01-PLAN.md (category filtering, purchase hardening, Stripe Tax)
+Plan: 3 of 3 in current phase
+Status: Plan 02-02 complete, ready for Plan 02-03
+Last activity: 2026-03-14 — Completed 02-02-PLAN.md (checkout success page, payment verification, download)
 
-Progress: [███░░░░░░░] ~20%
+Progress: [████░░░░░░] ~27%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 3
-- Average duration: 8min
-- Total execution time: 24min
+- Total plans completed: 4
+- Average duration: 7min
+- Total execution time: 27min
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 1. Book Upload | 2 | 20min | 10min |
-| 2. Book Commerce | 1 | 4min | 4min |
+| 2. Book Commerce | 2 | 7min | 3.5min |
 
 **Recent Trend:**
-- Last 5 plans: 5min, 15min, 4min
+- Last 5 plans: 5min, 15min, 4min, 3min
 - Trend: Improving
 
 *Updated after each plan completion*
@@ -67,6 +67,9 @@ Recent decisions affecting current work:
 - [Phase 02]: Used Link-based category filter for Remix consistency (02-01)
 - [Phase 02]: Rate limit type 'api' (100/min) for purchase action (02-01)
 - [Phase 02]: Purchase action security order: CSRF -> auth -> rate limit -> audit -> business logic (02-01)
+- [Phase 02]: Used cloudinaryUrl directly (not signed URLs) since books have public access_mode (02-02)
+- [Phase 02]: Download count incremented on URL generation, not click -- acceptable for post-payment flow (02-02)
+- [Phase 02]: useRevalidator polling for webhook completion every 2s with auto-stop (02-02)
 
 ### Pending Todos
 
@@ -81,5 +84,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-03-14
-Stopped at: Completed 02-01-PLAN.md — Category filtering, purchase hardening, Stripe Tax complete
+Stopped at: Completed 02-02-PLAN.md — Checkout success page with payment verification and download
 Resume file: None

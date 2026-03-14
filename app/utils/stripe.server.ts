@@ -63,6 +63,7 @@ export async function createCheckoutSession({
       name: book.title,
       description: book.description,
       images: book.thumbnailUrl ? [book.thumbnailUrl] : [],
+      tax_code: 'txcd_10010001',
       metadata: {
         bookId: book.id,
       },
@@ -111,8 +112,9 @@ export async function createCheckoutSession({
         quantity: 1,
       },
     ],
-    success_url: `${successUrl}?session_id={CHECKOUT_SESSION_ID}&token=${downloadToken}`,
+    success_url: `${successUrl}?session_id={CHECKOUT_SESSION_ID}`,
     cancel_url: cancelUrl,
+    automatic_tax: { enabled: true },
     metadata: {
       purchaseId: purchase.id,
       bookId,

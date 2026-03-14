@@ -10,7 +10,7 @@ Phase 2 builds on top of significant existing infrastructure. The codebase alrea
 
 The primary work for this phase is NOT greenfield development. Instead, it is: (1) adding category filtering to the existing book catalog listing, (2) fixing known bugs in the existing Stripe/download flow (download count limits not enforced, token expiration not checked, book.isActive not validated during download), and (3) adding CSRF protection and rate limiting to the purchase action. The existing code provides a solid 80% foundation; this phase fills the remaining gaps and hardens what exists.
 
-**Primary recommendation:** Audit and fix the existing book commerce routes rather than rebuilding them. Add category filtering to `books._index.tsx`, enforce `downloadCount < maxDownloads` in `verifyDownloadToken()`, add `tokenExpiresAt` checking, and apply the project's existing CSRF/rate-limiting patterns to the purchase action.
+**Primary recommendation:** Audit and fix the existing book commerce routes rather than rebuilding them. Add category filtering to `books._index.tsx`, enforce `downloadCount < maxDownloads` in `verifyDownloadToken()`, add `tokenExpiresAt` checking, and apply the project's existing CSRF/rate-limiting patterns to the purchase action. Additionally, create a dedicated checkout success page (`books.checkout-success.tsx`) that verifies payment status via the Stripe API (backend truth, never trust the client), generates time-limited Cloudinary signed URLs for secure PDF downloads, and uses `useRevalidator()` to poll for webhook completion if payment is still processing. Enable Stripe Tax for EU VAT compliance on digital books, pass `bookId`/`userId` in session metadata, and store only minimal payment data (last 4 digits, card brand).
 
 <phase_requirements>
 ## Phase Requirements
@@ -56,15 +56,16 @@ No new packages needed. All dependencies are already installed.
 ```
 app/
   routes/
-    books._index.tsx        # Book catalog listing (EXISTS - needs category filter)
-    books.$bookId.tsx       # Book detail + purchase action (EXISTS - needs CSRF/rate limit)
-    api.stripe-webhook.tsx  # Webhook handler (EXISTS - needs idempotency)
-    download.$token.tsx     # PDF download (EXISTS - needs limit enforcement)
-    purchases.tsx           # Purchase history (EXISTS - mostly complete)
+    books._index.tsx            # Book catalog listing (EXISTS - needs category filter)
+    books.$bookId.tsx           # Book detail + purchase action (EXISTS - needs CSRF/rate limit/Stripe Tax/metadata)
+    books.checkout-success.tsx  # Checkout success page (NEW - backend payment verification + signed URL download)
+    api.stripe-webhook.tsx      # Webhook handler (EXISTS - needs idempotency)
+    download.$token.tsx         # PDF download (EXISTS - needs limit enforcement)
+    purchases.tsx               # Purchase history (EXISTS - mostly complete)
   utils/
     stripe.server.ts        # Stripe checkout, webhook handlers, token verify (EXISTS)
     books.prisma.ts         # Book CRUD operations (EXISTS)
-    cloudinary.server.ts    # File upload/download/signed URLs (EXISTS)
+    cloudinary.server.ts    # File upload/download/signed URLs (EXISTS - generateSignedUrl already implemented)
     csrf.server.ts          # CSRF token generation/validation (EXISTS)
     ratelimit.server.ts     # Rate limiting per action type (EXISTS)
     audit.server.ts         # Security event logging (EXISTS)
@@ -197,10 +198,116 @@ export async function handlePaymentSuccess(sessionId: string): Promise<void> {
 }
 ```
 
+### Pattern 5: Checkout Success Page with Backend Verification + Signed URL
+**What:** After Stripe checkout, redirect to a success page whose loader verifies payment via Stripe API (backend truth), then generates a time-limited Cloudinary signed URL for download
+**When to use:** Any post-payment download page — never trust client-side payment status
+**Example:**
+```typescript
+// NEW: app/routes/books.checkout-success.tsx
+export const loader: LoaderFunction = async ({ request }) => {
+  const url = new URL(request.url);
+  const sessionId = url.searchParams.get("session_id");
+  if (!sessionId) throw new Response("Missing session", { status: 400 });
+
+  // BACKEND TRUTH: Verify payment status via Stripe API, not client
+  const session = await stripe.checkout.sessions.retrieve(sessionId, {
+    expand: ['payment_intent.payment_method'],
+  });
+
+  // Find purchase by stripeSessionId (the key connecting user to payment)
+  const purchase = await prisma.purchase.findFirst({
+    where: { stripeSessionId: sessionId },
+  });
+  if (!purchase) throw new Response("Purchase not found", { status: 404 });
+
+  const book = await prisma.book.findUnique({ where: { id: purchase.bookId } });
+  if (!book) throw new Response("Book not found", { status: 404 });
+
+  const isPaid = session.payment_status === 'paid' && purchase.status === 'completed';
+
+  // Generate time-limited signed URL only if paid (URL expires per Cloudinary config)
+  let downloadUrl: string | null = null;
+  if (isPaid && purchase.downloadCount < purchase.maxDownloads) {
+    downloadUrl = generateSignedUrl(book.cloudinaryPublicId, { expiresIn: 3600 });
+  }
+
+  // Minimal payment data — only last 4, brand (never raw card numbers)
+  const paymentMethod = session.payment_intent?.payment_method;
+  const cardInfo = paymentMethod?.card
+    ? { last4: paymentMethod.card.last4, brand: paymentMethod.card.brand }
+    : null;
+
+  return data({
+    book: { title: book.title, thumbnailUrl: book.thumbnailUrl },
+    isPaid,
+    downloadUrl,
+    cardInfo,
+    downloadsRemaining: Math.max(0, purchase.maxDownloads - purchase.downloadCount),
+  });
+};
+```
+
+**Key principles:**
+- `stripeSessionId` saved during checkout connects the returning user to their payment
+- `useRevalidator()` on the client polls the loader if `isPaid` is false (webhook may be delayed)
+- `generateSignedUrl()` creates an expiring URL — even bookmarked pages get fresh URLs on each load
+- Only `last4` and `brand` are extracted from `payment_method` — no sensitive data stored
+
+### Pattern 6: Stripe Tax for Digital Books (EU VAT Compliance)
+**What:** Enable `automatic_tax` in the Stripe checkout session so VAT/GST is calculated automatically
+**When to use:** Selling digital goods (e-books) in regions with digital tax requirements (EU, UK, etc.)
+**Example:**
+```typescript
+// In createCheckoutSession — add to stripe.checkout.sessions.create()
+const session = await stripe.checkout.sessions.create({
+  mode: 'payment',
+  automatic_tax: { enabled: true },
+  line_items: [{ price: priceId, quantity: 1 }],
+  metadata: { purchaseId: purchase.id, bookId, userId },
+  // ... other options
+});
+```
+**Prerequisites:** Stripe Tax must be enabled in the Stripe Dashboard (Settings → Tax). Products should have the correct tax code (`txcd_10010001` for digital books/e-books).
+
+### Pattern 7: useRevalidator for Webhook Polling
+**What:** Use Remix's `useRevalidator()` to refresh loader data without full page reload while waiting for webhook
+**When to use:** When the checkout success page loads before the Stripe webhook has processed
+**Example:**
+```typescript
+// In books.checkout-success.tsx component
+function CheckoutSuccess() {
+  const { isPaid, downloadUrl, book } = useLoaderData<LoaderData>();
+  const revalidator = useRevalidator();
+
+  useEffect(() => {
+    if (!isPaid) {
+      const interval = setInterval(() => {
+        revalidator.revalidate();
+      }, 2000); // Poll every 2s
+      return () => clearInterval(interval);
+    }
+  }, [isPaid, revalidator]);
+
+  if (!isPaid) {
+    return <div>Verifying payment...</div>;
+  }
+
+  return (
+    <div>
+      <h1>Purchase complete!</h1>
+      {downloadUrl && <a href={downloadUrl}>Download {book.title}</a>}
+    </div>
+  );
+}
+```
+
 ### Anti-Patterns to Avoid
 - **Double-spending the request body:** `requireCSRFToken()` calls `request.clone().formData()` internally. The `books.$bookId.tsx` action currently does NOT read formData (it's a simple POST with no body beyond CSRF). When adding CSRF, the token must be included in the form.
 - **Blocking webhook on slow operations:** The Stripe webhook should return 200 quickly. If any post-processing is slow (like sending emails), do it asynchronously or after the response.
 - **Fetching book PDF on every download request:** The current `download.$token.tsx` fetches the PDF from Cloudinary via `fetch()` every time. This is correct (server proxies the download) but could be optimized with streaming if files are large.
+- **Trusting client-side payment status:** NEVER use URL parameters like `?success=true` to determine payment status. Always verify via Stripe API (`session.payment_status`) in the loader. The `session_id` URL param is safe because it's only used as a lookup key — the actual verification happens server-side.
+- **Storing raw card data:** Only extract `last4` and `brand` from the expanded `payment_method`. Never store full card numbers, CVV, or expiration dates. Stripe handles PCI compliance — keep it that way.
+- **Hardcoding download URLs:** Always generate Cloudinary signed URLs on the fly in the loader. Even if the user bookmarks the success page, the signed URL will have expired by the time they return — a fresh one is generated on each load.
 
 ## Don't Hand-Roll
 
@@ -212,8 +319,11 @@ export async function handlePaymentSuccess(sessionId: string): Promise<void> {
 | Download token generation | UUID or custom random | `crypto.randomBytes(32).toString('hex')` | Already used; 256-bit entropy is sufficient |
 | Price formatting | Manual string formatting | `Intl.NumberFormat` with locale | Already implemented in existing book routes |
 | i18n content localization | Manual JSON parsing | `getLocalizedContent()` / `getLocalizedList()` from `i18n.server.ts` | Already handles both string and object translation fields |
+| Secure PDF URLs | Public Cloudinary URLs | `generateSignedUrl()` from `cloudinary.server.ts` | Already implemented; generates time-limited signed URLs with configurable expiry |
+| Tax calculation | Manual tax logic | Stripe `automatic_tax: { enabled: true }` | Stripe Tax handles EU VAT, UK VAT, etc. for digital goods automatically |
+| Payment verification | Client-side URL params | `stripe.checkout.sessions.retrieve()` in loader | Backend truth — never trust `?success=true` from the client |
 
-**Key insight:** This phase is primarily about hardening and extending existing code. Almost every utility needed already exists in the project.
+**Key insight:** This phase is primarily about hardening and extending existing code. Almost every utility needed already exists in the project. The new checkout success page is the main new route.
 
 ## Common Pitfalls
 

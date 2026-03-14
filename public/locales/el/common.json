@@ -171,6 +171,8 @@
     "purchases.purchasedOn": "Αγοράστηκε στις",
     "purchases.download": "Λήψη PDF",
     "purchases.downloadCount": "Λήψεις: {{count}}",
+    "purchases.downloadsRemaining": "{{remaining}} απο {{max}} λήψεις απομένουν",
+    "purchases.downloadLimitReached": "Το οριο ληψεων εχει εξαντληθει",
     "purchases.status.completed": "Ολοκληρώθηκε",
     "purchases.status.pending": "Σε εκκρεμότητα",
     "purchases.status.failed": "Απέτυχε",

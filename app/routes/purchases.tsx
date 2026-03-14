@@ -14,6 +14,8 @@ interface Purchase {
   status: string;
   downloadToken: string | null;
   downloadCount: number;
+  maxDownloads: number;
+  tokenExpiresAt: string | null;
   createdAt: string;
   book?: {
     id: string;
@@ -177,28 +179,38 @@ export default function Purchases() {
 
                       {purchase.status === "completed" && purchase.downloadToken && (
                         <div className="mt-4">
-                          <a
-                            href={`/download/${purchase.downloadToken}`}
-                            className="inline-flex items-center px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors"
-                          >
-                            <svg
-                              className="w-4 h-4 mr-2"
-                              fill="none"
-                              stroke="currentColor"
-                              viewBox="0 0 24 24"
+                          {purchase.downloadCount >= purchase.maxDownloads ? (
+                            <p className="text-sm text-red-600 mt-2">
+                              {t("purchases.downloadLimitReached")}
+                            </p>
+                          ) : (
+                            <a
+                              href={`/download/${purchase.downloadToken}`}
+                              className="inline-flex items-center px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors"
                             >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
-                              />
-                            </svg>
-                            {t("purchases.download")}
-                          </a>
+                              <svg
+                                className="w-4 h-4 mr-2"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+                                />
+                              </svg>
+                              {t("purchases.download")}
+                            </a>
+                          )}
                           <p className="text-xs text-gray-500 mt-2">
-                            {t("purchases.downloadCount", {
-                              count: purchase.downloadCount,
+                            {t("purchases.downloadsRemaining", {
+                              remaining: Math.max(
+                                0,
+                                purchase.maxDownloads - purchase.downloadCount
+                              ),
+                              max: purchase.maxDownloads,
                             })}
                           </p>
                         </div>

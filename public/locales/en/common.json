@@ -171,6 +171,8 @@
     "purchases.purchasedOn": "Purchased on",
     "purchases.download": "Download PDF",
     "purchases.downloadCount": "Downloaded {{count}} times",
+    "purchases.downloadsRemaining": "{{remaining}} of {{max}} downloads remaining",
+    "purchases.downloadLimitReached": "Download limit reached",
     "purchases.status.completed": "Completed",
     "purchases.status.pending": "Pending",
     "purchases.status.failed": "Failed",

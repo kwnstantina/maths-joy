@@ -1,18 +1,26 @@
 import { LoaderFunction } from '@remix-run/node';
+import { applyRateLimit } from '~/utils/ratelimit.server';
 import { verifyDownloadToken } from '~/utils/stripe.server';
 
-export const loader: LoaderFunction = async ({ params }) => {
+export const loader: LoaderFunction = async ({ params, request }) => {
   const { token } = params;
 
   if (!token) {
     throw new Response('Download token required', { status: 400 });
   }
 
+  // Rate limit downloads (20/hr per IP)
+  const rateLimitResponse = applyRateLimit(request, 'download');
+  if (rateLimitResponse) return rateLimitResponse;
+
   // Verify token and get book info
   const result = await verifyDownloadToken(token);
 
   if (!result) {
-    throw new Response('Invalid or expired download token', { status: 403 });
+    throw new Response(
+      'Download unavailable. The token may be invalid, expired, or the download limit has been reached.',
+      { status: 403 }
+    );
   }
 
   try {

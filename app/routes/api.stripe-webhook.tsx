@@ -1,19 +1,24 @@
 import type { ActionFunction } from '@remix-run/node';
-import { data } from '@remix-run/node';
 import {
   verifyWebhookSignature,
   handlePaymentSuccess,
   handlePaymentFailure,
 } from '~/utils/stripe.server';
 
+const jsonResponse = (body: Record<string, unknown>, status = 200) =>
+  new Response(JSON.stringify(body), {
+    status,
+    headers: { 'Content-Type': 'application/json' },
+  });
+
 export const action: ActionFunction = async ({ request }) => {
   if (request.method !== 'POST') {
-    return data({ error: 'Method not allowed' }, { status: 405 });
+    return jsonResponse({ error: 'Method not allowed' }, 405);
   }
 
   const signature = request.headers.get('stripe-signature');
   if (!signature) {
-    return data({ error: 'Missing stripe-signature header' }, { status: 400 });
+    return jsonResponse({ error: 'Missing stripe-signature header' }, 400);
   }
 
   // Get raw body for signature verification
@@ -22,7 +27,7 @@ export const action: ActionFunction = async ({ request }) => {
   // Verify webhook signature
   const event = verifyWebhookSignature(payload, signature);
   if (!event) {
-    return data({ error: 'Invalid signature' }, { status: 400 });
+    return jsonResponse({ error: 'Invalid signature' }, 400);
   }
 
   try {
@@ -52,17 +57,14 @@ export const action: ActionFunction = async ({ request }) => {
         console.log(`Unhandled event type: ${event.type}`);
     }
 
-    return data({ received: true });
+    return jsonResponse({ received: true });
   } catch (error) {
     console.error('Webhook handler error:', error);
-    return data(
-      { error: 'Webhook handler failed' },
-      { status: 500 }
-    );
+    return jsonResponse({ error: 'Webhook handler failed' }, 500);
   }
 };
 
 // Webhooks only use POST
 export const loader = () => {
-  return data({ error: 'Method not allowed' }, { status: 405 });
+  return jsonResponse({ error: 'Method not allowed' }, 405);
 };

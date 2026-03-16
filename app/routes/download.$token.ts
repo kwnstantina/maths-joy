@@ -34,18 +34,18 @@ export const loader: LoaderFunction = async ({ params, request }) => {
     // Get the file content
     const fileBuffer = await response.arrayBuffer();
 
-    // Sanitize filename for Content-Disposition header
-    const safeFilename = result.title
-      .replace(/[^a-zA-Z0-9\u0370-\u03FF\s\-_]/g, '') // Allow Greek chars
+    // ASCII-safe filename for Content-Disposition (fallback)
+    const asciiFilename = result.title
+      .replace(/[^a-zA-Z0-9\s\-_]/g, '')
       .trim()
-      .replace(/\s+/g, '_');
+      .replace(/\s+/g, '_') || 'download';
 
     // Return the file with proper headers for download
     return new Response(fileBuffer, {
       status: 200,
       headers: {
         'Content-Type': 'application/pdf',
-        'Content-Disposition': `attachment; filename="${safeFilename}.pdf"; filename*=UTF-8''${encodeURIComponent(result.title)}.pdf`,
+        'Content-Disposition': `attachment; filename="${asciiFilename}.pdf"; filename*=UTF-8''${encodeURIComponent(result.title)}.pdf`,
         'Content-Length': String(fileBuffer.byteLength),
         'Cache-Control': 'private, no-cache',
       },
@@ -56,7 +56,3 @@ export const loader: LoaderFunction = async ({ params, request }) => {
   }
 };
 
-// No component needed - this route just handles the download
-export default function Download() {
-  return null;
-}

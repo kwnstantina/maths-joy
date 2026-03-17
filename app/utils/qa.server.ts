@@ -37,7 +37,12 @@ export async function createQuestion(input: CreateQuestionInput) {
   });
 }
 
-export async function getQuestions(filters: QuestionFilters = {}, page = 1, limit = 20) {
+export async function getQuestions(
+  filters: QuestionFilters = {},
+  page = 1,
+  limit = 20,
+  sortBy: 'newest' | 'votes' = 'newest'
+) {
   const skip = (page - 1) * limit;
 
   const where: Record<string, unknown> = {};
@@ -61,10 +66,14 @@ export async function getQuestions(filters: QuestionFilters = {}, page = 1, limi
     ];
   }
 
+  const orderBy = sortBy === 'votes'
+    ? { voteCount: 'desc' as const }
+    : { createdAt: 'desc' as const };
+
   const [questions, total] = await Promise.all([
     prisma.question.findMany({
       where,
-      orderBy: { createdAt: 'desc' },
+      orderBy,
       skip,
       take: limit,
     }),
@@ -106,10 +115,30 @@ export async function updateQuestion(id: string, data: Partial<Pick<CreateQuesti
 }
 
 export async function deleteQuestion(id: string) {
-  // Delete all answers and votes first
-  await prisma.answer.deleteMany({ where: { questionId: id } });
-  await prisma.questionVote.deleteMany({ where: { questionId: id } });
-  return prisma.question.delete({ where: { id } });
+  // Wrap entire delete sequence in a transaction for atomicity
+  return prisma.$transaction(async (tx) => {
+    // Find all answer IDs for this question
+    const answers = await tx.answer.findMany({
+      where: { questionId: id },
+      select: { id: true },
+    });
+
+    // Delete all AnswerVotes for those answers (prevent orphans)
+    if (answers.length > 0) {
+      await tx.answerVote.deleteMany({
+        where: { answerId: { in: answers.map(a => a.id) } },
+      });
+    }
+
+    // Delete all answers
+    await tx.answer.deleteMany({ where: { questionId: id } });
+
+    // Delete all question votes
+    await tx.questionVote.deleteMany({ where: { questionId: id } });
+
+    // Delete the question itself
+    return tx.question.delete({ where: { id } });
+  });
 }
 
 // Answers
@@ -196,92 +225,124 @@ export async function acceptAnswer(answerId: string, questionId: string) {
 // Voting
 
 export async function voteQuestion(questionId: string, userId: string, value: 1 | -1) {
-  const existingVote = await prisma.questionVote.findUnique({
-    where: { questionId_userId: { questionId, userId } },
-  });
+  return prisma.$transaction(async (tx) => {
+    // Self-vote prevention: check if user is the question author
+    const question = await tx.question.findUnique({
+      where: { id: questionId },
+      select: { authorId: true },
+    });
 
-  if (existingVote) {
-    if (existingVote.value === value) {
-      // Remove vote if clicking same button
-      await prisma.questionVote.delete({
-        where: { id: existingVote.id },
-      });
-      await prisma.question.update({
-        where: { id: questionId },
-        data: { voteCount: { decrement: value } },
-      });
-      return { action: 'removed', newValue: 0 };
-    } else {
-      // Change vote direction
-      await prisma.questionVote.update({
-        where: { id: existingVote.id },
-        data: { value },
-      });
-      await prisma.question.update({
-        where: { id: questionId },
-        data: { voteCount: { increment: value * 2 } }, // -1 to 1 or 1 to -1
-      });
-      return { action: 'changed', newValue: value };
+    if (!question) {
+      throw new Error('Question not found');
     }
-  }
 
-  // New vote
-  await prisma.questionVote.create({
-    data: {
-      questionId,
-      userId,
-      value,
-      createdAt: new Date(),
-    },
+    if (userId === question.authorId) {
+      throw new Error('Cannot vote on own content');
+    }
+
+    const existingVote = await tx.questionVote.findUnique({
+      where: { questionId_userId: { questionId, userId } },
+    });
+
+    if (existingVote) {
+      if (existingVote.value === value) {
+        // Remove vote if clicking same button
+        await tx.questionVote.delete({
+          where: { id: existingVote.id },
+        });
+        await tx.question.update({
+          where: { id: questionId },
+          data: { voteCount: { decrement: value } },
+        });
+        return { action: 'removed' as const, newValue: 0 };
+      } else {
+        // Change vote direction
+        await tx.questionVote.update({
+          where: { id: existingVote.id },
+          data: { value },
+        });
+        await tx.question.update({
+          where: { id: questionId },
+          data: { voteCount: { increment: value * 2 } },
+        });
+        return { action: 'changed' as const, newValue: value };
+      }
+    }
+
+    // New vote
+    await tx.questionVote.create({
+      data: {
+        questionId,
+        userId,
+        value,
+        createdAt: new Date(),
+      },
+    });
+    await tx.question.update({
+      where: { id: questionId },
+      data: { voteCount: { increment: value } },
+    });
+    return { action: 'added' as const, newValue: value };
   });
-  await prisma.question.update({
-    where: { id: questionId },
-    data: { voteCount: { increment: value } },
-  });
-  return { action: 'added', newValue: value };
 }
 
 export async function voteAnswer(answerId: string, userId: string, value: 1 | -1) {
-  const existingVote = await prisma.answerVote.findUnique({
-    where: { answerId_userId: { answerId, userId } },
-  });
+  return prisma.$transaction(async (tx) => {
+    // Self-vote prevention: check if user is the answer author
+    const answer = await tx.answer.findUnique({
+      where: { id: answerId },
+      select: { authorId: true },
+    });
 
-  if (existingVote) {
-    if (existingVote.value === value) {
-      await prisma.answerVote.delete({
-        where: { id: existingVote.id },
-      });
-      await prisma.answer.update({
-        where: { id: answerId },
-        data: { voteCount: { decrement: value } },
-      });
-      return { action: 'removed', newValue: 0 };
-    } else {
-      await prisma.answerVote.update({
-        where: { id: existingVote.id },
-        data: { value },
-      });
-      await prisma.answer.update({
-        where: { id: answerId },
-        data: { voteCount: { increment: value * 2 } },
-      });
-      return { action: 'changed', newValue: value };
+    if (!answer) {
+      throw new Error('Answer not found');
     }
-  }
 
-  await prisma.answerVote.create({
-    data: {
-      answerId,
-      userId,
-      value,
-      createdAt: new Date(),
-    },
+    if (userId === answer.authorId) {
+      throw new Error('Cannot vote on own content');
+    }
+
+    const existingVote = await tx.answerVote.findUnique({
+      where: { answerId_userId: { answerId, userId } },
+    });
+
+    if (existingVote) {
+      if (existingVote.value === value) {
+        await tx.answerVote.delete({
+          where: { id: existingVote.id },
+        });
+        await tx.answer.update({
+          where: { id: answerId },
+          data: { voteCount: { decrement: value } },
+        });
+        return { action: 'removed' as const, newValue: 0 };
+      } else {
+        await tx.answerVote.update({
+          where: { id: existingVote.id },
+          data: { value },
+        });
+        await tx.answer.update({
+          where: { id: answerId },
+          data: { voteCount: { increment: value * 2 } },
+        });
+        return { action: 'changed' as const, newValue: value };
+      }
+    }
+
+    await tx.answerVote.create({
+      data: {
+        answerId,
+        userId,
+        value,
+        createdAt: new Date(),
+      },
+    });
+    await tx.answer.update({
+      where: { id: answerId },
+      data: { voteCount: { increment: value } },
+    });
+    return { action: 'added' as const, newValue: value };
   });
-  await prisma.answer.update({
-    where: { id: answerId },
-    data: { voteCount: { increment: value } },
-  });
-  return { action: 'added', newValue: value };
 }
 
 export async function getUserVotes(userId: string, questionId: string) {

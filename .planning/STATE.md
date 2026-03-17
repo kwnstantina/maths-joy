@@ -1,37 +1,37 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.0
-milestone_name: milestone
-status: unknown
-last_updated: "2026-03-14T13:55:40Z"
+milestone: v1.1
+milestone_name: Platform Completion
+status: roadmap_complete
+last_updated: "2026-03-17"
 progress:
-  total_phases: 2
-  completed_phases: 2
-  total_plans: 5
-  completed_plans: 5
+  total_phases: 5
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
 ---
 
 # Project State
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-02-21)
+See: .planning/PROJECT.md (updated 2026-03-17)
 
 **Core value:** Students can find, practice, and learn mathematics through exercises, videos, and books
-**Current focus:** Phase 2 - Book Commerce
+**Current focus:** Phase 3 -- Q&A Core (ready to plan)
 
 ## Current Position
 
-Phase: 2 of 7 (Book Commerce) -- COMPLETE
-Plan: 3 of 3 in current phase (all complete)
-Status: Phase 02 complete, ready for Phase 03
-Last activity: 2026-03-14 — Completed 02-03-PLAN.md (webhook idempotency, download enforcement, rate limiting)
+Phase: 3 of 7 (Q&A Core) -- first phase of v1.1
+Plan: --
+Status: Ready to plan
+Last activity: 2026-03-17 -- Roadmap created for v1.1 (5 phases, 14 requirements mapped)
 
-Progress: [█████░░░░░] ~33%
+Progress: [██████████] v1.0 100% | v1.1 [░░░░░░░░░░] 0%
 
 ## Performance Metrics
 
-**Velocity:**
+**v1.0 Velocity:**
 - Total plans completed: 5
 - Average duration: 7min
 - Total execution time: 33min
@@ -43,12 +43,6 @@ Progress: [█████░░░░░] ~33%
 | 1. Book Upload | 2 | 20min | 10min |
 | 2. Book Commerce | 3 | 13min | 4.3min |
 
-**Recent Trend:**
-- Last 5 plans: 5min, 15min, 4min, 3min, 6min
-- Trend: Improving
-
-*Updated after each plan completion*
-
 ## Accumulated Context
 
 ### Decisions
@@ -56,36 +50,22 @@ Progress: [█████░░░░░] ~33%
 Decisions are logged in PROJECT.md Key Decisions table.
 Recent decisions affecting current work:
 
-- Free exercises, paid books: exercises drive traffic, books generate revenue
-- Stack Overflow-style Q&A: open community, voting determines quality
-- YouTube embedding only: no video hosting on platform
-- Used Prisma.InputJsonValue type for translation field to fix pre-existing type error (01-01)
-- PDF archive uses two-step Prisma update for safe array push operation (01-01)
-- getAllBooks filters by both isActive=true AND deletedAt=null when activeOnly=true (01-01)
-- [Phase 01]: Used multi-action handler pattern (_action field) for create, update, toggle, delete in single route (01-02)
-- [Phase 01]: BookCard inline editing uses useFetcher for seamless UX without page reload (01-02)
-- [Phase 02]: Used Link-based category filter for Remix consistency (02-01)
-- [Phase 02]: Rate limit type 'api' (100/min) for purchase action (02-01)
-- [Phase 02]: Purchase action security order: CSRF -> auth -> rate limit -> audit -> business logic (02-01)
-- [Phase 02]: Used cloudinaryUrl directly (not signed URLs) since books have public access_mode (02-02)
-- [Phase 02]: Download count incremented on URL generation, not click -- acceptable for post-payment flow (02-02)
-- [Phase 02]: useRevalidator polling for webhook completion every 2s with auto-stop (02-02)
-- [Phase 02]: Download enforcement order: status -> count -> expiry -> book active -> increment (02-03)
-- [Phase 02]: Webhook idempotency: check DB before Stripe API call to avoid unnecessary external requests (02-03)
-- [Phase 02]: IP-based rate limiting on download route since it is unauthenticated (token-based) (02-03)
+- Phase 3: Q&A security hardening bundled with core features (existing routes lack CSRF/rate-limiting)
+- Phase 5-6: Video and Exercise phases are independent, can execute in either order
 
 ### Pending Todos
 
-None yet.
+None.
 
 ### Blockers/Concerns
 
-- Partial book model and Stripe utilities exist in codebase — plan-phase should audit before building to avoid duplication
-- Q&A models (Question, Answer, Vote) exist in Prisma schema — routes need to be built, not models
-- Upload dashboard (uploadEx.tsx) has book/tutorial tab stubs as untracked files — coordinate to avoid conflicts
+- Q&A routes/data access already exist but lack security (CSRF, rate limiting, self-vote prevention) -- Phase 3 priority
+- Vote count drift risk: need Prisma $transaction() for atomic vote operations
+- Video tags stored as single-element arrays -- fix needed in Phase 5
+- Bulk upload memory risk on Vercel serverless -- test with sequential streaming in Phase 6
 
 ## Session Continuity
 
-Last session: 2026-03-14
-Stopped at: Completed 02-03-PLAN.md — Webhook idempotency, download enforcement, rate limiting (Phase 02 complete)
+Last session: 2026-03-17
+Stopped at: Roadmap created for v1.1 milestone
 Resume file: None

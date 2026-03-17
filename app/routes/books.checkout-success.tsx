@@ -10,7 +10,6 @@ export const handle = { i18n: ["common"] };
 
 interface LoaderData {
   book: { title: string; thumbnailUrl: string | null };
-  isPaid: boolean;
   isCompleted: boolean;
   downloadUrl: string | null;
   cardInfo: { last4: string; brand: string } | null;
@@ -26,14 +25,6 @@ export const loader: LoaderFunction = async ({ request }) => {
     return redirect("/books");
   }
 
-  // Verify payment via Stripe API (BACKEND TRUTH - never trust client params)
-  let sessionDetails;
-  try {
-    sessionDetails = await getCheckoutSessionDetails(sessionId);
-  } catch {
-    throw new Response("Failed to verify payment", { status: 500 });
-  }
-
   // Find purchase by stripeSessionId -- the key connecting the returning user to their payment
   const purchase = await prisma.purchase.findFirst({
     where: { stripeSessionId: sessionId },
@@ -43,13 +34,26 @@ export const loader: LoaderFunction = async ({ request }) => {
     throw new Response("Purchase not found", { status: 404 });
   }
 
+  const isCompleted = purchase.status === "completed";
+
+  // Only call Stripe API on initial load (when payment just completed) to get card info.
+  // During polling (isCompleted=false), we only need the DB purchase status.
+  let cardInfo: { last4: string; brand: string } | null = null;
+  if (isCompleted) {
+    try {
+      const sessionDetails = await getCheckoutSessionDetails(sessionId);
+      cardInfo = sessionDetails.cardInfo;
+    } catch {
+      // Card info is cosmetic — don't fail the page if Stripe is unreachable
+    }
+  }
+
   // Find the book associated with the purchase
   const book = await prisma.book.findUnique({
     where: { id: purchase.bookId },
     select: {
       title: true,
       thumbnailUrl: true,
-      cloudinaryUrl: true,
     },
   });
 
@@ -57,40 +61,26 @@ export const loader: LoaderFunction = async ({ request }) => {
     throw new Response("Book not found", { status: 404 });
   }
 
-  const isCompleted = purchase.status === "completed";
   const canDownload =
     isCompleted && purchase.downloadCount < purchase.maxDownloads;
 
-  let downloadUrl: string | null = null;
-
-  if (canDownload) {
-    // Use the public cloudinaryUrl directly for download.
-    // Books are uploaded with access_mode: 'public', so the stored URL is accessible.
-    // Each loader invocation generates a fresh response -- bookmarked pages work fine.
-    downloadUrl = book.cloudinaryUrl;
-
-    // Increment download count when generating the URL.
-    // This is a tradeoff: user "uses" a download even if they don't complete it.
-    // Acceptable because the success page is a one-time post-payment flow.
-    await prisma.purchase.update({
-      where: { id: purchase.id },
-      data: {
-        downloadCount: { increment: 1 },
-      },
-    });
-  }
+  // Use the secure /download/:token route instead of exposing the raw Cloudinary URL.
+  // This ensures downloads are gated by token verification, expiration, and rate limiting.
+  const downloadUrl =
+    canDownload && purchase.downloadToken
+      ? `/download/${purchase.downloadToken}`
+      : null;
 
   const downloadsRemaining = Math.max(
     0,
-    purchase.maxDownloads - purchase.downloadCount - (canDownload ? 1 : 0)
+    purchase.maxDownloads - purchase.downloadCount
   );
 
   return data<LoaderData>({
     book: { title: book.title, thumbnailUrl: book.thumbnailUrl },
-    isPaid: sessionDetails.isPaid,
     isCompleted,
     downloadUrl,
-    cardInfo: sessionDetails.cardInfo,
+    cardInfo,
     downloadsRemaining,
     maxDownloads: purchase.maxDownloads,
   });

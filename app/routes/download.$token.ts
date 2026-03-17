@@ -1,4 +1,5 @@
 import { LoaderFunction } from '@remix-run/node';
+import { generateSignedUrl } from '~/utils/cloudinary.server';
 import { applyRateLimit } from '~/utils/ratelimit.server';
 import { verifyDownloadToken } from '~/utils/stripe.server';
 
@@ -24,15 +25,18 @@ export const loader: LoaderFunction = async ({ params, request }) => {
   }
 
   try {
-    // Fetch the PDF from Cloudinary
-    const response = await fetch(result.cloudinaryUrl);
+    // Generate a short-lived signed URL (15 min) instead of using the permanent public URL
+    const signedUrl = generateSignedUrl(result.cloudinaryPublicId, {
+      expiresIn: 900,
+      resourceType: 'raw',
+    });
+
+    // Fetch the PDF from Cloudinary via signed URL
+    const response = await fetch(signedUrl);
 
     if (!response.ok) {
       throw new Response('Failed to fetch file', { status: 502 });
     }
-
-    // Get the file content
-    const fileBuffer = await response.arrayBuffer();
 
     // ASCII-safe filename for Content-Disposition (fallback)
     const asciiFilename = result.title
@@ -40,13 +44,15 @@ export const loader: LoaderFunction = async ({ params, request }) => {
       .trim()
       .replace(/\s+/g, '_') || 'download';
 
-    // Return the file with proper headers for download
-    return new Response(fileBuffer, {
+    // Stream the PDF directly from Cloudinary to avoid buffering in memory
+    return new Response(response.body, {
       status: 200,
       headers: {
         'Content-Type': 'application/pdf',
         'Content-Disposition': `attachment; filename="${asciiFilename}.pdf"; filename*=UTF-8''${encodeURIComponent(result.title)}.pdf`,
-        'Content-Length': String(fileBuffer.byteLength),
+        ...(response.headers.get('content-length')
+          ? { 'Content-Length': response.headers.get('content-length')! }
+          : {}),
         'Cache-Control': 'private, no-cache',
       },
     });

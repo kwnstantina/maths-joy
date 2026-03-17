@@ -205,11 +205,11 @@ export async function handlePaymentFailure(
 }
 
 /**
- * Verify download token and get book download URL
+ * Verify download token and get book info for secure download
  */
 export async function verifyDownloadToken(
   token: string
-): Promise<{ bookId: string; cloudinaryUrl: string; title: string } | null> {
+): Promise<{ bookId: string; cloudinaryPublicId: string; title: string } | null> {
   // 1. Find purchase by token
   const purchase = await prisma.purchase.findUnique({
     where: { downloadToken: token },
@@ -248,10 +248,10 @@ export async function verifyDownloadToken(
     },
   });
 
-  // 8. Return book info
+  // 8. Return book info (public ID only — caller generates signed URL)
   return {
     bookId: book.id,
-    cloudinaryUrl: book.cloudinaryUrl,
+    cloudinaryPublicId: book.cloudinaryPublicId,
     title: book.title,
   };
 }
@@ -316,9 +316,6 @@ export function verifyWebhookSignature(
  */
 export interface CheckoutSessionDetails {
   isPaid: boolean;
-  purchaseId: string | null;
-  bookId: string | null;
-  downloadToken: string | null;
   cardInfo: { last4: string; brand: string } | null;
 }
 
@@ -360,9 +357,6 @@ export async function getCheckoutSessionDetails(
 
   return {
     isPaid,
-    purchaseId: session.metadata?.purchaseId ?? null,
-    bookId: session.metadata?.bookId ?? null,
-    downloadToken: session.metadata?.downloadToken ?? null,
     cardInfo,
   };
 }

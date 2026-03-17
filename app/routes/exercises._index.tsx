@@ -3,11 +3,8 @@ import Card from "components/card/card";
 import { useLoaderData, useSearchParams, useNavigation } from "@remix-run/react";
 import { LoaderFunction, data } from "@remix-run/node";
 import { useState, useCallback } from "react";
-import {
-  getAllExcersices,
-  getExersiceBySearch,
-} from "~/utils/exersices.prisma";
-import { TAGS, Category, Type } from "services/models/models";
+import { getAllExcersices } from "~/utils/exersices.prisma";
+import { TAGS, Category, Type, TAGS_En, Category_En, Type_En } from "services/models/models";
 import { useTranslation } from "react-i18next";
 import LoadingPage from "components/loadingPage/loadingPage";
 
@@ -19,7 +16,7 @@ interface Exercise {
   title: string;
   description?: string | null;
   category: string;
-  tags?: string;
+  tags: string;
   translation?: JsonValue;
 }
 
@@ -36,16 +33,109 @@ interface FilterEvent {
   name: string;
 }
 
-interface WhereClause {
-  category?: string;
-  title?: string;
-  description?: { contains: string };
-  tags?: { contains: string };
-  translation?: { not: { equals: null } };
+// Build English→Greek lookup maps so English filter values can match Greek DB data
+function buildEnToElMap(enModel: Record<string, { name: string }>, elModel: Record<string, { name: string }>): Record<string, string> {
+  const map: Record<string, string> = {};
+  for (const key of Object.keys(enModel)) {
+    const enName = enModel[key].name;
+    const elName = elModel[key]?.name;
+    if (enName && elName) {
+      map[enName] = elName;
+    }
+  }
+  return map;
+}
+
+const categoryEnToEl = buildEnToElMap(Category_En.byId, Category.byId);
+const levelEnToEl = buildEnToElMap(TAGS_En.byId, TAGS.byId);
+const typeEnToEl = buildEnToElMap(Type_En.byId, Type.byId);
+
+function mapToEnglish(exercise: Exercise): Exercise {
+  if (!exercise.translation) return exercise;
+  try {
+    const translation =
+      typeof exercise.translation === "string"
+        ? JSON.parse(exercise.translation)
+        : exercise.translation;
+    const en = translation?.en;
+    if (!en) return exercise;
+    return {
+      ...exercise,
+      title: en.title ?? exercise.title,
+      description: en.description ?? exercise.description,
+      category: en.category ?? exercise.category,
+      tags: Array.isArray(en.tags) ? en.tags.join(",") : (en.tags ?? exercise.tags),
+    };
+  } catch {
+    return exercise;
+  }
+}
+
+// Normalize for comparison: strip diacritics, handle Greek/Latin lookalikes, lowercase
+function normalize(s: string): string {
+  return s
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "") // strip combining diacritics (accents)
+    .replace(/A/g, "Α")              // Latin A → Greek Α
+    .replace(/B/g, "Β")              // Latin B → Greek Β
+    .toLowerCase();
+}
+
+function matches(value: string | null | undefined, filter: string): boolean {
+  if (!value) return false;
+  return normalize(value) === normalize(filter);
+}
+
+function includes(value: string | null | undefined, filter: string): boolean {
+  if (!value) return false;
+  return normalize(value).includes(normalize(filter));
+}
+
+function applyFilters(
+  exercises: Exercise[],
+  filters: { category: string | null; title: string | null; input: string | null; tags: string | null },
+  isEnglish: boolean
+): Exercise[] {
+  let result = exercises;
+
+  if (filters.category) {
+    const categoryEl = isEnglish ? categoryEnToEl[filters.category] : null;
+    result = result.filter(
+      (e) => matches(e.category, filters.category!) || (categoryEl && matches(e.category, categoryEl))
+    );
+  }
+  // "title" filter = school level; check both title and tags fields
+  // (old exercises store level in title, admin exercises store level in tags)
+  if (filters.title) {
+    const levelEl = isEnglish ? levelEnToEl[filters.title] : null;
+    result = result.filter(
+      (e) =>
+        matches(e.title, filters.title!) ||
+        matches(e.tags, filters.title!) ||
+        (levelEl && (matches(e.title, levelEl) || matches(e.tags, levelEl)))
+    );
+  }
+  if (filters.input) {
+    const search = filters.input.toLowerCase();
+    result = result.filter((e) =>
+      e.description?.toLowerCase().includes(search)
+    );
+  }
+  // "tags" filter = exercise type; check both tags and title fields
+  if (filters.tags) {
+    const typeEl = isEnglish ? typeEnToEl[filters.tags] : null;
+    result = result.filter(
+      (e) =>
+        includes(e.tags, filters.tags!) ||
+        includes(e.title, filters.tags!) ||
+        (typeEl && (includes(e.tags, typeEl) || includes(e.title, typeEl)))
+    );
+  }
+
+  return result;
 }
 
 export const loader: LoaderFunction = async ({ request }) => {
-  let exersisesAll: Exercise[] = await getAllExcersices();
   const url = new URL(request.url);
   const filters = {
     category: url.searchParams.get("category"),
@@ -55,63 +145,22 @@ export const loader: LoaderFunction = async ({ request }) => {
     lang: url.searchParams.get("lang"),
   };
 
-  const whereClause: WhereClause = {};
+  let exercises: Exercise[] = await getAllExcersices();
 
-  // Apply filters based on the 'filters' object.
-  if (filters.lang === "el") {
-    if (filters.category) {
-      whereClause.category = filters.category;
-    }
-    if (filters.title) {
-      whereClause.title = filters.title;
-    }
-    if (filters.input) {
-      whereClause.description = {
-        contains: filters.input,
-      };
-    }
-    if (filters.tags) {
-      whereClause.tags = {
-        contains: filters.tags,
-      };
-    }
-    exersisesAll = await getExersiceBySearch(whereClause);
-  } else if (filters.lang === "en") {
-    whereClause.translation = {
-      not: {
-        equals: null,
-      },
-    };
-
-    // After the search we need to parse the translation and query the db again
-    // to get the english translation
-    exersisesAll = await getExersiceBySearch(whereClause);
-    exersisesAll = exersisesAll.map((exercise: Exercise) => {
-      if (exercise.translation) {
-        try {
-          // Handle both string and already-parsed JSON
-          const translation = typeof exercise.translation === 'string'
-            ? JSON.parse(exercise.translation)
-            : exercise.translation;
-          if (translation && typeof translation === 'object' && 'en' in translation) {
-            const enTranslation = (translation as { en: { title?: string; description?: string; category?: string; tags?: string } }).en;
-            return {
-              ...exercise,
-              title: enTranslation.title ?? exercise.title,
-              description: enTranslation.description ?? exercise.description,
-              category: enTranslation.category ?? exercise.category,
-              tags: enTranslation.tags ?? exercise.tags,
-            };
-          }
-        } catch (err) {
-          console.error("Error parsing JSON:", err);
-        }
-      }
-      return exercise; // If no English translation, return original
-    });
+  // English: only show exercises with translations, mapped to English
+  if (filters.lang === "en") {
+    exercises = exercises
+      .filter((e) => e.translation)
+      .map(mapToEnglish);
   }
 
-  return data(exersisesAll) ?? [];
+  // Apply filters in-memory (works for both languages)
+  const hasFilters = filters.category || filters.title || filters.input || filters.tags;
+  if (hasFilters) {
+    exercises = applyFilters(exercises, filters, filters.lang === "en");
+  }
+
+  return data(exercises) ?? [];
 };
 
 const Exersices = () => {

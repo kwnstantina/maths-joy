@@ -15,7 +15,6 @@ interface Purchase {
   downloadToken: string | null;
   downloadCount: number;
   maxDownloads: number;
-  tokenExpiresAt: string | null;
   createdAt: string;
   book?: {
     id: string;

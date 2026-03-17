@@ -58,8 +58,8 @@ export async function uploadToCloudinary(
       public_id,
       overwrite,
       tags,
-      // For PDFs, we want to allow direct access
-      access_mode: 'public',
+      // Authenticated mode: direct URLs won't work without a signature
+      type: 'authenticated',
     });
 
     return {
@@ -100,7 +100,7 @@ export async function uploadBufferToCloudinary(
         resource_type,
         public_id: filename.replace(/\.[^/.]+$/, ''), // Remove extension
         tags,
-        access_mode: 'public',
+        type: 'authenticated',
       },
       (error, result) => {
         if (error) {
@@ -251,7 +251,7 @@ export async function uploadStreamToCloudinary(
         resource_type: options.resource_type,
         tags: options.tags,
         public_id: options.public_id,
-        access_mode: "public",
+        type: "authenticated",
       },
       (error, result) => {
         if (error) {

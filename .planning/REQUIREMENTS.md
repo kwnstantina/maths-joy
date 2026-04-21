@@ -24,10 +24,10 @@ Requirements for current milestone. Each maps to roadmap phases.
 
 ### Exercises
 
-- [ ] **EX-01**: Admin can bulk upload multiple exercise PDFs at once
-- [ ] **EX-02**: Exercises have improved category and tag organization
-- [ ] **EX-03**: Students can search exercises by title, category, or tags
-- [ ] **EX-04**: Exercise listing uses server-side pagination
+- [x] **EX-01**: Admin can bulk upload multiple exercise PDFs at once
+- [x] **EX-02**: Exercises have improved category and tag organization
+- [x] **EX-03**: Students can search exercises by title, category, or tags
+- [x] **EX-04**: Exercise listing uses server-side pagination
 
 ### i18n
 
@@ -80,10 +80,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | QA-07 | Phase 3 | Complete |
 | VID-01 | Phase 5 | Pending |
 | VID-02 | Phase 5 | Pending |
-| EX-01 | Phase 6 | Pending |
-| EX-02 | Phase 6 | Pending |
-| EX-03 | Phase 6 | Pending |
-| EX-04 | Phase 6 | Pending |
+| EX-01 | Phase 6 | Complete |
+| EX-02 | Phase 6 | Complete |
+| EX-03 | Phase 6 | Complete |
+| EX-04 | Phase 6 | Complete |
 | I18N-01 | Phase 7 | Pending |
 
 **Coverage:**
@@ -93,4 +93,4 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 ---
 *Requirements defined: 2026-03-17*
-*Last updated: 2026-03-17 after roadmap creation*
+*Last updated: 2026-04-21 after 06-02 Tasks 1+2 completion (EX-01 marked complete; Task 3 human-verify checkpoint pending)*

@@ -21,7 +21,9 @@ model Exersice {
   exerciseImgUrl     String?
   fileContentType    String?  // Legacy: Base64 encoded file (deprecated)
   fileName           String
-  tags               String
+  tags               String[]
+  level              String?
+  type               String?
   title              String
   updatedAt          DateTime @db.Date
   translation        Json?

@@ -1,6 +1,22 @@
+import { TAGS, Type } from "../../services/models/models";
+
 // Constants for validation
 const PASSWORD_MIN_LENGTH = 8;
 const FILE_MAX_SIZE_MB = 10;
+
+// Allowlist sets for exercise level + type validation (computed once at module load).
+// Exercises store Greek-canonical values in the DB; the English lists are paired by id
+// and are only used in the UI via getLocalizedContent, so we validate against the Greek set.
+const LEVEL_NAMES = new Set(
+  Object.values(TAGS.byId)
+    .filter((t) => !t.unavailable)
+    .map((t) => t.name)
+);
+const TYPE_NAMES = new Set(
+  Object.values(Type.byId)
+    .filter((t) => !t.unavailable)
+    .map((t) => t.name)
+);
 
 const ALLOWED_MIME_TYPES = {
   pdf: ['application/pdf'],
@@ -171,11 +187,15 @@ export const validateBookFields = (fields: {
 };
 
 /**
- * Validates required exercise fields
+ * Validates required exercise fields (title, category).
+ * Optionally validates level + type against TAGS / Type allowlists if provided.
+ * Missing or empty-string level/type are accepted silently (optional fields).
  */
 export const validateExerciseFields = (fields: {
   title: string;
   category: string;
+  level?: string;
+  type?: string;
 }): Record<string, string> | null => {
   const errors: Record<string, string> = {};
 
@@ -184,6 +204,12 @@ export const validateExerciseFields = (fields: {
   }
   if (!fields.category?.trim()) {
     errors.category = 'errors.requiredField';
+  }
+  if (fields.level && fields.level.trim() && !LEVEL_NAMES.has(fields.level)) {
+    errors.level = 'errors.invalidLevel';
+  }
+  if (fields.type && fields.type.trim() && !TYPE_NAMES.has(fields.type)) {
+    errors.type = 'errors.invalidType';
   }
 
   return Object.keys(errors).length > 0 ? errors : null;

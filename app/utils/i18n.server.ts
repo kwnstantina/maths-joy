@@ -82,7 +82,11 @@ export function getLocalizedContent<T extends Translatable>(
     title: translation.title || item.title,
     description: translation.description || item.description,
     category: translation.category || item.category,
-    tags: translation.tags?.join(',') || item.tags,
+    tags: Array.isArray(translation.tags)
+      ? translation.tags
+      : typeof (translation.tags as unknown) === 'string'
+        ? (translation.tags as unknown as string).split(',').map((t) => t.trim()).filter(Boolean)
+        : item.tags,
   };
 }
 

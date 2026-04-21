@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Form } from "@remix-run/react";
 import { useTranslation } from "react-i18next";
 import BilingualFields from "components/admin/BilingualFields";
-import CategorySelect from "components/admin/CategorySelect";
+import ExerciseCategorySelect from "components/admin/ExerciseCategorySelect";
 import FileUploadField from "components/admin/FileUploadField";
 import Alerts from "components/alerts/alerts";
 
@@ -80,11 +80,17 @@ export default function ExerciseUploadForm({
               />
             </div>
 
-            {/* Category + Tags */}
+            {/* Category + Level + Type + Tags (extras) */}
             <div className="mb-6">
-              <CategorySelect
+              <ExerciseCategorySelect
                 categoryError={
                   showErrors ? actionData.errors?.category : undefined
+                }
+                levelError={
+                  showErrors ? actionData.errors?.level : undefined
+                }
+                typeError={
+                  showErrors ? actionData.errors?.type : undefined
                 }
               />
             </div>

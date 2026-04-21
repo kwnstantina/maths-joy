@@ -90,9 +90,12 @@ Plans:
   2. Exercises are organized with consistent category and tag structure
   3. Student can search exercises by title, category, or tags and see relevant results
   4. Exercise listing uses server-side pagination instead of loading all records at once
-**Plans**: TBD
+**Plans**: 3 plans
 
-Plans: TBD
+Plans:
+- [x] 06-01-PLAN.md — Schema migration (tags String[] + level + type) + data-layer reshape + legacy migration script
+- [x] 06-02-PLAN.md — Admin bulk upload (multi-file + shared metadata + partial-success retry) + level/type on single-upload form (all 3 tasks complete; human-verify approved 2026-04-21)
+- [x] 06-03-PLAN.md — Public exercises: server-side pagination + URL-driven search/filters (Greek-canonical URL contract) + shared Pagination component
 
 ### Phase 7: i18n Completion
 **Goal**: Every new feature introduced in v1.1 is fully accessible in both Greek and English
@@ -120,5 +123,5 @@ Note: Phases 5 and 6 are independent of each other (both depend only on Phase 2)
 | 3. Q&A Core | v1.1 | 3/3 | Complete | 2026-03-17 |
 | 4. Q&A Discovery | v1.1 | 1/1 | Complete | 2026-03-17 |
 | 5. Video Tutorials | v1.1 | 1/2 | In progress | - |
-| 6. Exercise Improvements | v1.1 | 0/TBD | Not started | - |
+| 6. Exercise Improvements | v1.1 | 3/3 | Awaiting verification | - |
 | 7. i18n Completion | v1.1 | 0/TBD | Not started | - |

@@ -1,4 +1,4 @@
-import type { LoaderFunctionArgs, MetaFunction  } from "@remix-run/node";
+import type { LoaderFunctionArgs, MetaFunction } from "@remix-run/node";
 import { data } from "@remix-run/node";  // instead of json
 import {
   Links,
@@ -69,7 +69,11 @@ export const meta: MetaFunction = () => {
     { charset: "utf-8" },
     { title: "Gregory Kirtsias - GregKyrMaths" },
     { name: "viewport", content: "width=device-width,initial-scale=1" },
-    { name: "description", content: "Mathematics exercises and educational content" },
+    { name: "description", content: "Mathematics exercises, tutorials, books and educational content by Gregory Kirtsias. Ασκήσεις μαθηματικών, βιβλία και εκπαιδευτικό υλικό." },
+    { property: "og:title", content: "Gregory Kirtsias - GregKyrMaths" },
+    { property: "og:description", content: "Mathematics exercises, tutorials, books and educational content" },
+    { property: "og:type", content: "website" },
+    { name: "robots", content: "index, follow" },
   ];
 };
 
@@ -155,7 +159,7 @@ export function ErrorBoundary() {
   return (
     <html lang="el">
       <head>
-      <title>{`GregKyrMaths - Error ${errorStatus}`}</title>
+        <title>{`GregKyrMaths - Error ${errorStatus}`}</title>
         <Meta />
         <Links />
       </head>

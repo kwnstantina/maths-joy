@@ -3,6 +3,7 @@ import { useLoaderData, Link, useSearchParams } from '@remix-run/react';
 import { useTranslation } from 'react-i18next';
 import i18next from '~/i18next.server';
 import { getQuestions, getQuestionCategories, getPopularTags } from '~/utils/qa.server';
+import type { QuestionFilters } from '~/utils/qa.server';
 import { getUser } from '~/utils/auth.prisma';
 
 interface Question {
@@ -28,6 +29,8 @@ interface LoaderData {
   popularTags: { name: string; count: number }[];
   locale: string;
   isLoggedIn: boolean;
+  sort: 'newest' | 'votes';
+  unanswered: boolean;
 }
 
 export const loader: LoaderFunction = async ({ request }) => {
@@ -36,12 +39,21 @@ export const loader: LoaderFunction = async ({ request }) => {
   const category = url.searchParams.get('category') || undefined;
   const tag = url.searchParams.get('tag') || undefined;
   const search = url.searchParams.get('search') || undefined;
+  const unanswered = url.searchParams.get('unanswered') === 'true';
+
+  const sortParam = url.searchParams.get('sort');
+  const sort: 'newest' | 'votes' = sortParam === 'votes' ? 'votes' : 'newest';
 
   const locale = await i18next.getLocale(request);
   const user = await getUser(request);
 
+  const filters: QuestionFilters = { category, tag, search };
+  if (unanswered) {
+    filters.isResolved = false;
+  }
+
   const [questionsData, categories, popularTags] = await Promise.all([
-    getQuestions({ category, tag, search }, page, 20),
+    getQuestions(filters, page, 20, sort),
     getQuestionCategories(),
     getPopularTags(10),
   ]);
@@ -55,11 +67,13 @@ export const loader: LoaderFunction = async ({ request }) => {
     popularTags,
     locale,
     isLoggedIn: !!user,
+    sort,
+    unanswered,
   });
 };
 
 export default function QAIndex() {
-  const { questions, total, page, totalPages, categories, popularTags, locale, isLoggedIn } =
+  const { questions, total, page, totalPages, categories, popularTags, locale, isLoggedIn, sort } =
     useLoaderData<LoaderData>();
   const { t } = useTranslation();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -67,6 +81,19 @@ export default function QAIndex() {
   const currentCategory = searchParams.get('category') || '';
   const currentTag = searchParams.get('tag') || '';
   const currentSearch = searchParams.get('search') || '';
+  const currentUnanswered = searchParams.get('unanswered') === 'true';
+  const hasActiveFilters = !!(currentCategory || currentTag || currentSearch || currentUnanswered);
+
+  const buildSortUrl = (sortValue: string) => {
+    const newParams = new URLSearchParams(searchParams);
+    if (sortValue === 'newest') {
+      newParams.delete('sort');
+    } else {
+      newParams.set('sort', sortValue);
+    }
+    newParams.delete('page');
+    return `?${newParams.toString()}`;
+  };
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString(
@@ -108,6 +135,24 @@ export default function QAIndex() {
       newParams.set('tag', tag);
     }
     newParams.delete('page');
+    setSearchParams(newParams);
+  };
+
+  const handleUnansweredToggle = () => {
+    const newParams = new URLSearchParams(searchParams);
+    if (currentUnanswered) {
+      newParams.delete('unanswered');
+    } else {
+      newParams.set('unanswered', 'true');
+    }
+    newParams.delete('page');
+    setSearchParams(newParams);
+  };
+
+  const clearAllFilters = () => {
+    const newParams = new URLSearchParams();
+    const sortVal = searchParams.get('sort');
+    if (sortVal) newParams.set('sort', sortVal);
     setSearchParams(newParams);
   };
 
@@ -160,6 +205,18 @@ export default function QAIndex() {
             </div>
           </form>
 
+          {/* Unanswered Toggle */}
+          <button
+            onClick={handleUnansweredToggle}
+            className={`w-full text-left px-3 py-2 rounded-lg transition-colors mb-6 ${
+              currentUnanswered
+                ? 'bg-orange-100 text-orange-700 font-medium'
+                : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
+            }`}
+          >
+            {t('qa.unanswered')}
+          </button>
+
           {/* Categories */}
           <div className="mb-6">
             <h3 className="font-semibold text-gray-700 mb-3">{t('qa.categories')}</h3>
@@ -204,11 +261,104 @@ export default function QAIndex() {
 
         {/* Questions List */}
         <div className="flex-grow">
-          <div className="mb-4 text-gray-600">
-            {t('qa.totalQuestions', { count: total })}
+          <div className="flex items-center gap-4 mb-4">
+            <span className="text-gray-600">
+              {t('qa.totalQuestions', { count: total })}
+            </span>
+            <div className="flex gap-1 ml-auto">
+              <Link
+                to={buildSortUrl('newest')}
+                className={sort === 'newest' ? 'px-3 py-1 rounded bg-blue-100 text-blue-700 font-medium text-sm' : 'px-3 py-1 rounded text-gray-600 hover:bg-gray-100 text-sm'}
+              >
+                {t('qa.newest')}
+              </Link>
+              <Link
+                to={buildSortUrl('votes')}
+                className={sort === 'votes' ? 'px-3 py-1 rounded bg-blue-100 text-blue-700 font-medium text-sm' : 'px-3 py-1 rounded text-gray-600 hover:bg-gray-100 text-sm'}
+              >
+                {t('qa.mostVoted')}
+              </Link>
+            </div>
           </div>
 
-          {questions.length === 0 ? (
+          {/* Active Filter Summary Bar */}
+          {hasActiveFilters && (
+            <div className="flex flex-wrap items-center gap-2 mb-4 p-3 bg-gray-50 rounded-lg">
+              {currentSearch && (
+                <span className="inline-flex items-center gap-1 px-3 py-1 bg-white border border-gray-200 rounded-full text-sm">
+                  {t('qa.activeSearch', { term: currentSearch })}
+                  <button
+                    onClick={() => {
+                      const newParams = new URLSearchParams(searchParams);
+                      newParams.delete('search');
+                      newParams.delete('page');
+                      setSearchParams(newParams);
+                    }}
+                    className="ml-1 text-gray-400 hover:text-gray-600"
+                  >
+                    &times;
+                  </button>
+                </span>
+              )}
+              {currentCategory && (
+                <span className="inline-flex items-center gap-1 px-3 py-1 bg-white border border-gray-200 rounded-full text-sm">
+                  {t('qa.activeCategory', { name: currentCategory })}
+                  <button
+                    onClick={() => handleCategoryFilter(currentCategory)}
+                    className="ml-1 text-gray-400 hover:text-gray-600"
+                  >
+                    &times;
+                  </button>
+                </span>
+              )}
+              {currentTag && (
+                <span className="inline-flex items-center gap-1 px-3 py-1 bg-white border border-gray-200 rounded-full text-sm">
+                  {t('qa.activeTag', { name: currentTag })}
+                  <button
+                    onClick={() => handleTagFilter(currentTag)}
+                    className="ml-1 text-gray-400 hover:text-gray-600"
+                  >
+                    &times;
+                  </button>
+                </span>
+              )}
+              {currentUnanswered && (
+                <span className="inline-flex items-center gap-1 px-3 py-1 bg-white border border-gray-200 rounded-full text-sm">
+                  {t('qa.unanswered')}
+                  <button
+                    onClick={handleUnansweredToggle}
+                    className="ml-1 text-gray-400 hover:text-gray-600"
+                  >
+                    &times;
+                  </button>
+                </span>
+              )}
+              <button
+                onClick={clearAllFilters}
+                className="ml-auto text-sm text-orange-600 hover:text-orange-800 font-medium"
+              >
+                {t('qa.clearAll')}
+              </button>
+            </div>
+          )}
+
+          {questions.length === 0 && hasActiveFilters ? (
+            <div className="text-center py-20">
+              <div className="text-gray-400 mb-4">
+                <svg className="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+              </div>
+              <p className="text-gray-500 text-lg mb-2">{t('qa.noMatchingQuestions')}</p>
+              <p className="text-gray-400 text-sm mb-4">{t('qa.tryBroadening')}</p>
+              <button
+                onClick={clearAllFilters}
+                className="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors"
+              >
+                {t('qa.clearFilters')}
+              </button>
+            </div>
+          ) : questions.length === 0 ? (
             <div className="text-center py-20">
               <div className="text-gray-400 mb-4">
                 <svg className="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">

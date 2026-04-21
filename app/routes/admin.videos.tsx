@@ -144,6 +144,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
         url,
         description: description_el || "",
         creatorName,
+        category: category || undefined,
         tags: tags ? [tags] : [],
         translation: translation as Prisma.InputJsonValue,
       });
@@ -198,12 +199,14 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     const url = formData.get("url") as string;
     const creatorName = formData.get("creatorName") as string;
     const tags = formData.get("tags") as string;
+    const category = formData.get("category") as string;
 
     const updateData: Record<string, unknown> = {};
     if (title_el) updateData.title = title_el;
     if (description_el) updateData.description = description_el;
     if (url) updateData.url = url;
     if (creatorName) updateData.creatorName = creatorName;
+    if (category) updateData.category = category;
     if (tags) updateData.tags = [tags];
 
     // Build translation if text changed
@@ -292,6 +295,7 @@ export default function AdminVideos() {
                   description: video.description || "",
                   url: video.url,
                   creatorName: video.creatorName,
+                  category: video.category || "",
                   tags: video.tags,
                   translation: video.translation,
                   createdAt: String(video.createdAt),

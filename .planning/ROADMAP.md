@@ -29,8 +29,8 @@ See: [milestones/v1.0-ROADMAP.md](milestones/v1.0-ROADMAP.md)
 
 ### 🚧 v1.1 Platform Completion (Phases 3-7)
 
-- [ ] **Phase 3: Q&A Core** - Students ask questions, post answers, vote with security hardening, and accept best answers
-- [ ] **Phase 4: Q&A Discovery** - Students search and filter questions by category, tags, and text
+- [x] **Phase 3: Q&A Core** - Students ask questions, post answers, vote with security hardening, and accept best answers
+- [x] **Phase 4: Q&A Discovery** - Students search and filter questions by category, tags, and text
 - [ ] **Phase 5: Video Tutorials** - Admin manages YouTube links and students browse video tutorials by category
 - [ ] **Phase 6: Exercise Improvements** - Bulk exercise upload, improved search, and server-side pagination
 - [ ] **Phase 7: i18n Completion** - Full Greek and English translations for all new features
@@ -46,9 +46,12 @@ See: [milestones/v1.0-ROADMAP.md](milestones/v1.0-ROADMAP.md)
   2. Any logged-in user can post an answer to a question, and the question author can mark one answer as accepted
   3. Users can upvote or downvote questions and answers, with vote totals updating visibly -- but cannot vote on their own content
   4. All Q&A mutations (ask, answer, vote, accept) are protected by CSRF tokens, rate limiting, and audit logging
-**Plans**: TBD
+**Plans**: 3 plans
 
-Plans: TBD
+Plans:
+- [x] 03-01-PLAN.md — Backend hardening (transactional voting, self-vote prevention, orphan cleanup) + VoteButtons and ConfirmModal components
+- [x] 03-02-PLAN.md — Security chain on all Q&A routes + useFetcher refactor for voting, accept, and delete
+- [x] 03-03-PLAN.md — Sort tabs on question list + inline editing with "edited" indicator
 
 ### Phase 4: Q&A Discovery
 **Goal**: Students can find relevant questions through search and filtering without scrolling through everything
@@ -58,9 +61,10 @@ Plans: TBD
   1. Student can search questions by text and see matching results
   2. Student can filter questions by category or tag
   3. Combined search and filter works together (e.g., filter by "Algebra" category AND search for "quadratic")
-**Plans**: TBD
+**Plans**: 1 plan
 
-Plans: TBD
+Plans:
+- [x] 04-01-PLAN.md -- Filter UX polish (active filter bar, clear-all, unanswered toggle, differentiated empty states)
 
 ### Phase 5: Video Tutorials
 **Goal**: Admin can build a tutorial library and students can browse and discover video tutorials by category
@@ -71,9 +75,11 @@ Plans: TBD
   2. Admin can edit or remove a video entry from the admin dashboard
   3. Students can browse a public video listing page with videos organized by category
   4. Student can click a video and watch it via embedded YouTube player or link
-**Plans**: TBD
+**Plans**: 2 plans
 
-Plans: TBD
+Plans:
+- [x] 05-01-PLAN.md -- Schema fix (add category to Video model) + admin CRUD fix to persist category and fix tags
+- [ ] 05-02-PLAN.md -- Public /videos route with category filtering + navigation link
 
 ### Phase 6: Exercise Improvements
 **Goal**: Admin can upload exercises efficiently in bulk and students can find exercises through search and paginated browsing
@@ -111,8 +117,8 @@ Note: Phases 5 and 6 are independent of each other (both depend only on Phase 2)
 |-------|-----------|----------------|--------|-----------|
 | 1. Book Upload | v1.0 | 2/2 | Complete | 2026-03-08 |
 | 2. Book Commerce | v1.0 | 3/3 | Complete | 2026-03-14 |
-| 3. Q&A Core | v1.1 | 0/TBD | Not started | - |
-| 4. Q&A Discovery | v1.1 | 0/TBD | Not started | - |
-| 5. Video Tutorials | v1.1 | 0/TBD | Not started | - |
+| 3. Q&A Core | v1.1 | 3/3 | Complete | 2026-03-17 |
+| 4. Q&A Discovery | v1.1 | 1/1 | Complete | 2026-03-17 |
+| 5. Video Tutorials | v1.1 | 1/2 | In progress | - |
 | 6. Exercise Improvements | v1.1 | 0/TBD | Not started | - |
 | 7. i18n Completion | v1.1 | 0/TBD | Not started | - |

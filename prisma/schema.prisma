@@ -105,6 +105,7 @@ model User {
 
 model Video {
   id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  category    String?
   createdAt   DateTime @db.Date
   creatorName String
   description String

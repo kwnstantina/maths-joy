@@ -9,13 +9,13 @@ Requirements for current milestone. Each maps to roadmap phases.
 
 ### Q&A
 
-- [ ] **QA-01**: Student can ask question with title, body, category, and tags
-- [ ] **QA-02**: Anyone can answer a question
-- [ ] **QA-03**: Question author can accept best answer
-- [ ] **QA-04**: Users can upvote/downvote questions and answers
-- [ ] **QA-05**: Users can search and filter questions by category, tags, or text
-- [ ] **QA-06**: Q&A mutations have CSRF protection, rate limiting, and audit logging
-- [ ] **QA-07**: Users cannot vote on their own questions or answers
+- [x] **QA-01**: Student can ask question with title, body, category, and tags
+- [x] **QA-02**: Anyone can answer a question
+- [x] **QA-03**: Question author can accept best answer
+- [x] **QA-04**: Users can upvote/downvote questions and answers
+- [x] **QA-05**: Users can search and filter questions by category, tags, or text
+- [x] **QA-06**: Q&A mutations have CSRF protection, rate limiting, and audit logging
+- [x] **QA-07**: Users cannot vote on their own questions or answers
 
 ### Videos
 
@@ -71,13 +71,13 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| QA-01 | Phase 3 | Pending |
-| QA-02 | Phase 3 | Pending |
-| QA-03 | Phase 3 | Pending |
-| QA-04 | Phase 3 | Pending |
+| QA-01 | Phase 3 | Complete |
+| QA-02 | Phase 3 | Complete |
+| QA-03 | Phase 3 | Complete |
+| QA-04 | Phase 3 | Complete |
 | QA-05 | Phase 4 | Pending |
-| QA-06 | Phase 3 | Pending |
-| QA-07 | Phase 3 | Pending |
+| QA-06 | Phase 3 | Complete |
+| QA-07 | Phase 3 | Complete |
 | VID-01 | Phase 5 | Pending |
 | VID-02 | Phase 5 | Pending |
 | EX-01 | Phase 6 | Pending |

@@ -89,6 +89,15 @@ const Navbar = ({ user }: NavbarProps) => {
             </li>
             <li>
               <NavLink
+                to="videos"
+                className="hover:bg-orange-600 text-black block px-3 py-2 rounded-md text-base font-medium"
+                style={({ isActive }) => (isActive ? activeStyle : undefined)}
+              >
+                {t("nav.videos", "Βίντεο")}
+              </NavLink>
+            </li>
+            <li>
+              <NavLink
                 to="qa"
                 className="hover:bg-orange-600 text-black block px-3 py-2 rounded-md text-base font-medium"
                 style={({ isActive }) => (isActive ? activeStyle : undefined)}
@@ -151,6 +160,16 @@ const Navbar = ({ user }: NavbarProps) => {
             onClick={handleClick}
           >
             {t("training")}
+          </NavLink>
+        </li>
+        <li className="border-b-2 border-orange-300 w-full">
+          <NavLink
+            to="videos"
+            className="hover:bg-orange-400 text-white block px-3 py-2 rounded-md text-base font-medium"
+            style={({ isActive }) => (isActive ? activeStyle : undefined)}
+            onClick={handleClick}
+          >
+            {t("nav.videos", "Βίντεο")}
           </NavLink>
         </li>
         <li className="border-b-2 border-orange-300 w-full">

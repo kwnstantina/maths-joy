@@ -3,6 +3,8 @@
   "depth": "comprehensive",
   "parallelization": true,
   "commit_docs": false,
+  "auto_commit": false,
+  "auto_push": false,
   "model_profile": "quality",
   "workflow": {
     "research": true,

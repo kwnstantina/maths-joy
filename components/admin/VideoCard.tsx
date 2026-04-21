@@ -10,6 +10,7 @@ interface VideoCardProps {
     description: string;
     url: string;
     creatorName: string;
+    category: string;
     tags: string[];
     translation?: unknown;
     createdAt: string;
@@ -146,7 +147,7 @@ export default function VideoCard({ video, csrfToken }: VideoCardProps) {
                 </label>
                 <select
                   name="category"
-                  defaultValue={video.tags[0] || ""}
+                  defaultValue={video.category || ""}
                   className="mt-1 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded focus:ring-orange-500 focus:border-orange-500 block w-full p-1.5"
                 >
                   {Object.values(Category.byId)
@@ -242,10 +243,10 @@ export default function VideoCard({ video, csrfToken }: VideoCardProps) {
         <p className="text-sm text-gray-500 mt-1">{video.creatorName}</p>
 
         {/* Category badge */}
-        {video.tags[0] && (
+        {video.category && (
           <div className="mt-2">
             <span className="inline-block px-2 py-0.5 text-xs font-medium rounded-full bg-gray-100 text-gray-600">
-              {video.tags[0]}
+              {video.category}
             </span>
           </div>
         )}

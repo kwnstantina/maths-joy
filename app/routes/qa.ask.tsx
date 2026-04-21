@@ -3,7 +3,9 @@ import { useLoaderData, Form, useActionData, Link } from '@remix-run/react';
 import { useTranslation } from 'react-i18next';
 import i18next from '~/i18next.server';
 import { getUser } from '~/utils/auth.prisma';
+import { getCSRFToken, requireCSRFToken } from '~/utils/csrf.server';
 import { createQuestion, getQuestionCategories, getPopularTags } from '~/utils/qa.server';
+import { applyRateLimit } from '~/utils/ratelimit.server';
 import { useState } from 'react';
 
 interface LoaderData {
@@ -11,6 +13,7 @@ interface LoaderData {
   categories: { name: string; count: number }[];
   popularTags: { name: string; count: number }[];
   user: { id: string; profile: { firstName: string; lastName: string } };
+  csrfToken: string;
 }
 
 interface ActionData {
@@ -30,6 +33,7 @@ export const loader: LoaderFunction = async ({ request }) => {
   }
 
   const locale = await i18next.getLocale(request);
+  const { token, headers } = await getCSRFToken(request);
   const [categories, popularTags] = await Promise.all([
     getQuestionCategories(),
     getPopularTags(20),
@@ -52,15 +56,24 @@ export const loader: LoaderFunction = async ({ request }) => {
     categories: mergedCategories,
     popularTags,
     user: { id: user.id, profile: user.profile ?? { firstName: '', lastName: '' } },
-  });
+    csrfToken: token,
+  }, { headers });
 };
 
 export const action: ActionFunction = async ({ request }) => {
+  // CSRF validation (must be before formData consumption)
+  const csrfError = await requireCSRFToken(request);
+  if (csrfError) return csrfError;
+
   const user = await getUser(request);
 
   if (!user) {
     return redirect('/login?redirectTo=/qa/ask');
   }
+
+  // Rate limiting: 3 questions per hour
+  const rateLimitResponse = applyRateLimit(request, 'contact', user.id);
+  if (rateLimitResponse) return rateLimitResponse;
 
   const formData = await request.formData();
   const title = (formData.get('title') as string)?.trim();
@@ -112,7 +125,7 @@ export const action: ActionFunction = async ({ request }) => {
 };
 
 export default function AskQuestion() {
-  const { categories, popularTags } = useLoaderData<LoaderData>();
+  const { categories, popularTags, csrfToken } = useLoaderData<LoaderData>();
   const actionData = useActionData<ActionData>();
   const { t } = useTranslation();
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
@@ -154,6 +167,7 @@ export default function AskQuestion() {
       )}
 
       <Form method="post" className="space-y-6">
+        <input type="hidden" name="_csrf" value={csrfToken} />
         {/* Title */}
         <div>
           <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-2">

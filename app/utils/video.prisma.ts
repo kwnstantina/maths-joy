@@ -6,6 +6,7 @@ interface VideoInput {
   url: string;
   description: string;
   creatorName: string;
+  category?: string;
   tags: string[];
   translation?: Prisma.InputJsonValue;
 }

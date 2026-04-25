@@ -1,4 +1,4 @@
-import { starterLetters } from "utils/utils";
+import { starterLetters } from "../../../utils/utils";
 
 type Props = {
   users: {
@@ -28,7 +28,7 @@ const UserContent = (props: Props) => {
                     </svg>
                   </span>
                   {item?.profilePicture ? (
-                  
+
                     <img
                       className=" w-10 h-10  sm:w-16 h-10 sm:h-16 rounded-full"
                       src={item.profilePicture}
@@ -39,12 +39,12 @@ const UserContent = (props: Props) => {
                     <div
                       className="text-center items-center  w-10 h-10  sm:w-16 h-10 sm:h-16 rounded-full "
                       style={{
-                        background:item.color             
+                        background: item.color
                       }}
                     >
                       <p className="text-lg p-[16px]">
                         {starterLetters(
-                         item?.firstName,
+                          item?.firstName,
                           item?.lastName
                         )}
                       </p>

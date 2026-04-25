@@ -43,7 +43,7 @@ const UploadTutorial = (props: Props) => {
             htmlFor={"title"}
             label={t("admin.common.title")}
             value={uploadData.title}
-            error={actionData?.errors?.title}
+            error={actionData?.errors?.title || ""}
             labelStyle={"block text-sm font-medium text-gray-700"}
             typeOfField={"input"}
             onChange={onChangeHandler}
@@ -55,7 +55,7 @@ const UploadTutorial = (props: Props) => {
             htmlFor={"url"}
             label={t("admin.tutorials.url")}
             value={uploadData.url}
-            error={actionData?.errors?.url}
+            error={actionData?.errors?.url || ""}
             labelStyle={"block text-sm font-medium text-gray-700"}
             typeOfField={"input"}
             onChange={onChangeHandler}
@@ -67,7 +67,7 @@ const UploadTutorial = (props: Props) => {
             htmlFor={"creatorName"}
             label={t("admin.tutorials.creator")}
             value={uploadData.creatorName}
-            error={actionData?.errors?.creatorName}
+            error={actionData?.errors?.creatorName || ""}
             labelStyle={"block text-sm font-medium text-gray-700"}
             typeOfField={"input"}
             onChange={onChangeHandler}
@@ -79,7 +79,7 @@ const UploadTutorial = (props: Props) => {
             htmlFor={"description"}
             label={t("admin.tutorials.description")}
             value={uploadData.description}
-            error={actionData?.errors?.description}
+            error={actionData?.errors?.description || ""}
             labelStyle={"block text-sm font-medium text-gray-700"}
             typeOfField={"input"}
             onChange={onChangeHandler}
@@ -91,7 +91,7 @@ const UploadTutorial = (props: Props) => {
             htmlFor={"tags"}
             label={t("admin.common.tags")}
             value={uploadData.tags}
-            error={actionData?.errors?.tags}
+            error={actionData?.errors?.tags || ""}
             labelStyle={"block text-sm font-medium text-gray-700"}
             typeOfField={"select"}
             listCategories={Object.values(TAGS.byId)}
@@ -103,7 +103,7 @@ const UploadTutorial = (props: Props) => {
             htmlFor={"category"}
             label={t("admin.common.category")}
             value={uploadData.category}
-            error={actionData?.errors?.category}
+            error={actionData?.errors?.category || ""}
             labelStyle={"block text-sm font-medium text-gray-700"}
             typeOfField={"select"}
             listCategories={Object.values(Category.byId)}

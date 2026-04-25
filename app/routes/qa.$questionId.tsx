@@ -23,6 +23,8 @@ import {
 import { applyRateLimit } from '~/utils/ratelimit.server';
 import { useState, useEffect } from 'react';
 
+export const handle = { i18n: ["common"] };
+
 interface Question {
   id: string;
   title: string;
@@ -97,7 +99,7 @@ export const loader: LoaderFunction = async ({ params, request }) => {
 export const action: ActionFunction = async ({ request, params }) => {
   const { questionId } = params;
   if (!questionId) {
-    return json<ActionData>({ error: 'Question ID required' }, { status: 400 });
+    return json<ActionData>({ error: 'qa.errors.questionIdRequired' }, { status: 400 });
   }
 
   // CSRF validation (must be before formData consumption)
@@ -106,7 +108,7 @@ export const action: ActionFunction = async ({ request, params }) => {
 
   const user = await getUser(request);
   if (!user) {
-    return json<ActionData>({ error: 'You must be logged in' }, { status: 401 });
+    return json<ActionData>({ error: 'qa.errors.mustBeLoggedIn' }, { status: 401 });
   }
 
   const formData = await request.formData();
@@ -120,7 +122,7 @@ export const action: ActionFunction = async ({ request, params }) => {
 
         const body = formData.get('body') as string;
         if (!body || body.trim().length < 10) {
-          return json<ActionData>({ error: 'Answer must be at least 10 characters' }, { status: 400 });
+          return json<ActionData>({ error: 'qa.errors.answerTooShort' }, { status: 400 });
         }
         await createAnswer({
           questionId,
@@ -140,7 +142,7 @@ export const action: ActionFunction = async ({ request, params }) => {
           await voteQuestion(questionId, user.id, value);
         } catch (err) {
           if (err instanceof Error && err.message.includes('own')) {
-            return json<ActionData>({ error: 'Cannot vote on own content' }, { status: 403 });
+            return json<ActionData>({ error: 'qa.errors.cannotVoteOwn' }, { status: 403 });
           }
           throw err;
         }
@@ -157,7 +159,7 @@ export const action: ActionFunction = async ({ request, params }) => {
           await voteAnswer(answerId, user.id, value);
         } catch (err) {
           if (err instanceof Error && err.message.includes('own')) {
-            return json<ActionData>({ error: 'Cannot vote on own content' }, { status: 403 });
+            return json<ActionData>({ error: 'qa.errors.cannotVoteOwn' }, { status: 403 });
           }
           throw err;
         }
@@ -171,7 +173,7 @@ export const action: ActionFunction = async ({ request, params }) => {
         const answerId = formData.get('answerId') as string;
         const question = await getQuestionById(questionId);
         if (question?.authorId !== user.id) {
-          return json<ActionData>({ error: 'Only question author can accept answers' }, { status: 403 });
+          return json<ActionData>({ error: 'qa.errors.onlyAuthorCanAccept' }, { status: 403 });
         }
         await acceptAnswer(answerId, questionId);
         return json<ActionData>({ success: true });
@@ -183,7 +185,7 @@ export const action: ActionFunction = async ({ request, params }) => {
 
         const question = await getQuestionById(questionId);
         if (question?.authorId !== user.id) {
-          return json<ActionData>({ error: 'Only question author can delete' }, { status: 403 });
+          return json<ActionData>({ error: 'qa.errors.onlyAuthorCanDeleteQuestion' }, { status: 403 });
         }
         await deleteQuestion(questionId);
 
@@ -209,7 +211,7 @@ export const action: ActionFunction = async ({ request, params }) => {
         const answers = await getAnswersByQuestionId(questionId);
         const answer = answers.find(a => a.id === answerId);
         if (answer?.authorId !== user.id) {
-          return json<ActionData>({ error: 'Only answer author can delete' }, { status: 403 });
+          return json<ActionData>({ error: 'qa.errors.onlyAuthorCanDeleteAnswer' }, { status: 403 });
         }
         await deleteAnswer(answerId, questionId);
 
@@ -233,7 +235,7 @@ export const action: ActionFunction = async ({ request, params }) => {
 
         const question = await getQuestionById(questionId);
         if (question?.authorId !== user.id) {
-          return json<ActionData>({ error: 'Only question author can edit' }, { status: 403 });
+          return json<ActionData>({ error: 'qa.errors.onlyAuthorCanEditQuestion' }, { status: 403 });
         }
 
         const title = (formData.get('title') as string)?.trim();
@@ -245,10 +247,10 @@ export const action: ActionFunction = async ({ request, params }) => {
           : [];
 
         if (!title || title.length < 10) {
-          return json<ActionData>({ error: 'Title must be at least 10 characters' }, { status: 400 });
+          return json<ActionData>({ error: 'qa.errors.titleTooShort' }, { status: 400 });
         }
         if (!body || body.length < 10) {
-          return json<ActionData>({ error: 'Body must be at least 10 characters' }, { status: 400 });
+          return json<ActionData>({ error: 'qa.errors.editBodyTooShort' }, { status: 400 });
         }
 
         await updateQuestion(questionId, { title, body, category, tags });
@@ -263,13 +265,13 @@ export const action: ActionFunction = async ({ request, params }) => {
         const answerBody = (formData.get('body') as string)?.trim();
 
         if (!answerBody || answerBody.length < 10) {
-          return json<ActionData>({ error: 'Answer must be at least 10 characters' }, { status: 400 });
+          return json<ActionData>({ error: 'qa.errors.answerTooShort' }, { status: 400 });
         }
 
         const answers = await getAnswersByQuestionId(questionId);
         const answer = answers.find(a => a.id === answerId);
         if (answer?.authorId !== user.id) {
-          return json<ActionData>({ error: 'Only answer author can edit' }, { status: 403 });
+          return json<ActionData>({ error: 'qa.errors.onlyAuthorCanEditAnswer' }, { status: 403 });
         }
 
         await updateAnswer(answerId, answerBody);
@@ -277,18 +279,18 @@ export const action: ActionFunction = async ({ request, params }) => {
       }
 
       default:
-        return json<ActionData>({ error: 'Unknown action' }, { status: 400 });
+        return json<ActionData>({ error: 'qa.errors.unknownAction' }, { status: 400 });
     }
   } catch (error) {
     console.error('Action error:', error);
-    return json<ActionData>({ error: 'An error occurred' }, { status: 500 });
+    return json<ActionData>({ error: 'qa.errors.generic' }, { status: 500 });
   }
 };
 
 export default function QuestionDetail() {
   const { question, answers, locale, user, userVotes, csrfToken } = useLoaderData<LoaderData>();
   const actionData = useActionData<ActionData>();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [answerBody, setAnswerBody] = useState('');
 
   // Delete question modal state
@@ -330,6 +332,8 @@ export default function QuestionDetail() {
   };
 
   const formatRelativeTime = (dateString: string) => {
+    const lang = i18n.language?.startsWith('en') ? 'en' : 'el';
+    const rtf = new Intl.RelativeTimeFormat(lang, { numeric: 'auto' });
     const now = Date.now();
     const then = new Date(dateString).getTime();
     const diffMs = now - then;
@@ -338,10 +342,10 @@ export default function QuestionDetail() {
     const diffHr = Math.floor(diffMin / 60);
     const diffDay = Math.floor(diffHr / 24);
 
-    if (diffDay > 0) return `${diffDay} day${diffDay > 1 ? 's' : ''} ago`;
-    if (diffHr > 0) return `${diffHr} hour${diffHr > 1 ? 's' : ''} ago`;
-    if (diffMin > 0) return `${diffMin} minute${diffMin > 1 ? 's' : ''} ago`;
-    return 'just now';
+    if (diffDay > 0) return rtf.format(-diffDay, 'day');
+    if (diffHr > 0) return rtf.format(-diffHr, 'hour');
+    if (diffMin > 0) return rtf.format(-diffMin, 'minute');
+    return rtf.format(-diffSec, 'second');
   };
 
   const wasEdited = (createdAt: string, updatedAt: string) => {
@@ -382,7 +386,7 @@ export default function QuestionDetail() {
                 <input type="hidden" name="_action" value="editQuestion" />
                 <div>
                   <label htmlFor="edit-title" className="block text-sm font-medium text-gray-700 mb-1">
-                    {t('qa.questionTitle', 'Title')}
+                    {t('qa.questionTitle')}
                   </label>
                   <input
                     id="edit-title"
@@ -397,7 +401,7 @@ export default function QuestionDetail() {
                 </div>
                 <div>
                   <label htmlFor="edit-body" className="block text-sm font-medium text-gray-700 mb-1">
-                    {t('qa.questionBody', 'Body')}
+                    {t('qa.questionBody')}
                   </label>
                   <textarea
                     id="edit-body"
@@ -411,7 +415,7 @@ export default function QuestionDetail() {
                 </div>
                 <div>
                   <label htmlFor="edit-category" className="block text-sm font-medium text-gray-700 mb-1">
-                    {t('qa.category', 'Category')}
+                    {t('qa.category')}
                   </label>
                   <select
                     id="edit-category"
@@ -430,7 +434,7 @@ export default function QuestionDetail() {
                 </div>
                 <div>
                   <label htmlFor="edit-tags" className="block text-sm font-medium text-gray-700 mb-1">
-                    {t('qa.tags', 'Tags')}
+                    {t('qa.tags')}
                   </label>
                   <input
                     id="edit-tags"
@@ -438,11 +442,11 @@ export default function QuestionDetail() {
                     name="tags"
                     defaultValue={question.tags.join(', ')}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                    placeholder={t('qa.tagsPlaceholder', 'Comma-separated tags')}
+                    placeholder={t('qa.tagsPlaceholder')}
                   />
                 </div>
                 {editQuestionFetcher.data?.error && (
-                  <p className="text-sm text-red-600">{editQuestionFetcher.data.error}</p>
+                  <p className="text-sm text-red-600">{t(editQuestionFetcher.data.error)}</p>
                 )}
                 <div className="flex gap-2">
                   <button
@@ -450,14 +454,14 @@ export default function QuestionDetail() {
                     className="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors text-sm"
                     disabled={editQuestionFetcher.state !== 'idle'}
                   >
-                    {t('qa.save', 'Save')}
+                    {t('qa.save')}
                   </button>
                   <button
                     type="button"
                     onClick={() => setEditingQuestion(false)}
                     className="px-4 py-2 text-gray-600 hover:text-gray-800 text-sm"
                   >
-                    {t('qa.cancel', 'Cancel')}
+                    {t('qa.cancel')}
                   </button>
                 </div>
               </editQuestionFetcher.Form>
@@ -494,7 +498,7 @@ export default function QuestionDetail() {
                 {t('qa.askedBy')} <span className="font-medium">{question.authorName}</span> - {formatDate(question.createdAt)}
                 {wasEdited(question.createdAt, question.updatedAt) && (
                   <span className="text-gray-400 text-xs italic ml-2">
-                    ({t('qa.edited', 'edited')} {formatRelativeTime(question.updatedAt)})
+                    ({t('qa.edited')} {formatRelativeTime(question.updatedAt)})
                   </span>
                 )}
               </div>
@@ -506,7 +510,7 @@ export default function QuestionDetail() {
                     onClick={() => setEditingQuestion(true)}
                     className="text-blue-500 hover:text-blue-700"
                   >
-                    {t('qa.edit', 'Edit')}
+                    {t('qa.edit')}
                   </button>
                 )}
                 {isQuestionAuthor && (
@@ -596,7 +600,7 @@ export default function QuestionDetail() {
                         required
                       />
                       {editAnswerFetcher.data?.error && (
-                        <p className="text-sm text-red-600">{editAnswerFetcher.data.error}</p>
+                        <p className="text-sm text-red-600">{t(editAnswerFetcher.data.error)}</p>
                       )}
                       <div className="flex gap-2">
                         <button
@@ -604,14 +608,14 @@ export default function QuestionDetail() {
                           className="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors text-sm"
                           disabled={editAnswerFetcher.state !== 'idle'}
                         >
-                          {t('qa.save', 'Save')}
+                          {t('qa.save')}
                         </button>
                         <button
                           type="button"
                           onClick={() => setEditingAnswerId(null)}
                           className="px-4 py-2 text-gray-600 hover:text-gray-800 text-sm"
                         >
-                          {t('qa.cancel', 'Cancel')}
+                          {t('qa.cancel')}
                         </button>
                       </div>
                     </editAnswerFetcher.Form>
@@ -626,7 +630,7 @@ export default function QuestionDetail() {
                       {t('qa.answeredBy')} <span className="font-medium">{answer.authorName}</span> - {formatDate(answer.createdAt)}
                       {wasEdited(answer.createdAt, answer.updatedAt) && (
                         <span className="text-gray-400 text-xs italic ml-2">
-                          ({t('qa.edited', 'edited')} {formatRelativeTime(answer.updatedAt)})
+                          ({t('qa.edited')} {formatRelativeTime(answer.updatedAt)})
                         </span>
                       )}
                     </div>
@@ -637,7 +641,7 @@ export default function QuestionDetail() {
                           onClick={() => setEditingAnswerId(answer.id)}
                           className="text-blue-500 hover:text-blue-700"
                         >
-                          {t('qa.edit', 'Edit')}
+                          {t('qa.edit')}
                         </button>
                       )}
                       {user?.id === answer.authorId && (
@@ -664,7 +668,7 @@ export default function QuestionDetail() {
           <h3 className="text-lg font-bold text-gray-800 mb-4">{t('qa.yourAnswer')}</h3>
           {actionData?.error && (
             <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700">
-              {actionData.error}
+              {t(actionData.error)}
             </div>
           )}
           <Form method="post">
@@ -713,8 +717,8 @@ export default function QuestionDetail() {
           );
           setDeleteQuestionOpen(false);
         }}
-        title={t('qa.deleteQuestionTitle', 'Delete Question')}
-        message={t('qa.deleteQuestionMessage', 'Are you sure you want to delete this question? This action cannot be undone.')}
+        title={t('qa.deleteQuestionTitle')}
+        message={t('qa.deleteQuestionMessage')}
         isLoading={deleteQuestionFetcher.state !== 'idle'}
       />
 
@@ -731,8 +735,8 @@ export default function QuestionDetail() {
           }
           setDeleteAnswerId(null);
         }}
-        title={t('qa.deleteAnswerTitle', 'Delete Answer')}
-        message={t('qa.deleteAnswerMessage', 'Are you sure you want to delete this answer? This action cannot be undone.')}
+        title={t('qa.deleteAnswerTitle')}
+        message={t('qa.deleteAnswerMessage')}
         isLoading={deleteAnswerFetcher.state !== 'idle'}
       />
     </div>

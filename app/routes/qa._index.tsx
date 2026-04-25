@@ -6,6 +6,8 @@ import { getQuestions, getQuestionCategories, getPopularTags } from '~/utils/qa.
 import type { QuestionFilters } from '~/utils/qa.server';
 import { getUser } from '~/utils/auth.prisma';
 
+export const handle = { i18n: ["common"] };
+
 interface Question {
   id: string;
   title: string;

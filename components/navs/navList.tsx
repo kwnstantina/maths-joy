@@ -6,9 +6,8 @@ import logo from "../../app/assets/logoD.png";
 import useDetectOutside from "hooks/useDetectOutside";
 import {
   UserIcon,
-  ArrowRightOnRectangleIcon,
-  ArrowLeftOnRectangleIcon,
   Cog6ToothIcon,
+  ArrowRightIcon,
 } from "@heroicons/react/24/solid";
 
 import LanguageIndicator from "components/languageIndicator/languageIndicator";
@@ -60,15 +59,7 @@ const Navbar = ({ user }: NavbarProps) => {
                 {t("exersice")}
               </NavLink>
             </li>
-            <li>
-              <NavLink
-                to="tutorial"
-                className="hover:bg-orange-600 text-black block px-3 py-2 rounded-md text-base font-medium"
-                style={({ isActive }) => (isActive ? activeStyle : undefined)}
-              >
-                {t("topic")}
-              </NavLink>
-            </li>
+
             <li>
               <NavLink
                 to="books"
@@ -93,7 +84,7 @@ const Navbar = ({ user }: NavbarProps) => {
                 className="hover:bg-orange-600 text-black block px-3 py-2 rounded-md text-base font-medium"
                 style={({ isActive }) => (isActive ? activeStyle : undefined)}
               >
-                {t("nav.videos", "Βίντεο")}
+                {t("topic")}
               </NavLink>
             </li>
             <li>
@@ -110,13 +101,13 @@ const Navbar = ({ user }: NavbarProps) => {
             </li>
           </ul>
         </div>
-    
+
         <div className="md:hidden mr-4" onClick={handleClick}>
           {!nav ? <Bars3Icon className="w-8" /> : <XMarkIcon className="w-8" />}
-  
+
         </div>
         <div >
-        <LanguageIndicator />
+          <LanguageIndicator />
         </div>
       </div>
       <ul
@@ -235,7 +226,7 @@ const Navbar = ({ user }: NavbarProps) => {
               onClick={handleClick}
             >
               <span className="flex align-center justify-center">
-                <ArrowRightOnRectangleIcon className="mr-2 h-5 w-5" aria-hidden="true" /> {t("nav.login")}
+                <ArrowRightIcon className="mr-2 h-5 w-5" aria-hidden="true" /> {t("nav.login")}
               </span>
             </NavLink>
           </li>
@@ -251,7 +242,7 @@ const Navbar = ({ user }: NavbarProps) => {
               to={"logout"}
             >
               <span className="flex align-center justify-center">
-                <ArrowLeftOnRectangleIcon className="mr-2 h-5 w-5" aria-hidden="true" /> {t("nav.logout")}
+                <ArrowRightIcon className="mr-2 h-5 w-5" aria-hidden="true" /> {t("nav.logout")}
               </span>
             </NavLink>
           </li>

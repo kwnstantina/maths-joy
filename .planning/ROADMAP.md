@@ -106,9 +106,13 @@ Plans:
   2. All video listing and detail page text displays correctly in both Greek and English
   3. All exercise upload and search UI text displays correctly in both Greek and English
   4. Switching language on any new page works without untranslated strings appearing
-**Plans**: TBD
+**Plans**: 4 plans
 
-Plans: TBD
+Plans:
+- [ ] 07-01-PLAN.md — Add all missing locale keys (Q&A UI + qa.errors.* + admin.qa.actions + admin.training image keys + exercises.download/pdfNotAvailable) symmetrically to el/common.json and en/common.json
+- [ ] 07-02-PLAN.md — Q&A i18n retrofit: handle.i18n on 3 routes, Intl.RelativeTimeFormat for time-ago, action errors returned as error keys rendered via t()
+- [ ] 07-03-PLAN.md — Admin Video upload form: swap to existing admin.videos.uploadButton/uploading keys (no new keys)
+- [ ] 07-04-PLAN.md — Public /exercises/:pdfId retrofit (useTranslation + getLocalizedContent) + fix double-t() bug in ExerciseUploadForm and BulkExerciseUploadForm
 
 ## Progress
 

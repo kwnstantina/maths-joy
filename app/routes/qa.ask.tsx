@@ -8,6 +8,8 @@ import { createQuestion, getQuestionCategories, getPopularTags } from '~/utils/q
 import { applyRateLimit } from '~/utils/ratelimit.server';
 import { useState } from 'react';
 
+export const handle = { i18n: ["common"] };
+
 interface LoaderData {
   locale: string;
   categories: { name: string; count: number }[];
@@ -84,18 +86,18 @@ export const action: ActionFunction = async ({ request }) => {
   const fieldErrors: ActionData['fieldErrors'] = {};
 
   if (!title || title.length < 10) {
-    fieldErrors.title = 'Title must be at least 10 characters';
+    fieldErrors.title = 'qa.errors.titleTooShort';
   }
   if (title && title.length > 200) {
-    fieldErrors.title = 'Title must be less than 200 characters';
+    fieldErrors.title = 'qa.errors.titleTooLong';
   }
 
   if (!body || body.length < 30) {
-    fieldErrors.body = 'Question body must be at least 30 characters';
+    fieldErrors.body = 'qa.errors.bodyTooShort';
   }
 
   if (!category) {
-    fieldErrors.category = 'Please select a category';
+    fieldErrors.category = 'qa.errors.selectCategory';
   }
 
   if (Object.keys(fieldErrors).length > 0) {
@@ -120,7 +122,7 @@ export const action: ActionFunction = async ({ request }) => {
     return redirect(`/qa/${question.id}`);
   } catch (error) {
     console.error('Create question error:', error);
-    return json<ActionData>({ error: 'Failed to create question' }, { status: 500 });
+    return json<ActionData>({ error: 'qa.errors.createFailed' }, { status: 500 });
   }
 };
 
@@ -162,7 +164,7 @@ export default function AskQuestion() {
 
       {actionData?.error && (
         <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">
-          {actionData.error}
+          {t(actionData.error)}
         </div>
       )}
 
@@ -186,7 +188,7 @@ export default function AskQuestion() {
             required
           />
           {actionData?.fieldErrors?.title && (
-            <p className="mt-1 text-sm text-red-600">{actionData.fieldErrors.title}</p>
+            <p className="mt-1 text-sm text-red-600">{t(actionData.fieldErrors.title)}</p>
           )}
           <p className="mt-1 text-sm text-gray-500">{t('qa.titleHint')}</p>
         </div>
@@ -208,7 +210,7 @@ export default function AskQuestion() {
             required
           />
           {actionData?.fieldErrors?.body && (
-            <p className="mt-1 text-sm text-red-600">{actionData.fieldErrors.body}</p>
+            <p className="mt-1 text-sm text-red-600">{t(actionData.fieldErrors.body)}</p>
           )}
           <p className="mt-1 text-sm text-gray-500">{t('qa.bodyHint')}</p>
         </div>
@@ -234,7 +236,7 @@ export default function AskQuestion() {
             ))}
           </select>
           {actionData?.fieldErrors?.category && (
-            <p className="mt-1 text-sm text-red-600">{actionData.fieldErrors.category}</p>
+            <p className="mt-1 text-sm text-red-600">{t(actionData.fieldErrors.category)}</p>
           )}
         </div>
 

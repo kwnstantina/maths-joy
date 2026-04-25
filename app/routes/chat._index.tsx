@@ -1,5 +1,5 @@
 import { useLoaderData, useNavigation, Link, useRouteError, isRouteErrorResponse } from "@remix-run/react";
-import supabase from "utils/supabase";
+import supabase from "../../utils/supabase";
 import type { LoaderFunction, ActionFunctionArgs } from "@remix-run/node";
 import { redirect, data } from "@remix-run/node";
 import { useEffect, useState } from "react";

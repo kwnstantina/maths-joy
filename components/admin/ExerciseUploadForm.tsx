@@ -63,8 +63,8 @@ export default function ExerciseUploadForm({
             <div className="space-y-4 mb-6">
               <BilingualFields
                 fieldName="title"
-                labelKeyEl={t("admin.exercises.titleEl")}
-                labelKeyEn={t("admin.exercises.titleEn")}
+                labelKeyEl="admin.exercises.titleEl"
+                labelKeyEn="admin.exercises.titleEn"
                 required
                 errors={showErrors ? actionData.errors : undefined}
               />
@@ -74,8 +74,8 @@ export default function ExerciseUploadForm({
             <div className="space-y-4 mb-6">
               <BilingualFields
                 fieldName="description"
-                labelKeyEl={t("admin.exercises.descriptionEl")}
-                labelKeyEn={t("admin.exercises.descriptionEn")}
+                labelKeyEl="admin.exercises.descriptionEl"
+                labelKeyEn="admin.exercises.descriptionEn"
                 textarea
               />
             </div>

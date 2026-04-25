@@ -6,7 +6,7 @@ import type { RegisterForm, LoginForm } from "./types.server";
 import { GoogleStrategy } from "remix-auth-google";
 import { Authenticator } from "remix-auth";
 import supabase from "../../utils/supabase";
-import { arrayOfColors } from "utils/utils";
+import { arrayOfColors } from "../../utils/utils";
 
 // Google OAuth profile type
 interface GoogleProfile {
@@ -83,7 +83,7 @@ let googleStrategy = new GoogleStrategy(
         password: "",
         firstName: profile.displayName,
         lastName: profile.name.givenName,
-        profilePicture:profile["_json"].picture
+        profilePicture: profile["_json"].picture
       };
       let userId = await createUser(newUser);
       const session = await storage.getSession();
@@ -221,9 +221,9 @@ export async function chatAuthorization(request: Request) {
   let userByExternalAuth = await getUserByGoogleAuth(request);
   let userByStorage = await getUser(request);
   let checkIfUserExists = await supabase.from("users").select().eq("email", userByExternalAuth?.email);
-  let checkIfUserStorageExists=await supabase.from("users").select().eq("email",userByStorage?.email);
-  
-  if (userByExternalAuth && checkIfUserExists.data?.length===0) {
+  let checkIfUserStorageExists = await supabase.from("users").select().eq("email", userByStorage?.email);
+
+  if (userByExternalAuth && checkIfUserExists.data?.length === 0) {
     await supabase.from("users").insert({
       provider_id: userByExternalAuth.id,
       email: userByExternalAuth.email,
@@ -234,11 +234,11 @@ export async function chatAuthorization(request: Request) {
       firstName: userByExternalAuth.profile?.firstName ?? '',
       lastName: userByExternalAuth.profile?.lastName ?? '',
       isActive: true,
-      profilePicture:userByExternalAuth.profilePicture,
+      profilePicture: userByExternalAuth.profilePicture,
       color: arrayOfColors(),
     });
   }
-  if(userByStorage && checkIfUserStorageExists.data?.length===0){
+  if (userByStorage && checkIfUserStorageExists.data?.length === 0) {
     await supabase.from("users").insert({
       provider_id: userByStorage?.id,
       email: userByStorage?.email,
@@ -249,11 +249,11 @@ export async function chatAuthorization(request: Request) {
       color: arrayOfColors(),
     });
   }
-  await updateUserStatus(userByExternalAuth?.id || userByStorage?.id,true);
+  await updateUserStatus(userByExternalAuth?.id || userByStorage?.id, true);
   return userByExternalAuth || userByStorage;
 }
 
-export const updateUserStatus=async(userId:string,isActive:boolean)=> {
+export const updateUserStatus = async (userId: string, isActive: boolean) => {
   try {
     const { data, error } = await supabase
       .from('users')

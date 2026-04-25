@@ -1,4 +1,3 @@
-import chat from "../assets/chat.png";
 import { useState } from "react";
 import AboutUsHoc from "components/aboutUs/aboutUs";
 import Intro from "components/intro/intro";
@@ -155,7 +154,7 @@ export default function Index() {
         titleKey="features.tutorials.title"
         descriptionKey="features.tutorials.description"
         linkKey="features.tutorials.link"
-        linkTo="/tutorial"
+        linkTo="/videos"
         accentColor="pink"
         reversed={true}
       />
@@ -190,16 +189,6 @@ export default function Index() {
           reversed={false}
         />
       </div>
-
-      {/* <FeatureSection
-        titleKey="features.chat.title"
-        descriptionKey="features.chat.description"
-        linkKey="features.chat.link"
-        linkTo="/chat"
-        accentColor="green"
-        reversed={true}
-        imageSrc={chat}
-      /> */}
 
       {/* About Us Section */}
       <section>

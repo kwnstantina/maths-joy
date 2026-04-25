@@ -1,13 +1,19 @@
 import { LoaderFunction, data } from "@remix-run/node";
 import { useLoaderData } from "@remix-run/react";
-import { getExersiceById } from "~/utils/exersices.prisma";
 import { Worker, Viewer, RotateDirection } from "@react-pdf-viewer/core";
 import { defaultLayoutPlugin } from "@react-pdf-viewer/default-layout";
 import type { ToolbarProps } from "@react-pdf-viewer/default-layout";
+import { pageNavigationPlugin } from "@react-pdf-viewer/page-navigation";
 import React, { useState } from "react";
+import { useTranslation } from "react-i18next";
+import i18next from "~/i18next.server";
+import { getExersiceById } from "~/utils/exersices.prisma";
+import { getLocalizedContent } from "~/utils/i18n.server";
+import type { SupportedLanguage } from "~/utils/i18n.server";
 import "@react-pdf-viewer/core/lib/styles/index.css";
 import "@react-pdf-viewer/default-layout/lib/styles/index.css";
-import { pageNavigationPlugin } from "@react-pdf-viewer/page-navigation";
+
+export const handle = { i18n: ["common"] };
 
 // Type for PDF data
 interface PdfData {
@@ -20,7 +26,7 @@ interface PdfData {
 }
 
 
-export const loader: LoaderFunction = async ({ params }) => {
+export const loader: LoaderFunction = async ({ request, params }) => {
   const { pdfId } = params;
   const pdf = await getExersiceById(pdfId);
 
@@ -28,11 +34,18 @@ export const loader: LoaderFunction = async ({ params }) => {
     throw new Response("PDF not found", { status: 404 });
   }
 
-  return data(pdf);
+  const locale = (await i18next.getLocale(request)) as SupportedLanguage;
+  const localizedPdf = getLocalizedContent(
+    pdf as unknown as Parameters<typeof getLocalizedContent>[0],
+    locale
+  );
+
+  return data(localizedPdf);
 };
 
 export default function PdfContainer() {
   const data = useLoaderData<PdfData>();
+  const { t } = useTranslation();
   const [isDisabled] = useState(true);
   const [pageNumber] = useState<number>(1);
 
@@ -101,7 +114,7 @@ export default function PdfContainer() {
                     disabled={isDisabled}
                     onClick={props.onClick}
                   >
-                    Download
+                    {t("exercises.download")}
                   </button>
                 )}
               </Download>     
@@ -133,7 +146,7 @@ export default function PdfContainer() {
             />
           ) : (
             <div className="text-center text-red-500 py-10">
-              PDF not available
+              {t("exercises.pdfNotAvailable")}
             </div>
           )}
         </div>

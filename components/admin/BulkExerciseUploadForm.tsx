@@ -133,8 +133,8 @@ export default function BulkExerciseUploadForm({
             <div className="space-y-4 mb-6">
               <BilingualFields
                 fieldName="description"
-                labelKeyEl={t("admin.exercises.descriptionEl")}
-                labelKeyEn={t("admin.exercises.descriptionEn")}
+                labelKeyEl="admin.exercises.descriptionEl"
+                labelKeyEn="admin.exercises.descriptionEn"
                 textarea
               />
             </div>

@@ -74,6 +74,7 @@
     "footer.training": "Εξάσκηση",
     "footer.terms": "Όροι Χρήσης",
     "footer.privacy": "Απόρρητο",
+    "footer.legal": "Νομικά",
     "footer.copyright": "Με επιφύλαξη παντός δικαιώματος.",
 
     "newsletter.emailLabel": "Διεύθυνση email",
@@ -246,6 +247,9 @@
     "contact.sending": "Αποστολή...",
     "contact.success": "Το μήνυμα στάλθηκε επιτυχώς! Θα επικοινωνήσουμε σύντομα.",
     "contact.error": "Αποτυχία αποστολής μηνύματος. Παρακαλώ δοκιμάστε ξανά.",
+    "contact.phoneLabel": "Τηλέφωνο",
+    "contact.errors.invalidForm": "Μη έγκυρη υποβολή φόρμας. Παρακαλώ ανανεώστε τη σελίδα και δοκιμάστε ξανά.",
+    "contact.errors.messageTooShort": "Το μήνυμα πρέπει να έχει τουλάχιστον 10 χαρακτήρες",
 
     "progress.title": "Η πρόοδός σας",
     "progress.subtitle": "Παρακολουθήστε την πρόοδό σας στα μαθηματικά",

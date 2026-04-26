@@ -74,6 +74,7 @@
     "footer.training": "Training",
     "footer.terms": "Terms",
     "footer.privacy": "Privacy",
+    "footer.legal": "Legal",
     "footer.copyright": "All rights reserved.",
 
     "newsletter.emailLabel": "Email address",
@@ -246,6 +247,9 @@
     "contact.sending": "Sending...",
     "contact.success": "Message sent successfully! We'll get back to you soon.",
     "contact.error": "Failed to send message. Please try again.",
+    "contact.phoneLabel": "Phone",
+    "contact.errors.invalidForm": "Invalid form submission. Please refresh and try again.",
+    "contact.errors.messageTooShort": "Message must be at least 10 characters",
 
     "progress.title": "Your Progress",
     "progress.subtitle": "Track your progress in mathematics",

@@ -44,13 +44,11 @@ export const validateName = (name: string): string | undefined => {
 };
 
 /**
- * Validates a required field
- * @param value - Field value
- * @param fieldName - Name of the field for error message
+ * Validates a required field. Returns the i18n key on failure so callers can render via t().
  */
-export const validateRequiredField = (value: string | null | undefined, fieldName: string): string | undefined => {
+export const validateRequiredField = (value: string | null | undefined): string | undefined => {
   if (!value || !value.trim().length) {
-    return `${fieldName} is required`;
+    return 'errors.requiredField';
   }
 };
 

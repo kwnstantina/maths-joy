@@ -47,28 +47,28 @@ export const action = async ({ request }: ActionFunctionArgs) => {
   const isValidCsrf = await validateCSRFToken(request, csrfToken);
   if (!isValidCsrf) {
     return data<ActionData>(
-      { errors: { form: "Invalid form submission. Please refresh and try again." } },
+      { errors: { form: "contact.errors.invalidForm" } },
       { status: 400 }
     );
   }
 
-  // Validate fields
+  // Validate fields — errors are i18n keys, rendered via t() in the component
   const errors: ActionData["errors"] = {};
 
-  const nameError = validateRequiredField(name, "Name");
+  const nameError = validateRequiredField(name);
   if (nameError) errors.name = nameError;
 
   const emailError = validateEmail(email);
   if (emailError) errors.email = emailError;
 
-  const subjectError = validateRequiredField(subject, "Subject");
+  const subjectError = validateRequiredField(subject);
   if (subjectError) errors.subject = subjectError;
 
-  const messageError = validateRequiredField(message, "Message");
+  const messageError = validateRequiredField(message);
   if (messageError) errors.message = messageError;
 
   if (message && message.length < 10) {
-    errors.message = "Message must be at least 10 characters";
+    errors.message = "contact.errors.messageTooShort";
   }
 
   if (Object.keys(errors).length > 0) {
@@ -116,7 +116,7 @@ export default function ContactPage() {
 
         {actionData?.errors?.form && (
           <div className="mb-6 p-4 bg-red-100 dark:bg-red-900/30 border border-red-400 dark:border-red-700 text-red-700 dark:text-red-400 rounded-lg">
-            {actionData.errors.form}
+            {t(actionData.errors.form)}
           </div>
         )}
 
@@ -144,7 +144,7 @@ export default function ContactPage() {
               />
               {actionData?.errors?.name && (
                 <p className="mt-1 text-sm text-red-600 dark:text-red-400">
-                  {actionData.errors.name}
+                  {t(actionData.errors.name)}
                 </p>
               )}
             </div>
@@ -169,7 +169,7 @@ export default function ContactPage() {
               />
               {actionData?.errors?.email && (
                 <p className="mt-1 text-sm text-red-600 dark:text-red-400">
-                  {actionData.errors.email}
+                  {t(actionData.errors.email)}
                 </p>
               )}
             </div>
@@ -194,7 +194,7 @@ export default function ContactPage() {
               />
               {actionData?.errors?.subject && (
                 <p className="mt-1 text-sm text-red-600 dark:text-red-400">
-                  {actionData.errors.subject}
+                  {t(actionData.errors.subject)}
                 </p>
               )}
             </div>
@@ -219,7 +219,7 @@ export default function ContactPage() {
               />
               {actionData?.errors?.message && (
                 <p className="mt-1 text-sm text-red-600 dark:text-red-400">
-                  {actionData.errors.message}
+                  {t(actionData.errors.message)}
                 </p>
               )}
             </div>
@@ -252,7 +252,7 @@ export default function ContactPage() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
               </svg>
             </div>
-            <h3 className="text-lg font-medium text-gray-900 dark:text-white">Phone</h3>
+            <h3 className="text-lg font-medium text-gray-900 dark:text-white">{t('contact.phoneLabel')}</h3>
             <p className="mt-2 text-gray-600 dark:text-gray-400">+30 6987495775</p>
           </div>
         </div>

@@ -70,7 +70,7 @@ const Footer = () => {
         <div className="flex flex-col justify-start items-baseline">
           <nav className="flex flex-col space-y-3">
             <p className="mb-8 font-light text-gray-500 md:mb-12 sm:text-xl">
-              {t('footer.terms')}
+              {t('footer.legal')}
             </p>
             <Link to="/useOfTerms" className="hover:text-orange-300 transition-colors">
               {t('footer.terms')}

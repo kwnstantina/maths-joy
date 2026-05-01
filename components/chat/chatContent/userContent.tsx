@@ -13,7 +13,7 @@ const UserContent = (props: Props) => {
       {users?.data?.map((item: any) => {
         return (
           <li key={item.id}>
-            <button className="w-full flex items-center px-3 py-2 text-sm transition duration-150 ease-in-out border-b border-gray-300 cursor-pointer hover:bg-gray-100 focus:outline-none">
+            <button className="w-full flex items-center px-3 py-2 text-sm transition duration-150 ease-in-out border-b border-gray-300 cursor-pointer hover:bg-gray-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500">
               <div className="relative flex items-center space-x-4">
                 <div className="relative">
                   <span className="absolute text-green-500 right-0 bottom-0">

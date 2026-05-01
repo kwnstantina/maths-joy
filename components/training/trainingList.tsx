@@ -11,11 +11,12 @@ type Props = {
 
 const TrainingList = (props: Props) => {
   const { contentImage, solutionImage,id,isExersiceViewed ,handleViewedExersices,index} = props;
+  const exerciseLabel = `Άσκηση ${index + 1}`;
   return (
     <div key={id} className="mx-5 my-10">
-        <h1 className="text-gray-700 text-base underline">Άσκηση {index+1} </h1>
+        <h2 className="text-gray-700 text-base underline">{exerciseLabel} </h2>
       <div>
-        <img src={contentImage} />
+        <img src={contentImage} alt={`${exerciseLabel} - εκφώνηση`} />
       </div>
       <div>
         <HorizontalLine/>
@@ -23,15 +24,16 @@ const TrainingList = (props: Props) => {
       <div>
         <button
          onClick={()=>handleViewedExersices(id)}
-         className="w-30 h-30 text-center rounded bg-orange-500  py-2 px-4 text-white hover:bg-orange-600 focus:bg-orange-400 m-5"
+         aria-expanded={isExersiceViewed.includes(id)}
+         className="w-30 h-30 text-center rounded bg-orange-500  py-2 px-4 text-white hover:bg-orange-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-700 m-5"
          >
           Λύση
         </button>
       </div>
       <div>
-        {isExersiceViewed.includes(id)?  
+        {isExersiceViewed.includes(id)?
         <>
-         <img src={solutionImage} />
+         <img src={solutionImage} alt={`${exerciseLabel} - λύση`} />
          <HorizontalLine/>
          </>
          : null}

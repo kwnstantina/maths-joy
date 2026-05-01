@@ -11,6 +11,8 @@ import { prisma } from "~/utils/prisma.server";
 import { applyRateLimit } from "~/utils/ratelimit.server";
 import { createCheckoutSession, isStripeConfigured } from "~/utils/stripe.server";
 
+export const handle = { i18n: ["common"] };
+
 interface Book {
   id: string;
   title: string;

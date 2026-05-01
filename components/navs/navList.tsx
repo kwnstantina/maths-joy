@@ -44,8 +44,8 @@ const Navbar = ({ user }: NavbarProps) => {
     <div ref={wrapperRef} className="md:mx-12 mt-10  text-center h-40 md:h-20 z-50">
       <div className="flex justify-between items-center w-full h-full">
         <div>
-          <NavLink to="/">
-            <img className="w-32 h-20" src={logo}></img>
+          <NavLink to="/" aria-label="GregKyrMaths - Home">
+            <img className="w-32 h-20" src={logo} alt="GregKyrMaths" />
           </NavLink>
         </div>
         <div className="mr-32">
@@ -102,15 +102,22 @@ const Navbar = ({ user }: NavbarProps) => {
           </ul>
         </div>
 
-        <div className="md:hidden mr-4" onClick={handleClick}>
-          {!nav ? <Bars3Icon className="w-8" /> : <XMarkIcon className="w-8" />}
-
-        </div>
+        <button
+          type="button"
+          className="md:hidden mr-4 focus-visible:ring-2 focus-visible:ring-orange-500 focus-visible:outline-none rounded"
+          onClick={handleClick}
+          aria-expanded={nav}
+          aria-controls="mobile-nav-menu"
+          aria-label={nav ? t("nav.closeMenu", "Close menu") : t("nav.openMenu", "Open menu")}
+        >
+          {!nav ? <Bars3Icon className="w-8" aria-hidden="true" /> : <XMarkIcon className="w-8" aria-hidden="true" />}
+        </button>
         <div >
           <LanguageIndicator />
         </div>
       </div>
       <ul
+        id="mobile-nav-menu"
         className={!nav ? "hidden" : "absolute bg-orange-600 w-3/4 px-8 z-100"}
       >
         <li className="border-b-2 border-orange-300 w-full">

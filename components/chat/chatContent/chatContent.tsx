@@ -42,7 +42,7 @@ const ChatContent = (props: Props) => {
                 <div className="relative max-w-xl px-4 py-2 text-gray-700 rounded shadow">
                   <span className="block">{decode(message.content)}</span>
                 </div>
-                <a  className={"flex items-center px-3 py-2 transition duration-150 ease-in-out border-b border-gray-300 cursor-pointer hover:bg-gray-100 focus:outline-none"}>
+                <span className={"flex items-center px-3 py-2 transition duration-150 ease-in-out border-b border-gray-300 hover:bg-gray-100"}>
                    {/* {message.user_id === data.user?.id && data.user?.profile?.profilePicture? */}
                   {message?.user?.profilePicture?
                    <img
@@ -57,7 +57,7 @@ const ChatContent = (props: Props) => {
                      <p className="text-lg pt-2">{starterLetters(data.user?.profile?.firstName,data.user?.profile?.lastName)}</p>
                   </div>
                 }
-                </a>
+                </span>
               </div>
             </li>
             <div className="w-full pb-2">

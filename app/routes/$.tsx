@@ -2,6 +2,8 @@ import { LoaderFunction } from "@remix-run/node";
 import { Link } from "@remix-run/react";
 import { useTranslation } from "react-i18next";
 
+export const handle = { i18n: ["common"] };
+
 // Catch-all route for 404 pages
 export const loader: LoaderFunction = async ({ request }) => {
   const url = new URL(request.url);
@@ -24,16 +26,16 @@ export default function CatchAll() {
     <div className="flex flex-col items-center justify-center min-h-[60vh] px-4">
       <h1 className="text-6xl font-bold text-gray-300 mb-4">404</h1>
       <h2 className="text-2xl font-semibold text-gray-700 mb-4">
-        Page Not Found
+        {t('notFound.title')}
       </h2>
       <p className="text-gray-500 mb-8 text-center">
-        The page you are looking for does not exist.
+        {t('notFound.message')}
       </p>
       <Link
         to="/"
         className="px-6 py-3 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors"
       >
-        Go Home
+        {t('notFound.goHome')}
       </Link>
     </div>
   );

@@ -251,6 +251,10 @@
     "contact.errors.invalidForm": "Invalid form submission. Please refresh and try again.",
     "contact.errors.messageTooShort": "Message must be at least 10 characters",
 
+    "notFound.title": "Page Not Found",
+    "notFound.message": "The page you are looking for does not exist.",
+    "notFound.goHome": "Go Home",
+
     "progress.title": "Your Progress",
     "progress.subtitle": "Track your progress in mathematics",
     "progress.exercisesViewed": "Exercises",

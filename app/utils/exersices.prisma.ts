@@ -1,7 +1,5 @@
 import type { Prisma } from "@prisma/client";
 import { prisma } from "./prisma.server";
-import { UploadExersiceForm } from "./types.server";
-import { uploadToCloudinary } from "./cloudinary.server";
 
 export interface ExerciseFilters {
   category?: string;
@@ -21,104 +19,6 @@ export interface ExerciseFilters {
    */
   lang?: "el" | "en";
 }
-
-interface CreateExerciseData {
-  title: string;
-  category: string;
-  fileContentType?: string;
-  fileName: string;
-  tags: string;
-  description?: string;
-  exerciseImgUrl?: string;
-  cloudinaryPublicId?: string;
-  cloudinaryUrl?: string;
-  fileSize?: number;
-}
-
-/**
- * Legacy helper — retained for backward compatibility with old callers.
- * TODO: deprecated — replaced by createExerciseFromStream + getPaginatedExercises.
- */
-export const createExersice = async (exer: UploadExersiceForm) => {
-  const fileName = typeof exer.file === 'string' ? 'uploaded-file' : exer.file['name'] || 'exercise';
-
-  // Prepare base exercise data
-  const exerciseData: CreateExerciseData = {
-    title: exer.title,
-    category: exer.category,
-    fileName: fileName,
-    tags: exer.tags,
-    description: exer.description,
-    exerciseImgUrl: exer.exerciseImgUrl,
-  };
-
-  // If we have base64 content, try to upload to Cloudinary
-  if (exer.fileContentType && process.env.CLOUDINARY_CLOUD_NAME) {
-    try {
-      const cloudinaryResult = await uploadToCloudinary(exer.fileContentType, {
-        folder: 'maths-joy/exercises',
-        resource_type: 'raw',
-        tags: [exer.category, ...exer.tags.split(',').map(t => t.trim())],
-      });
-
-      exerciseData.cloudinaryPublicId = cloudinaryResult.public_id;
-      exerciseData.cloudinaryUrl = cloudinaryResult.secure_url;
-      exerciseData.fileSize = cloudinaryResult.bytes;
-      // Don't store base64 in DB when using Cloudinary
-      exerciseData.fileContentType = undefined;
-    } catch (error) {
-      console.error('Failed to upload to Cloudinary, falling back to base64:', error);
-      // Fallback: store base64 in database
-      exerciseData.fileContentType = exer.fileContentType;
-    }
-  } else {
-    // No Cloudinary configured, use legacy base64 storage
-    exerciseData.fileContentType = exer.fileContentType;
-  }
-
-  // Legacy helper — takes a comma-separated tags string and splits it into the
-  // new String[] shape so the typed client accepts it. This is only here for
-  // back-compat; new code should use createExerciseFromStream.
-  const tagArray = exerciseData.tags
-    ? exerciseData.tags.split(',').map((t) => t.trim()).filter((t) => t.length > 0)
-    : [];
-
-  const newExercise = await prisma.exersice.create({
-    data: {
-      title: exerciseData.title,
-      category: exerciseData.category,
-      fileName: exerciseData.fileName,
-      tags: tagArray,
-      description: exerciseData.description ?? null,
-      exerciseImgUrl: exerciseData.exerciseImgUrl ?? null,
-      fileContentType: exerciseData.fileContentType ?? null,
-      cloudinaryPublicId: exerciseData.cloudinaryPublicId ?? null,
-      cloudinaryUrl: exerciseData.cloudinaryUrl ?? null,
-      fileSize: exerciseData.fileSize ?? null,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    },
-  });
-
-  return { id: newExercise.id };
-};
-
-
-export const getAllExcersices = async()=>{
-
-  const exersices =await prisma.exersice.findMany(  {select: {
-    id:true,
-    title: true,
-    category:true,
-    createdAt:true,
-    tags:true,
-    description:true,
-    exerciseImgUrl:true,
-    translation:true,
-  }})
-  return exersices;
-}
-
 
 export const getExersiceById = async (id: string | undefined) => {
   const exersice = await prisma.exersice.findFirst({
@@ -290,21 +190,3 @@ export async function deleteExercise(id: string) {
   return exercise;
 }
 
-/**
- * TODO: deprecated — superseded by getPaginatedExercises. Left in place
- * to avoid blast radius; revisit when all call sites are audited.
- */
-export const getExersiceBySearch = async(filters:any) =>{
-  const exersice =await prisma.exersice.findMany({select: {
-    id:true,
-    title: true,
-    category:true,
-    createdAt:true,
-    tags:true,
-    description:true,
-    exerciseImgUrl:true,
-    translation:true,
-  },where: {...filters}});
-
-  return exersice;
-}

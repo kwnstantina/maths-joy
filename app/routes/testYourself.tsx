@@ -45,8 +45,10 @@ const TestYourself = () => {
   return (
     <div tabIndex={0} onKeyDown={handleKeyDown}>
         <button
-          className={`relative top-[20rem] bg-orange-700 rounded-full ${isSideBarClose ? "left-[5em]" : "left-[14em]"} pl-2 h-7 w-10  text-white hover:text-gray-700 focus:outline-none transition-all ease-in-out duration-300`}
+          className={`relative top-[20rem] bg-orange-700 rounded-full ${isSideBarClose ? "left-[5em]" : "left-[14em]"} pl-2 h-7 w-10  text-white hover:text-gray-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-300 transition-all ease-in-out duration-300`}
           onClick={handleToggle}
+          aria-label={isSideBarClose ? "Open sidebar" : "Close sidebar"}
+          aria-expanded={!isSideBarClose}
         >
           {isSideBarClose ? (
             <ChevronDoubleLeftIcon className="h-6 w-6 " />
@@ -95,7 +97,7 @@ const TestYourself = () => {
                                     key={sub.id}
                                   >
                                     <button
-                                      className=" text-orange-900 text-left background-transparent font-bold uppercase  text-m outline-none focus:outline-none mr-1 mb-1 ease-linear transition-all duration-150"
+                                      className=" text-orange-900 text-left background-transparent font-bold uppercase  text-m focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 mr-1 mb-1 ease-linear transition-all duration-150"
                                       onClick={()=>setFilterHander(sub.searchableTitle)}
                                     >
                                       {sub.searchableTitle}

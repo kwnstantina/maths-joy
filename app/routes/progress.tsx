@@ -4,6 +4,8 @@ import { getUser } from "~/utils/auth.prisma";
 import { getUserProgressSummary, getUserDetailedProgress } from "~/utils/progress.server";
 import { useTranslation } from "react-i18next";
 
+export const handle = { i18n: ["common"] };
+
 interface LoaderData {
   user: {
     id: string;

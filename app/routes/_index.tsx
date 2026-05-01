@@ -8,12 +8,14 @@ import { useFetcher, Link } from "@remix-run/react";
 import { validateEmail } from "~/utils/validators.server";
 import { useTranslation } from "react-i18next";
 
+export const handle = { i18n: ["common"] };
+
 export const action: ActionFunction = async ({ request }) => {
   const form = await request.formData();
   const email = form.get("email") as string;
   if (!email || !validateEmail(email)) {
     return data({
-      error: "Παρακαλώ εισάγετε ένα έγκυρο email"
+      error: "errors.invalidEmail"
     });
   }
   const convertApiKit = process.env.CONVERTKIT_API_KEY;
@@ -93,7 +95,7 @@ function FeatureSection({
             className={`inline-flex items-center text-gray-900 font-medium ${hoverColor} transition-colors`}
           >
             {t(linkKey)}
-            <svg className="w-5 h-5 ml-2" fill="currentColor" viewBox="0 0 20 20">
+            <svg aria-hidden="true" className="w-5 h-5 ml-2" fill="currentColor" viewBox="0 0 20 20">
               <path fillRule="evenodd" d="M12.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd" />
             </svg>
           </Link>

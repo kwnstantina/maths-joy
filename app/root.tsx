@@ -133,9 +133,17 @@ export function AppLayout({ children }: AppLayoutProps) {
   useScrollToTop({ location, prevPath: prevPath ?? "" });
 
   return (
-    <div className="h-screen min-h-screen flex flex-col justify-start">
+    <div className="min-h-screen flex flex-col">
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[100] focus:bg-orange-600 focus:text-white focus:px-4 focus:py-2 focus:rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
+      >
+        Skip to content
+      </a>
       <NavList user={rootData?.user ?? null} />
-      {isLoading ? <LoadingPage /> : children}
+      <main id="main-content" className="flex-grow" tabIndex={-1}>
+        {isLoading ? <LoadingPage /> : children}
+      </main>
       <Footer />
     </div>
   );
@@ -164,9 +172,17 @@ export function ErrorBoundary() {
         <Links />
       </head>
       <body className="font-mono">
-        <div className="h-screen min-h-screen flex flex-col justify-start">
+        <div className="min-h-screen flex flex-col">
+          <a
+            href="#main-content"
+            className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[100] focus:bg-orange-600 focus:text-white focus:px-4 focus:py-2 focus:rounded"
+          >
+            Skip to content
+          </a>
           <NavList user={null} />
-          <ErrorPage />
+          <main id="main-content" className="flex-grow" tabIndex={-1} role="main" aria-label={`Error ${errorStatus}`}>
+            <ErrorPage />
+          </main>
           <Footer />
         </div>
         <Scripts />

@@ -196,16 +196,18 @@ const Chat = () => {
                       />
                     </svg>
                   </button>
+                  <label htmlFor="chat-message-input" className="sr-only">Γράψε το μήνυμα σου</label>
                   <input
+                    id="chat-message-input"
                     type="text"
                     placeholder="Γράψε το μήνυμα σου!"
-                    className="block w-full py-2 pl-4 mx-3 bg-gray-100 rounded-full outline-none focus:text-gray-700"
+                    className="block w-full py-2 pl-4 mx-3 bg-gray-100 rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 focus:text-gray-700"
                     name="message"
                     required
                     value={message}
                     onChange={onChangeHandler}
                   />
-                  <button type="submit" name="intent">
+                  <button type="submit" name="intent" aria-label="Send message">
                     <svg
                       className="w-5 h-5 text-gray-500 origin-center transform rotate-90"
                       xmlns="http://www.w3.org/2000/svg"

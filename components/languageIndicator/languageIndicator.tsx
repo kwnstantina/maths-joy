@@ -78,7 +78,7 @@ const LanguageIndicator: React.FC = () => {
                         selected ? 'font-medium' : 'font-normal'
                       }`}
                     >
-                      {lang.code==='en'?<img src={gb} className="w-5 h-5 my-4" />:<img src={gr} className="w-5 h-5 my-4" />}
+                      {lang.code==='en'?<img src={gb} alt="English" className="w-5 h-5 my-4" />:<img src={gr} alt="Ελληνικά" className="w-5 h-5 my-4" />}
                     </span>
                     {selected ? (
                       <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-amber-600">

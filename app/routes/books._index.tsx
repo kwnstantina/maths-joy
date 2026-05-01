@@ -6,6 +6,8 @@ import { useTranslation } from "react-i18next";
 import { getLocalizedList, SupportedLanguage } from "~/utils/i18n.server";
 import i18next from "~/i18next.server";
 
+export const handle = { i18n: ["common"] };
+
 interface Book {
   id: string;
   title: string;

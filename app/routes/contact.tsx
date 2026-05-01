@@ -109,13 +109,13 @@ export default function ContactPage() {
         </div>
 
         {actionData?.success && (
-          <div className="mb-6 p-4 bg-green-100 dark:bg-green-900/30 border border-green-400 dark:border-green-700 text-green-700 dark:text-green-400 rounded-lg">
+          <div role="status" aria-live="polite" className="mb-6 p-4 bg-green-100 dark:bg-green-900/30 border border-green-400 dark:border-green-700 text-green-700 dark:text-green-400 rounded-lg">
             {t('contact.success')}
           </div>
         )}
 
         {actionData?.errors?.form && (
-          <div className="mb-6 p-4 bg-red-100 dark:bg-red-900/30 border border-red-400 dark:border-red-700 text-red-700 dark:text-red-400 rounded-lg">
+          <div role="alert" aria-live="assertive" className="mb-6 p-4 bg-red-100 dark:bg-red-900/30 border border-red-400 dark:border-red-700 text-red-700 dark:text-red-400 rounded-lg">
             {t(actionData.errors.form)}
           </div>
         )}
@@ -135,15 +135,18 @@ export default function ContactPage() {
                 type="text"
                 name="name"
                 id="name"
+                required
+                aria-required="true"
+                aria-invalid={actionData?.errors?.name ? true : undefined}
+                aria-describedby={actionData?.errors?.name ? "name-error" : undefined}
                 placeholder={t('contact.namePlaceholder')}
-                className={`mt-1 block w-full px-4 py-3 border rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white ${
-                  actionData?.errors?.name
-                    ? 'border-red-500'
-                    : 'border-gray-300 dark:border-gray-600'
-                }`}
+                className={`mt-1 block w-full px-4 py-3 border rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white ${actionData?.errors?.name
+                  ? 'border-red-500'
+                  : 'border-gray-300 dark:border-gray-600'
+                  }`}
               />
               {actionData?.errors?.name && (
-                <p className="mt-1 text-sm text-red-600 dark:text-red-400">
+                <p id="name-error" role="alert" className="mt-1 text-sm text-red-600 dark:text-red-400">
                   {t(actionData.errors.name)}
                 </p>
               )}
@@ -160,15 +163,19 @@ export default function ContactPage() {
                 type="email"
                 name="email"
                 id="email"
+                required
+                autoComplete="email"
+                aria-required="true"
+                aria-invalid={actionData?.errors?.email ? true : undefined}
+                aria-describedby={actionData?.errors?.email ? "email-error" : undefined}
                 placeholder={t('contact.emailPlaceholder')}
-                className={`mt-1 block w-full px-4 py-3 border rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white ${
-                  actionData?.errors?.email
-                    ? 'border-red-500'
-                    : 'border-gray-300 dark:border-gray-600'
-                }`}
+                className={`mt-1 block w-full px-4 py-3 border rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white ${actionData?.errors?.email
+                  ? 'border-red-500'
+                  : 'border-gray-300 dark:border-gray-600'
+                  }`}
               />
               {actionData?.errors?.email && (
-                <p className="mt-1 text-sm text-red-600 dark:text-red-400">
+                <p id="email-error" role="alert" className="mt-1 text-sm text-red-600 dark:text-red-400">
                   {t(actionData.errors.email)}
                 </p>
               )}
@@ -185,15 +192,18 @@ export default function ContactPage() {
                 type="text"
                 name="subject"
                 id="subject"
+                required
+                aria-required="true"
+                aria-invalid={actionData?.errors?.subject ? true : undefined}
+                aria-describedby={actionData?.errors?.subject ? "subject-error" : undefined}
                 placeholder={t('contact.subjectPlaceholder')}
-                className={`mt-1 block w-full px-4 py-3 border rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white ${
-                  actionData?.errors?.subject
-                    ? 'border-red-500'
-                    : 'border-gray-300 dark:border-gray-600'
-                }`}
+                className={`mt-1 block w-full px-4 py-3 border rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white ${actionData?.errors?.subject
+                  ? 'border-red-500'
+                  : 'border-gray-300 dark:border-gray-600'
+                  }`}
               />
               {actionData?.errors?.subject && (
-                <p className="mt-1 text-sm text-red-600 dark:text-red-400">
+                <p id="subject-error" role="alert" className="mt-1 text-sm text-red-600 dark:text-red-400">
                   {t(actionData.errors.subject)}
                 </p>
               )}
@@ -210,15 +220,18 @@ export default function ContactPage() {
                 name="message"
                 id="message"
                 rows={5}
+                required
+                aria-required="true"
+                aria-invalid={actionData?.errors?.message ? true : undefined}
+                aria-describedby={actionData?.errors?.message ? "message-error" : undefined}
                 placeholder={t('contact.messagePlaceholder')}
-                className={`mt-1 block w-full px-4 py-3 border rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white ${
-                  actionData?.errors?.message
-                    ? 'border-red-500'
-                    : 'border-gray-300 dark:border-gray-600'
-                }`}
+                className={`mt-1 block w-full px-4 py-3 border rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white ${actionData?.errors?.message
+                  ? 'border-red-500'
+                  : 'border-gray-300 dark:border-gray-600'
+                  }`}
               />
               {actionData?.errors?.message && (
-                <p className="mt-1 text-sm text-red-600 dark:text-red-400">
+                <p id="message-error" role="alert" className="mt-1 text-sm text-red-600 dark:text-red-400">
                   {t(actionData.errors.message)}
                 </p>
               )}
@@ -246,15 +259,6 @@ export default function ContactPage() {
             <p className="mt-2 text-gray-600 dark:text-gray-400">gregkirmaths@gmail.com</p>
           </div>
 
-          <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6 text-center">
-            <div className="w-12 h-12 mx-auto mb-4 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center">
-              <svg className="w-6 h-6 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-              </svg>
-            </div>
-            <h3 className="text-lg font-medium text-gray-900 dark:text-white">{t('contact.phoneLabel')}</h3>
-            <p className="mt-2 text-gray-600 dark:text-gray-400">+30 6987495775</p>
-          </div>
         </div>
       </div>
     </div>

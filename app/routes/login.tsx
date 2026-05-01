@@ -5,6 +5,8 @@ import { ActionFunction, data } from "@remix-run/node";
 import { login } from "~/utils/auth.prisma";
 import { useTranslation } from "react-i18next";
 
+export const handle = { i18n: ["common"] };
+
 interface ActionData {
   errors?: {
     email?: string;

@@ -251,6 +251,10 @@
     "contact.errors.invalidForm": "Μη έγκυρη υποβολή φόρμας. Παρακαλώ ανανεώστε τη σελίδα και δοκιμάστε ξανά.",
     "contact.errors.messageTooShort": "Το μήνυμα πρέπει να έχει τουλάχιστον 10 χαρακτήρες",
 
+    "notFound.title": "Η σελίδα δεν βρέθηκε",
+    "notFound.message": "Η σελίδα που αναζητάτε δεν υπάρχει.",
+    "notFound.goHome": "Αρχική σελίδα",
+
     "progress.title": "Η πρόοδός σας",
     "progress.subtitle": "Παρακολουθήστε την πρόοδό σας στα μαθηματικά",
     "progress.exercisesViewed": "Ασκήσεις",

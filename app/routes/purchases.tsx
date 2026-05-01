@@ -6,6 +6,8 @@ import { getUserPurchases } from "~/utils/stripe.server";
 import { useTranslation } from "react-i18next";
 import i18next from "~/i18next.server";
 
+export const handle = { i18n: ["common"] };
+
 interface Purchase {
   id: string;
   bookId: string;

@@ -51,12 +51,12 @@ export async function sendContactEmail(input: ContactEmailInput): Promise<SendRe
     });
 
     if (error) {
-      console.error("[email] Resend send failed:", error);
+    
       return { ok: false, errorKey: "contact.error" };
     }
     return { ok: true };
   } catch (err) {
-    console.error("[email] Resend threw:", err);
+
     return { ok: false, errorKey: "contact.error" };
   }
 }

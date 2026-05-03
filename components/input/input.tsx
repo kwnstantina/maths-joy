@@ -1,13 +1,12 @@
-type Props={
-  onChangeCallback:Function | any;
-  isSideBarClose:boolean;
-}
+type Props = {
+  value: string;
+  onChange: (value: string) => void;
+  placeholder?: string;
+};
 
-const Input = (props:Props) => {
-  const {onChangeCallback,isSideBarClose}=props;
-
+const Input = ({ value, onChange, placeholder = "Αναζήτηση" }: Props) => {
   return (
-    <form className="flex items-center">
+    <div className="flex items-center">
       <label htmlFor="simple-search" className="hidden">
         Αναζήτηση
       </label>
@@ -31,23 +30,12 @@ const Input = (props:Props) => {
           type="text"
           id="simple-search"
           className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5"
-          placeholder="Αναζήτηση"
-          onChange={onChangeCallback}
-          autoFocus={false}
-          onClick={onChangeCallback}
-        >
-        </input>
-        {!isSideBarClose && <div className="flex absolute bottom-3 right-3 text-sm">
-          <div className=" items-center flex h-5 relative w-6 rounded shadow-md bg-gray-100 ring-4  justify-center ring-gray-200 mr-3">
-          Ctr
-          </div>
-          <div  className=" items-center flex h-5 relative w-6 rounded shadow-md bg-gray-100 ring-4 justify-center ring-gray-200">
-            K
-          </div>
-        </div>
-        }
+          placeholder={placeholder}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+        />
       </div>
-    </form>
+    </div>
   );
 };
 

@@ -6,7 +6,7 @@
     "user": "User",
     "notifications": "Notifications",
     "subTitle": "At GregKyrMaths you will find exercises, topics, books and teaching materials for students of all educational levels.",
-    "start": "Let's start!",
+    "start": "Let's start",
     "mathsExersice": "Maths Exercises",
     "mathsTopic": "Training Exercises",
     "mathsTraining": "Tutorials",
@@ -24,7 +24,7 @@
     "aboutUsDescription": "The thirst for mathematics and the enthusiasm, prompted us to create an online site where students will have access to a wealth of teaching material.",
     "aboutUsReadMore": "Read more here",
     "newsletterTitle": "Subscribe to our newsletter!",
-    "newletterSubTitle": "Stay tuned to gregkyrMath!",
+    "newletterSubTitle": "Stay tuned to gregkyrMaths!",
     "newletterPlaceholder": "We care about the protection of your data.",
     "privacyPolicy": "Read our Privacy Policy",
     "search": "Search",
@@ -34,14 +34,12 @@
     "filter": "Filters",
     "searchPlaceholder": "Derivatives, Integrals...",
     "level": "Level",
-
     "nav.chat": "Q&A",
     "nav.login": "Log in",
     "nav.logout": "Log out",
     "nav.qa": "Questions",
     "nav.books": "Books",
     "nav.videos": "Videos",
-
     "videos.pageTitle": "Video Tutorials",
     "videos.pageSubtitle": "Browse available videos by category.",
     "videos.allCategories": "All",
@@ -49,7 +47,6 @@
     "videos.noVideosAtAll": "No videos yet.",
     "videos.noVideosInCategory": "No videos found in this category.",
     "videos.showAll": "Show all",
-
     "auth.signInTitle": "Sign in to your account",
     "auth.signUpTitle": "Create your account",
     "auth.emailLabel": "Email address",
@@ -65,7 +62,6 @@
     "auth.googleLogin": "Continue with Google",
     "auth.loggingIn": "Signing in...",
     "auth.tryAgainHint": "Please check your credentials and try again.",
-
     "footer.contact": "Contact",
     "footer.services": "Services",
     "footer.exercises": "Exercises",
@@ -76,11 +72,9 @@
     "footer.privacy": "Privacy",
     "footer.legal": "Legal",
     "footer.copyright": "All rights reserved.",
-
     "newsletter.emailLabel": "Email address",
     "newsletter.emailPlaceholder": "Your email...",
     "newsletter.subscribe": "Subscribe",
-
     "errors.invalidEmail": "Please enter a valid email address",
     "errors.passwordTooShort": "Password must be at least 8 characters long",
     "errors.requiredField": "This field is required",
@@ -93,7 +87,6 @@
     "errors.createUserFailed": "Failed to create account. Please try again.",
     "errors.invalidCredentials": "Invalid email or password",
     "errors.chatLoadFailed": "Failed to load chat. Please try again.",
-
     "qa.title": "Questions & Answers",
     "qa.askQuestion": "Ask a Question",
     "qa.loginToAsk": "Log in to ask",
@@ -178,7 +171,6 @@
     "qa.errors.unknownAction": "Unknown action",
     "qa.errors.createFailed": "Failed to create question",
     "qa.errors.generic": "An error occurred",
-
     "books.title": "Math Books",
     "books.subtitle": "Quality educational materials for students of all levels",
     "books.noBooks": "No books available at the moment",
@@ -199,7 +191,6 @@
     "books.loginRequired": "Please log in to purchase",
     "books.processing": "Processing...",
     "books.paymentsNotConfigured": "Payments are not currently available",
-
     "checkout.success": "Payment Successful!",
     "checkout.verifying": "Verifying your payment...",
     "checkout.pleaseWait": "This usually takes just a moment. Please don't close this page.",
@@ -209,7 +200,6 @@
     "checkout.downloadsRemaining": "{{remaining}} of {{max}} downloads remaining",
     "checkout.viewPurchases": "View All Purchases",
     "checkout.continueBrowsing": "Continue Browsing",
-
     "purchases.title": "My Purchases",
     "purchases.successMessage": "Thank you for your purchase! Your download is ready.",
     "purchases.noPurchases": "You haven't made any purchases yet",
@@ -224,7 +214,6 @@
     "purchases.status.pending": "Pending",
     "purchases.status.failed": "Failed",
     "purchases.status.refunded": "Refunded",
-
     "exercises.resultCount": "{{count}} exercises found",
     "exercises.resultCount_one": "{{count}} exercise found",
     "exercises.noResults": "No exercises found",
@@ -232,7 +221,6 @@
     "exercises.clearFilters": "Clear Filters",
     "exercises.download": "Download",
     "exercises.pdfNotAvailable": "PDF not available",
-
     "contact.title": "Contact Us",
     "contact.subtitle": "Have questions? We'd love to hear from you.",
     "contact.name": "Your Name",
@@ -250,11 +238,9 @@
     "contact.phoneLabel": "Phone",
     "contact.errors.invalidForm": "Invalid form submission. Please refresh and try again.",
     "contact.errors.messageTooShort": "Message must be at least 10 characters",
-
     "notFound.title": "Page Not Found",
     "notFound.message": "The page you are looking for does not exist.",
     "notFound.goHome": "Go Home",
-
     "progress.title": "Your Progress",
     "progress.subtitle": "Track your progress in mathematics",
     "progress.exercisesViewed": "Exercises",
@@ -267,10 +253,8 @@
     "progress.unknownTraining": "Unknown training",
     "progress.noExercises": "You haven't viewed any exercises yet",
     "progress.noTraining": "You haven't completed any training yet",
-
     "footer.books": "Books",
     "footer.chatLink": "Chat",
-
     "features.exercises.title": "Math Exercises",
     "features.exercises.description": "Unsolved, solved and multiple choice exercises for Middle and High School students. Practice at your own pace with comprehensive problem sets.",
     "features.exercises.link": "Browse Exercises",
@@ -289,14 +273,12 @@
     "features.chat.title": "Online Chat",
     "features.chat.description": "For questions and discussion on exercises and topics. Get real-time help and connect with others.",
     "features.chat.link": "Join Chat",
-
     "admin.title": "Admin Dashboard",
     "admin.tabs.exercises": "Exercises",
     "admin.tabs.training": "Training",
     "admin.tabs.tutorials": "Tutorials",
     "admin.tabs.books": "Books",
     "admin.tabs.sections": "Book Sections",
-
     "admin.tutorials.title": "Upload Tutorial",
     "admin.tutorials.url": "Video URL",
     "admin.tutorials.urlPlaceholder": "https://youtube.com/watch?v=...",
@@ -304,7 +286,6 @@
     "admin.tutorials.description": "Description",
     "admin.tutorials.descriptionPlaceholder": "Describe this tutorial...",
     "admin.tutorials.success": "Tutorial uploaded successfully",
-
     "admin.books.pageTitle": "Book Management",
     "admin.books.upload": "Upload Book",
     "admin.books.uploadButton": "Create Book",
@@ -341,13 +322,11 @@
     "admin.books.keepCurrentFile": "Leave empty to keep current file",
     "admin.books.replacePdf": "Replace PDF",
     "admin.books.replaceThumbnail": "Replace Cover Image",
-
     "admin.sections.upload": "Add Book Section",
     "admin.sections.selectBook": "Select Book",
     "admin.sections.order": "Order",
     "admin.sections.content": "Content",
     "admin.sections.success": "Section added successfully",
-
     "admin.common.submit": "Submit",
     "admin.common.uploading": "Uploading...",
     "admin.common.title": "Title",
@@ -371,7 +350,6 @@
     "admin.common.deleting": "Deleting...",
     "admin.common.confirmDelete": "Delete",
     "admin.common.description": "Description",
-
     "admin.nav.title": "Admin Panel",
     "admin.nav.dashboard": "Dashboard",
     "admin.nav.exercises": "Exercises",
@@ -381,7 +359,6 @@
     "admin.nav.qa": "Q&A",
     "admin.nav.guide": "Guide",
     "admin.nav.backToSite": "Back to Site",
-
     "admin.dashboard.title": "Admin Dashboard",
     "admin.dashboard.subtitle": "Overview of your content",
     "admin.dashboard.exercises": "Exercises",
@@ -389,15 +366,12 @@
     "admin.dashboard.training": "Training",
     "admin.dashboard.videos": "Tutorials",
     "admin.dashboard.qa": "Questions",
-
     "admin.error.title": "Access Denied",
     "admin.error.unauthorized": "You do not have permission to access this page.",
     "admin.error.goBack": "Go Back",
-
     "admin.pagination.showing": "Page {{page}} of {{totalPages}} ({{total}} items)",
     "admin.pagination.prev": "Previous",
     "admin.pagination.next": "Next",
-
     "admin.exercises.pageTitle": "Exercise Management",
     "admin.exercises.upload": "Upload Exercise",
     "admin.exercises.uploadButton": "Create Exercise",
@@ -431,7 +405,6 @@
     "admin.exercises.bulkResultsSucceeded": "Succeeded: {{count}}",
     "admin.exercises.bulkResultsFailed": "Failed: {{count}}",
     "admin.exercises.bulkRetryFailed": "Retry failed",
-
     "admin.training.pageTitle": "Training Management",
     "admin.training.upload": "Upload Training Exercise",
     "admin.training.uploadButton": "Create Training",
@@ -459,7 +432,6 @@
     "admin.training.replaceSolution": "Replace Solution Image",
     "admin.training.replaceContentImage": "Replace Content Image",
     "admin.training.replaceSolutionImage": "Replace Solution Image",
-
     "admin.videos.pageTitle": "Tutorial Management",
     "admin.videos.upload": "Add Tutorial",
     "admin.videos.uploadButton": "Create Tutorial",
@@ -481,7 +453,6 @@
     "admin.videos.cancel": "Cancel",
     "admin.videos.delete": "Delete",
     "admin.videos.confirmDelete": "Are you sure you want to delete this tutorial?",
-
     "admin.qa.pageTitle": "Q&A Moderation",
     "admin.qa.noQuestions": "No questions yet.",
     "admin.qa.questionCount": "Questions",
@@ -496,7 +467,6 @@
     "admin.qa.delete": "Delete",
     "admin.qa.confirmDelete": "Are you sure you want to delete this question and all its answers?",
     "admin.qa.actions": "Actions",
-
     "admin.guide.pageTitle": "Admin Guide",
     "admin.guide.dashboard.title": "Dashboard",
     "admin.guide.dashboard.content": "The dashboard shows a summary of all content across the platform including exercise, book, training, tutorial, and Q&A counts. Click any card to navigate to that section.",

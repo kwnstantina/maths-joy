@@ -322,7 +322,7 @@ export default function QuestionDetail() {
   }, [editAnswerFetcher.data]);
 
   // Default categories for the edit form
-  const defaultCategories = ['Algebra', 'Geometry', 'Calculus', 'Statistics', 'Number Theory', 'Other'];
+  const defaultCategories = ['c', 'Geometry', 'Calculus', 'Statistics', 'Number Theory', 'Other'];
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString(
@@ -544,9 +544,8 @@ export default function QuestionDetail() {
           return (
             <div
               key={answer.id}
-              className={`bg-white rounded-lg shadow-md p-6 mb-4 ${
-                isAccepted ? 'border-2 border-green-500' : ''
-              }`}
+              className={`bg-white rounded-lg shadow-md p-6 mb-4 ${isAccepted ? 'border-2 border-green-500' : ''
+                }`}
             >
               <div className="flex gap-6">
                 {/* Vote Column */}

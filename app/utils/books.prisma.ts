@@ -155,12 +155,27 @@ export async function getBookById(id: string) {
 }
 
 /**
+ * Predicate for "not soft-deleted" on MongoDB.
+ *
+ * Prisma + MongoDB quirk: `where: { deletedAt: null }` only matches documents
+ * where the field is *explicitly* null. Documents created without writing the
+ * field at all (which is the default — neither `createBook` nor MongoDB stores
+ * unset optional fields) are NOT matched. We OR with `isSet: false` to also
+ * include those.
+ *
+ * See: https://www.prisma.io/docs/orm/overview/databases/mongodb#filtering-for-null-and-missing-fields
+ */
+const notSoftDeleted = {
+  OR: [{ deletedAt: null }, { deletedAt: { isSet: false } }],
+};
+
+/**
  * Get all books, optionally filtering to only active (non-soft-deleted) books.
- * When activeOnly is true, returns books where isActive=true AND deletedAt is null.
+ * When activeOnly is true, returns books where isActive=true AND deletedAt is null/unset.
  */
 export async function getAllBooks(activeOnly = false) {
   return prisma.book.findMany({
-    where: activeOnly ? { isActive: true, deletedAt: null } : undefined,
+    where: activeOnly ? { isActive: true, ...notSoftDeleted } : undefined,
     orderBy: { createdAt: "desc" },
   });
 }
@@ -170,7 +185,7 @@ export async function getAllBooks(activeOnly = false) {
  */
 export async function getPaginatedBooks(page = 1, limit = 12) {
   const skip = (page - 1) * limit;
-  const where = { deletedAt: null };
+  const where = notSoftDeleted;
 
   const [books, total] = await Promise.all([
     prisma.book.findMany({

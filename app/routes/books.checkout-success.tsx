@@ -1,16 +1,24 @@
 import type { LoaderFunction } from "@remix-run/node";
 import { data, redirect } from "@remix-run/node";
 import { Link, useLoaderData, useRevalidator } from "@remix-run/react";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { prisma } from "~/utils/prisma.server";
-import { getCheckoutSessionDetails } from "~/utils/stripe.server";
+import {
+  getCheckoutSessionDetails,
+  reconcilePendingPurchase,
+} from "~/utils/stripe.server";
 
 export const handle = { i18n: ["common"] };
+
+// After this many seconds of pending state, the loader actively reconciles
+// against Stripe rather than waiting for the webhook to land.
+const RECONCILE_AFTER_SECONDS = 30;
 
 interface LoaderData {
   book: { title: string; thumbnailUrl: string | null };
   isCompleted: boolean;
+  isFailed: boolean;
   downloadUrl: string | null;
   cardInfo: { last4: string; brand: string } | null;
   downloadsRemaining: number;
@@ -26,7 +34,7 @@ export const loader: LoaderFunction = async ({ request }) => {
   }
 
   // Find purchase by stripeSessionId -- the key connecting the returning user to their payment
-  const purchase = await prisma.purchase.findFirst({
+  let purchase = await prisma.purchase.findFirst({
     where: { stripeSessionId: sessionId },
   });
 
@@ -34,7 +42,24 @@ export const loader: LoaderFunction = async ({ request }) => {
     throw new Response("Purchase not found", { status: 404 });
   }
 
+  // Reconciliation fallback: if the webhook hasn't fired but the purchase is
+  // older than RECONCILE_AFTER_SECONDS, query Stripe directly. This guarantees
+  // we never strand a paying customer on an infinite-spinner page when the
+  // webhook is delayed or lost.
+  const ageSeconds = (Date.now() - purchase.createdAt.getTime()) / 1000;
+  if (purchase.status === "pending" && ageSeconds >= RECONCILE_AFTER_SECONDS) {
+    await reconcilePendingPurchase(sessionId);
+    purchase = await prisma.purchase.findFirst({
+      where: { stripeSessionId: sessionId },
+    });
+    if (!purchase) {
+      throw new Response("Purchase not found", { status: 404 });
+    }
+  }
+
   const isCompleted = purchase.status === "completed";
+  const isFailed =
+    purchase.status === "failed" || purchase.status === "refunded";
 
   // Only call Stripe API on initial load (when payment just completed) to get card info.
   // During polling (isCompleted=false), we only need the DB purchase status.
@@ -79,6 +104,7 @@ export const loader: LoaderFunction = async ({ request }) => {
   return data<LoaderData>({
     book: { title: book.title, thumbnailUrl: book.thumbnailUrl },
     isCompleted,
+    isFailed,
     downloadUrl,
     cardInfo,
     downloadsRemaining,
@@ -86,10 +112,16 @@ export const loader: LoaderFunction = async ({ request }) => {
   });
 };
 
+// Cap client-side polling so we don't spin forever if reconciliation also fails.
+// At ~60s the loader has already attempted Stripe reconciliation; further
+// waiting won't help and the user should be told to contact support.
+const MAX_POLL_ATTEMPTS = 30; // 30 × 2s = 60s
+
 export default function CheckoutSuccess() {
   const {
     book,
     isCompleted,
+    isFailed,
     downloadUrl,
     cardInfo,
     downloadsRemaining,
@@ -97,16 +129,57 @@ export default function CheckoutSuccess() {
   } = useLoaderData<LoaderData>();
   const { t } = useTranslation();
   const revalidator = useRevalidator();
+  const [pollAttempts, setPollAttempts] = useState(0);
+  const giveUp = pollAttempts >= MAX_POLL_ATTEMPTS;
 
-  // Poll every 2s if payment is not yet confirmed (webhook may be delayed)
+  // Poll every 2s if payment is not yet confirmed (webhook may be delayed).
+  // Stops once we hit a terminal state (completed/failed/refunded) or the cap.
   useEffect(() => {
-    if (!isCompleted) {
-      const interval = setInterval(() => {
-        revalidator.revalidate();
-      }, 2000);
-      return () => clearInterval(interval);
-    }
-  }, [isCompleted, revalidator]);
+    if (isCompleted || isFailed || giveUp) return;
+    const interval = setInterval(() => {
+      setPollAttempts((n) => n + 1);
+      revalidator.revalidate();
+    }, 2000);
+    return () => clearInterval(interval);
+  }, [isCompleted, isFailed, giveUp, revalidator]);
+
+  // Failed / refunded -- terminal error state
+  if (isFailed) {
+    return (
+      <div className="container mx-auto px-6 py-10 text-center max-w-lg">
+        <h1 className="text-2xl font-bold text-gray-800 mb-2">
+          {t("checkout.failed")}
+        </h1>
+        <p className="text-gray-600 mb-6">{t("checkout.failedDescription")}</p>
+        <Link
+          to="/books"
+          className="inline-block px-6 py-3 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors"
+        >
+          {t("checkout.continueBrowsing")}
+        </Link>
+      </div>
+    );
+  }
+
+  // Polling cap hit -- webhook never landed and reconciliation didn't help
+  if (giveUp && !isCompleted) {
+    return (
+      <div className="container mx-auto px-6 py-10 text-center max-w-lg">
+        <h1 className="text-2xl font-bold text-gray-800 mb-2">
+          {t("checkout.stillProcessing")}
+        </h1>
+        <p className="text-gray-600 mb-6">
+          {t("checkout.contactSupport")}
+        </p>
+        <Link
+          to="/purchases"
+          className="inline-block px-6 py-3 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors"
+        >
+          {t("checkout.viewPurchases")}
+        </Link>
+      </div>
+    );
+  }
 
   // Processing state -- webhook hasn't fired yet
   if (!isCompleted) {

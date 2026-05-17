@@ -3,6 +3,9 @@ import {
   verifyWebhookSignature,
   handlePaymentSuccess,
   handlePaymentFailure,
+  handlePaymentIntentFailed,
+  handleChargeRefunded,
+  handleDisputeCreated,
 } from '~/utils/stripe.server';
 
 const jsonResponse = (body: Record<string, unknown>, status = 200) =>
@@ -47,19 +50,31 @@ export const action: ActionFunction = async ({ request }) => {
       }
 
       case 'payment_intent.payment_failed': {
-        // Payment failed - could log for analytics
-        console.log('Payment failed:', event.data.object.id);
+        await handlePaymentIntentFailed(event.data.object);
+        break;
+      }
+
+      case 'charge.refunded': {
+        await handleChargeRefunded(event.data.object);
+        break;
+      }
+
+      case 'charge.dispute.created': {
+        await handleDisputeCreated(event.data.object);
         break;
       }
 
       default:
-        // Unhandled event type - that's okay
+        // Unhandled event type — log at debug level only.
+        // Stripe fires many events we don't subscribe to; this isn't a problem.
         console.log(`Unhandled event type: ${event.type}`);
     }
 
     return jsonResponse({ received: true });
   } catch (error) {
-    console.error('Webhook handler error:', error);
+    // Returning 500 causes Stripe to retry — desirable for transient failures.
+    // Stripe retries with exponential backoff for up to ~3 days.
+    console.error('Webhook handler error:', { eventId: event.id, type: event.type, error });
     return jsonResponse({ error: 'Webhook handler failed' }, 500);
   }
 };

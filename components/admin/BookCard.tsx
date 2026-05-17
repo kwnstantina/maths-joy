@@ -34,6 +34,7 @@ const priceFormatter = new Intl.NumberFormat("el-GR", {
 export default function BookCard({ book, csrfToken }: BookCardProps) {
   const { t } = useTranslation();
   const [isEditing, setIsEditing] = useState(false);
+  const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
   const toggleFetcher = useFetcher();
   const deleteFetcher = useFetcher();
   const editFetcher = useFetcher();
@@ -374,75 +375,102 @@ export default function BookCard({ book, csrfToken }: BookCardProps) {
           </span>
         </div>
 
-        {/* Action buttons */}
-        <div className="mt-4 flex gap-2">
-          {/* Edit button */}
-          <button
-            type="button"
-            onClick={() => setIsEditing(true)}
-            className="flex-1 rounded bg-orange-500 py-1.5 px-3 text-sm text-white hover:bg-orange-600"
-          >
-            {t("admin.books.edit")}
-          </button>
-
-          {/* Toggle active */}
-          <toggleFetcher.Form method="post">
-            <input type="hidden" name="_csrf" value={csrfToken} />
-            <input type="hidden" name="_action" value="toggleActive" />
-            <input type="hidden" name="bookId" value={book.id} />
+        {/* Action buttons / inline delete confirmation */}
+        {isConfirmingDelete ? (
+          <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded">
+            <p className="text-sm text-red-800 mb-3">
+              {t("admin.books.confirmDeleteMessage", { title: book.title })}
+            </p>
+            <div className="flex gap-2">
+              <deleteFetcher.Form method="post" className="flex-1">
+                <input type="hidden" name="_csrf" value={csrfToken} />
+                <input type="hidden" name="_action" value="softDelete" />
+                <input type="hidden" name="bookId" value={book.id} />
+                <button
+                  type="submit"
+                  disabled={deleteFetcher.state === "submitting"}
+                  className="w-full rounded bg-red-600 py-1.5 px-3 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-50"
+                >
+                  {deleteFetcher.state === "submitting"
+                    ? t("admin.books.deleting")
+                    : t("admin.books.confirmDelete")}
+                </button>
+              </deleteFetcher.Form>
+              <button
+                type="button"
+                onClick={() => setIsConfirmingDelete(false)}
+                disabled={deleteFetcher.state === "submitting"}
+                className="flex-1 rounded bg-gray-200 py-1.5 px-3 text-sm text-gray-700 hover:bg-gray-300 disabled:opacity-50"
+              >
+                {t("admin.books.cancel")}
+              </button>
+            </div>
+          </div>
+        ) : (
+          <div className="mt-4 flex gap-2">
+            {/* Edit button */}
             <button
-              type="submit"
-              disabled={toggleFetcher.state === "submitting"}
-              className="rounded bg-gray-200 py-1.5 px-3 text-sm text-gray-700 hover:bg-gray-300 disabled:opacity-50"
-              title={t("admin.books.toggleActive")}
+              type="button"
+              onClick={() => setIsEditing(true)}
+              className="flex-1 rounded bg-orange-500 py-1.5 px-3 text-sm text-white hover:bg-orange-600"
             >
-              {book.isActive ? (
-                <svg
-                  className="w-4 h-4"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21"
-                  />
-                </svg>
-              ) : (
-                <svg
-                  className="w-4 h-4"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                  />
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
-                  />
-                </svg>
-              )}
+              {t("admin.books.edit")}
             </button>
-          </toggleFetcher.Form>
 
-          {/* Delete button */}
-          <deleteFetcher.Form method="post">
-            <input type="hidden" name="_csrf" value={csrfToken} />
-            <input type="hidden" name="_action" value="softDelete" />
-            <input type="hidden" name="bookId" value={book.id} />
+            {/* Toggle active */}
+            <toggleFetcher.Form method="post">
+              <input type="hidden" name="_csrf" value={csrfToken} />
+              <input type="hidden" name="_action" value="toggleActive" />
+              <input type="hidden" name="bookId" value={book.id} />
+              <button
+                type="submit"
+                disabled={toggleFetcher.state === "submitting"}
+                className="rounded bg-gray-200 py-1.5 px-3 text-sm text-gray-700 hover:bg-gray-300 disabled:opacity-50"
+                title={t("admin.books.toggleActive")}
+              >
+                {book.isActive ? (
+                  <svg
+                    className="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21"
+                    />
+                  </svg>
+                ) : (
+                  <svg
+                    className="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                    />
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                    />
+                  </svg>
+                )}
+              </button>
+            </toggleFetcher.Form>
+
+            {/* Delete button — opens inline confirmation */}
             <button
-              type="submit"
-              disabled={deleteFetcher.state === "submitting"}
-              className="rounded bg-red-100 py-1.5 px-3 text-sm text-red-700 hover:bg-red-200 disabled:opacity-50"
+              type="button"
+              onClick={() => setIsConfirmingDelete(true)}
+              className="rounded bg-red-100 py-1.5 px-3 text-sm font-medium text-red-700 hover:bg-red-200 flex items-center gap-1.5"
               title={t("admin.books.delete")}
             >
               <svg
@@ -458,9 +486,10 @@ export default function BookCard({ book, csrfToken }: BookCardProps) {
                   d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
                 />
               </svg>
+              <span>{t("admin.books.delete")}</span>
             </button>
-          </deleteFetcher.Form>
-        </div>
+          </div>
+        )}
       </div>
     </div>
   );

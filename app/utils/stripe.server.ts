@@ -26,7 +26,15 @@ export interface CheckoutSessionResult {
 }
 
 /**
- * Create a Stripe checkout session for purchasing a book
+ * Create a Stripe checkout session for purchasing a book.
+ *
+ * Idempotency:
+ *   - If the same user has a pending Purchase for the same book within the last
+ *     5 minutes with a still-open Stripe session, that session is reused. This
+ *     prevents double-clicked Buy buttons from creating duplicate Purchase rows.
+ *   - The Stripe API call also passes an Idempotency-Key derived from
+ *     userId+bookId+minute-bucket as belt-and-braces protection against
+ *     parallel requests racing past the DB check.
  */
 export async function createCheckoutSession({
   bookId,
@@ -49,6 +57,33 @@ export async function createCheckoutSession({
 
   if (!book.isActive) {
     throw new Error('Book is not available for purchase');
+  }
+
+  // Reuse an existing pending Purchase + open Stripe session if the same user
+  // recently started a checkout for the same book (e.g. double-clicked Buy).
+  const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
+  const recentPending = await prisma.purchase.findFirst({
+    where: {
+      userId,
+      bookId,
+      status: 'pending',
+      createdAt: { gte: fiveMinutesAgo },
+      stripeSessionId: { not: null },
+    },
+    orderBy: { createdAt: 'desc' },
+  });
+
+  if (recentPending?.stripeSessionId) {
+    try {
+      const existing = await stripe.checkout.sessions.retrieve(
+        recentPending.stripeSessionId
+      );
+      if (existing.status === 'open' && existing.url) {
+        return { sessionId: existing.id, url: existing.url };
+      }
+    } catch {
+      // Fall through and create a fresh session
+    }
   }
 
   // Generate a unique download token for this purchase
@@ -102,27 +137,47 @@ export async function createCheckoutSession({
     },
   });
 
-  // Create Stripe checkout session
-  const session = await stripe.checkout.sessions.create({
-    mode: 'payment',
-    payment_method_types: ['card'],
-    line_items: [
-      {
-        price: priceId,
-        quantity: 1,
+  // Idempotency key collapses concurrent identical requests into one Stripe
+  // session. Minute-bucket so a user reopening the page next minute gets a
+  // fresh session if the previous one expired.
+  const minuteBucket = Math.floor(Date.now() / 60_000);
+  const idempotencyKey = `checkout:${userId}:${bookId}:${minuteBucket}`;
+
+  // Create Stripe checkout session.
+  // Note: payment_method_types is intentionally omitted so Stripe auto-enables
+  // every payment method configured in the dashboard (cards, Apple Pay,
+  // Google Pay, Link, SEPA, etc).
+  const session = await stripe.checkout.sessions.create(
+    {
+      mode: 'payment',
+      line_items: [
+        {
+          price: priceId,
+          quantity: 1,
+        },
+      ],
+      success_url: `${successUrl}?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: cancelUrl,
+      automatic_tax: { enabled: true },
+      metadata: {
+        purchaseId: purchase.id,
+        bookId,
+        userId,
+        downloadToken,
       },
-    ],
-    success_url: `${successUrl}?session_id={CHECKOUT_SESSION_ID}`,
-    cancel_url: cancelUrl,
-    automatic_tax: { enabled: true },
-    metadata: {
-      purchaseId: purchase.id,
-      bookId,
-      userId,
-      downloadToken,
+      // Propagate metadata onto the PaymentIntent so payment_intent.payment_failed
+      // webhooks can resolve back to the Purchase row.
+      payment_intent_data: {
+        metadata: {
+          purchaseId: purchase.id,
+          bookId,
+          userId,
+        },
+      },
+      customer_email: undefined, // Will be filled by user
     },
-    customer_email: undefined, // Will be filled by user
-  });
+    { idempotencyKey }
+  );
 
   // Update purchase with session ID
   await prisma.purchase.update({
@@ -139,7 +194,12 @@ export async function createCheckoutSession({
 }
 
 /**
- * Handle successful payment webhook
+ * Handle successful payment webhook.
+ *
+ * Idempotent: uses an atomic conditional update so concurrent webhook
+ * deliveries (or webhook + reconciliation poller racing) cannot both fulfill
+ * the same purchase. Only the row currently in `pending` is upgraded; any
+ * subsequent caller observes count=0 and returns silently.
  */
 export async function handlePaymentSuccess(
   sessionId: string
@@ -147,12 +207,6 @@ export async function handlePaymentSuccess(
   if (!stripe) {
     throw new Error('Stripe is not configured');
   }
-
-  // Idempotency: check if already processed
-  const existingPurchase = await prisma.purchase.findFirst({
-    where: { stripeSessionId: sessionId, status: 'completed' },
-  });
-  if (existingPurchase) return; // Already fulfilled — safe to return
 
   const session = await stripe.checkout.sessions.retrieve(sessionId);
 
@@ -169,9 +223,10 @@ export async function handlePaymentSuccess(
   const tokenExpiresAt = new Date();
   tokenExpiresAt.setDate(tokenExpiresAt.getDate() + 365);
 
-  // Update purchase status
-  await prisma.purchase.update({
-    where: { id: purchaseId },
+  // Atomic transition: pending -> completed.
+  // If another caller already won the race, count will be 0 and we return safely.
+  const result = await prisma.purchase.updateMany({
+    where: { id: purchaseId, status: 'pending' },
     data: {
       status: 'completed',
       stripePaymentId: session.payment_intent as string,
@@ -179,10 +234,16 @@ export async function handlePaymentSuccess(
       updatedAt: new Date(),
     },
   });
+
+  if (result.count === 0) {
+    // Already fulfilled by a previous webhook delivery or by the reconciliation
+    // path — nothing to do.
+    return;
+  }
 }
 
 /**
- * Handle payment failure webhook
+ * Handle payment failure webhook (checkout.session.expired)
  */
 export async function handlePaymentFailure(
   sessionId: string
@@ -195,13 +256,189 @@ export async function handlePaymentFailure(
 
   const purchaseId = session.metadata?.purchaseId;
   if (purchaseId) {
-    await prisma.purchase.update({
-      where: { id: purchaseId },
+    // Only transition pending -> failed; never overwrite a completed purchase.
+    await prisma.purchase.updateMany({
+      where: { id: purchaseId, status: 'pending' },
       data: {
         status: 'failed',
+        updatedAt: new Date(),
       },
     });
   }
+}
+
+/**
+ * Handle a payment_intent.payment_failed webhook.
+ *
+ * Resolves the related Purchase via PaymentIntent metadata (propagated from
+ * the Checkout Session via payment_intent_data.metadata at session creation)
+ * and marks it 'failed'. Only transitions from 'pending' so a later success
+ * cannot regress.
+ */
+export async function handlePaymentIntentFailed(
+  paymentIntent: Stripe.PaymentIntent
+): Promise<void> {
+  const purchaseId = paymentIntent.metadata?.purchaseId;
+  if (!purchaseId) {
+    // No metadata — likely a PI not created by our checkout flow. Ignore.
+    return;
+  }
+
+  await prisma.purchase.updateMany({
+    where: { id: purchaseId, status: 'pending' },
+    data: {
+      status: 'failed',
+      stripePaymentId: paymentIntent.id,
+      updatedAt: new Date(),
+    },
+  });
+}
+
+/**
+ * Handle a charge.refunded webhook.
+ *
+ * Finds the Purchase via PaymentIntent ID (stored as Purchase.stripePaymentId
+ * on success) and marks it 'refunded'. Nulls the downloadToken so the
+ * /download/:token route immediately rejects further attempts.
+ *
+ * Stripe fires charge.refunded for both full and partial refunds. We treat
+ * any refund as access-revoking — partial refunds for digital goods are rare
+ * and almost always represent a customer-service decision to undo the sale.
+ */
+export async function handleChargeRefunded(
+  charge: Stripe.Charge
+): Promise<void> {
+  const paymentIntentId =
+    typeof charge.payment_intent === 'string'
+      ? charge.payment_intent
+      : charge.payment_intent?.id;
+
+  if (!paymentIntentId) {
+    return;
+  }
+
+  const purchase = await prisma.purchase.findFirst({
+    where: { stripePaymentId: paymentIntentId },
+  });
+
+  if (!purchase) {
+    return;
+  }
+
+  await prisma.purchase.update({
+    where: { id: purchase.id },
+    data: {
+      status: 'refunded',
+      downloadToken: null, // revoke access
+      updatedAt: new Date(),
+    },
+  });
+}
+
+/**
+ * Handle a charge.dispute.created webhook.
+ *
+ * Records the dispute in AuditLog and revokes download access immediately.
+ * The merchant should also receive an out-of-band alert (email/Slack) — that
+ * wiring is out of scope here, but the AuditLog entry preserves the signal.
+ */
+export async function handleDisputeCreated(
+  dispute: Stripe.Dispute
+): Promise<void> {
+  const chargeId =
+    typeof dispute.charge === 'string' ? dispute.charge : dispute.charge?.id;
+
+  let purchaseId: string | null = null;
+  let userId: string | null = null;
+
+  if (chargeId && stripe) {
+    try {
+      const charge = await stripe.charges.retrieve(chargeId);
+      const paymentIntentId =
+        typeof charge.payment_intent === 'string'
+          ? charge.payment_intent
+          : charge.payment_intent?.id;
+
+      if (paymentIntentId) {
+        const purchase = await prisma.purchase.findFirst({
+          where: { stripePaymentId: paymentIntentId },
+        });
+        if (purchase) {
+          purchaseId = purchase.id;
+          userId = purchase.userId;
+          // Revoke access pending dispute resolution.
+          await prisma.purchase.update({
+            where: { id: purchase.id },
+            data: { downloadToken: null, updatedAt: new Date() },
+          });
+        }
+      }
+    } catch (error) {
+      console.error('Failed to resolve dispute charge:', error);
+    }
+  }
+
+  if (userId) {
+    await prisma.auditLog.create({
+      data: {
+        userId,
+        action: 'purchase',
+        resource: 'book',
+        resourceId: purchaseId ?? undefined,
+        metadata: {
+          event: 'stripe.dispute.created',
+          disputeId: dispute.id,
+          amount: dispute.amount,
+          currency: dispute.currency,
+          reason: dispute.reason,
+        },
+        createdAt: new Date(),
+      },
+    });
+  }
+}
+
+/**
+ * Reconcile a pending Purchase by querying Stripe directly.
+ *
+ * Used as a fallback when the checkout.session.completed webhook is delayed,
+ * lost, or arriving outside the success-page polling window. Safe to call
+ * repeatedly — handlePaymentSuccess is idempotent.
+ *
+ * Returns the latest Purchase status after reconciliation (or null if the
+ * purchase couldn't be looked up).
+ */
+export async function reconcilePendingPurchase(
+  sessionId: string
+): Promise<string | null> {
+  if (!stripe) return null;
+
+  const purchase = await prisma.purchase.findFirst({
+    where: { stripeSessionId: sessionId },
+  });
+  if (!purchase) return null;
+
+  // Already in a terminal state — nothing to reconcile.
+  if (purchase.status !== 'pending') return purchase.status;
+
+  try {
+    const session = await stripe.checkout.sessions.retrieve(sessionId);
+
+    if (session.payment_status === 'paid') {
+      await handlePaymentSuccess(sessionId);
+      return 'completed';
+    }
+
+    if (session.status === 'expired') {
+      await handlePaymentFailure(sessionId);
+      return 'failed';
+    }
+  } catch (error) {
+    // Don't break the calling page if Stripe is briefly unreachable.
+    console.error('Reconciliation failed:', error);
+  }
+
+  return purchase.status;
 }
 
 /**

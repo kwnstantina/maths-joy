@@ -7,10 +7,17 @@ import { prisma } from "~/utils/prisma.server";
 export const handle = { i18n: ["common"] };
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
+  // Prisma + MongoDB quirk: `deletedAt: null` only matches documents where the
+  // field is explicitly null, not where it's missing. Existing books were
+  // created without ever writing `deletedAt`, so we OR with `isSet: false`.
+  const notSoftDeleted = {
+    OR: [{ deletedAt: null }, { deletedAt: { isSet: false } }],
+  };
+
   const [exerciseCount, bookCount, trainingCount, videoCount, questionCount] =
     await Promise.all([
       prisma.exersice.count(),
-      prisma.book.count({ where: { deletedAt: null } }),
+      prisma.book.count({ where: notSoftDeleted }),
       prisma.training.count(),
       prisma.video.count(),
       prisma.question.count(),

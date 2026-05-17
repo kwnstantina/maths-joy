@@ -5,6 +5,21 @@ import { useFetcher, useLoaderData } from "@remix-run/react";
 import { useEffect, useRef, useState } from "react";
 import { getTutorialsWithPagination } from "../utils/tutorial.server";
 
+interface TutorialItem {
+  id: string;
+  url: string;
+  title: string;
+  description: string;
+  creatorName: string;
+  tags: string[];
+  createdAt: string;
+}
+
+interface LoaderData {
+  data: TutorialItem[];
+  page: number;
+}
+
 export const loader: LoaderFunction = async (remixContext) => {
   const url = new URL(remixContext.request.url);
   const page = url.searchParams.get("page") || 0;
@@ -48,15 +63,19 @@ const InfiniteScroller = (props: {
 };
 
 const Tutorial = () => {
-  const initialItems = useLoaderData();
-  const fetcher = useFetcher();
+  const initialItems = useLoaderData<LoaderData>();
+  const fetcher = useFetcher<LoaderData>();
 
   const [items, setItems] = useState(initialItems);
 
   useEffect(() => {
     if (fetcher.data) {
       const newItems = fetcher.data.data;
-      setItems((prev: any) => [...prev, ...newItems]);
+      setItems((prev: LoaderData) => ({
+        ...prev,
+        data: [...prev.data, ...newItems],
+        page: fetcher.data?.page ?? prev.page,
+      }));
     }
   }, [fetcher.data]);
   

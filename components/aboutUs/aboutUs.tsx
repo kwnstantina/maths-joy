@@ -32,12 +32,12 @@ const AboutUsHoc = () => {
             <h3 className="text-2xl font-semibold leading-6 text-center text-white">
               {t("aboutUsType")}
             </h3>
-            <p className="lg:w-80 lg:px-0 px-4 text-base leading-6 text-center text-white mt-6">
+            <p className="lg:w-80 lg:px-0 px-4 text-base leading-6 text-left text-white mt-6">
               {t("aboutUsDescription")}{" "}
             </p>
             <a
               href="/aboutUs"
-              className="inline-flex items-center font-medium text-white hover:underline mt-10"
+              className="inline-flex items-left font-medium text-white hover:underline mt-10"
             >
               {t("aboutUsReadMore")}
               <svg

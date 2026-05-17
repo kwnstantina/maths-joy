@@ -1,9 +1,10 @@
-import React, { useState, Fragment } from "react";
+import React, { useState, Fragment, useEffect } from "react";
 import gb from '../../app/assets/united-kingdom.png';
 import gr from '../../app/assets/greece.png';
 import { Listbox, Transition } from '@headlessui/react'
-import { CheckIcon, TranslateIcon } from '@heroicons/react/solid'
+import { CheckIcon, LanguageIcon } from '@heroicons/react/24/solid'
 import { useTranslation } from "react-i18next";
+import { useFetcher } from "@remix-run/react";
 
 interface Language {
   code: string;
@@ -16,12 +17,31 @@ const languages: Language[] = [
 ];
 
 const LanguageIndicator: React.FC = () => {
-  const [selectedLanguage, setSelectedLanguage] = useState<Language>(languages[0]);
-  let { i18n } = useTranslation();
+  const { i18n } = useTranslation();
+  const fetcher = useFetcher();
+
+  // Initialize from current i18n language instead of hardcoded default
+  const [selectedLanguage, setSelectedLanguage] = useState<Language>(
+    languages.find(l => l.code === i18n.language) || languages[0]
+  );
+
+  // Sync state when i18n language changes externally
+  useEffect(() => {
+    const currentLang = languages.find(l => l.code === i18n.language);
+    if (currentLang && currentLang.code !== selectedLanguage.code) {
+      setSelectedLanguage(currentLang);
+    }
+  }, [i18n.language]);
 
   const handleLanguageSelect = (language: Language) => {
     setSelectedLanguage(language);
     i18n.changeLanguage(language.code);
+
+    // Persist language selection to server cookie
+    fetcher.submit(
+      { language: language.code },
+      { method: 'post', action: '/api/language' }
+    );
   };
 
   return (
@@ -29,7 +49,7 @@ const LanguageIndicator: React.FC = () => {
     <Listbox value={selectedLanguage} onChange={handleLanguageSelect}>
       <div className="relative mt-1">
         <Listbox.Button className="relative w-full cursor-default rounded-lg bg-white py-2 pl-3 pr-10 text-left shadow-md focus:outline-none focus-visible:border-indigo-500 focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75 focus-visible:ring-offset-2 focus-visible:ring-offset-orange-300 sm:text-sm">
-           <TranslateIcon
+           <LanguageIcon
                   className="ml-2  h-8 w-8 text-black hover:text-orange-300"
                   aria-hidden="true"
                 />
@@ -58,7 +78,7 @@ const LanguageIndicator: React.FC = () => {
                         selected ? 'font-medium' : 'font-normal'
                       }`}
                     >
-                      {lang.code==='en'?<img src={gb} className="w-5 h-5 my-4" />:<img src={gr} className="w-5 h-5 my-4" />}
+                      {lang.code==='en'?<img src={gb} alt="English" className="w-5 h-5 my-4" />:<img src={gr} alt="Ελληνικά" className="w-5 h-5 my-4" />}
                     </span>
                     {selected ? (
                       <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-amber-600">

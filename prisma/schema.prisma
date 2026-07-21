@@ -184,6 +184,31 @@ model UserProgress {
   @@index([userId, type])
 }
 
+// Greg AI chatbot - persistent chat history per user
+model GregChatSession {
+  id        String           @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String           @db.ObjectId
+  title     String
+  locale    String           @default("el")
+  createdAt DateTime         @db.Date
+  updatedAt DateTime         @db.Date
+  messages  GregChatMessage[]
+
+  @@index([userId])
+  @@index([userId, updatedAt])
+}
+
+model GregChatMessage {
+  id        String          @id @default(auto()) @map("_id") @db.ObjectId
+  sessionId String          @db.ObjectId
+  session   GregChatSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  role      String          // "user" | "assistant"
+  content   String
+  createdAt DateTime        @db.Date
+
+  @@index([sessionId, createdAt])
+}
+
 // Audit Logging for security
 model AuditLog {
   id         String   @id @default(auto()) @map("_id") @db.ObjectId

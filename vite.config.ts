@@ -33,7 +33,7 @@ export default defineConfig({
     exclude: ["i18next-fs-backend"],
   },
   ssr: {
-    noExternal: ["i18next-fs-backend"],
+    noExternal: ["i18next-fs-backend", "better-react-mathjax"],
     target: "node",
   },
   build: {

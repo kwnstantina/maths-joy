@@ -24,6 +24,7 @@ import i18next from "~/i18next.server";
 import { i18nCookie } from "../services/cookies/cookies";
 import useScrollToTop from "hooks/useScrollToTop";
 import { getUser } from "~/utils/auth.prisma";
+import GregAiWidget from "components/gregAi/gregAiWidget";
 
 export interface RootUser {
   id: string;
@@ -145,6 +146,7 @@ export function AppLayout({ children }: AppLayoutProps) {
         {isLoading ? <LoadingPage /> : children}
       </main>
       <Footer />
+      <GregAiWidget isLoggedIn={Boolean(rootData?.user)} />
     </div>
   );
 }

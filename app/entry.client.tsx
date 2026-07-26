@@ -9,15 +9,25 @@ import Backend from "i18next-http-backend";
 import { getInitialNamespaces } from "remix-i18next/client";
 
 async function hydrate() {
+  // Don't pin a fixed `lng` on the client: the server (RemixI18Next) renders in
+  // the cookie-detected language and sets <html lang>. The client must detect
+  // that same language via htmlTag — otherwise client-only UI (e.g. the Greg AI
+  // widget) renders in Greek while the server rendered English, producing a
+  // hydration mismatch. Drop i18n.ts's `lng` so LanguageDetector runs.
+  const { lng: _defaultLng, ...i18nConfig } = i18n;
   await i18next
     .use(initReactI18next)
     .use(LanguageDetector)
     .use(Backend)
     .init({
-      ...i18n,
+      ...i18nConfig,
       ns: getInitialNamespaces(),
-      lng: "el",
-      fallbackLng: "en",
+      // Wait for the initial namespaces to finish loading before hydrating.
+      // Client-only components (e.g. the Greg AI widget) mount after hydration
+      // via useEffect; with the default (initImmediate: true), init resolves
+      // before the async fetch completes, so the widget can render raw keys and
+      // never recover. Awaiting the load guarantees translations are present.
+      initImmediate: false,
       backend: { loadPath: "/locales/{{lng}}/{{ns}}.json" },
       detection: {
         order: ["htmlTag"],

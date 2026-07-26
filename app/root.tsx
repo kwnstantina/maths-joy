@@ -18,7 +18,6 @@ import LoadingPage from "components/loadingPage/loadingPage";
 import { useState } from "react";
 import usePrevious from "hooks/usePrevious";
 import ErrorPage from "components/errorPage/errorPage";
-import logo from "./assets/mathsLogo.png";
 import { useTranslation } from "react-i18next";
 import i18next from "~/i18next.server";
 import { i18nCookie } from "../services/cookies/cookies";
@@ -79,7 +78,12 @@ export const meta: MetaFunction = () => {
 };
 
 export function links() {
-  return [{ rel: "icon", type: "image/png", href: logo }];
+  return [
+    { rel: "icon", href: "/favicon.ico", sizes: "48x48" },
+    { rel: "icon", type: "image/png", sizes: "32x32", href: "/favicon-32x32.png" },
+    { rel: "icon", type: "image/png", sizes: "16x16", href: "/favicon-16x16.png" },
+    { rel: "apple-touch-icon", sizes: "180x180", href: "/apple-touch-icon.png" },
+  ];
 }
 
 export default function App() {

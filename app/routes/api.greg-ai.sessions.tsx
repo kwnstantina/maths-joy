@@ -6,11 +6,17 @@ import {
   getSessionMessages,
   listSessions,
 } from "~/utils/gregChat.prisma";
+import { applyRateLimit } from "~/utils/ratelimit.server";
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const userId = await getUserId(request);
   if (!userId) {
     return json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const rateLimitResponse = applyRateLimit(request, "api", userId);
+  if (rateLimitResponse) {
+    return rateLimitResponse;
   }
 
   const url = new URL(request.url);
@@ -36,6 +42,11 @@ export async function action({ request }: ActionFunctionArgs) {
 
   if (request.method !== "DELETE") {
     return json({ error: "Method not allowed" }, { status: 405 });
+  }
+
+  const rateLimitResponse = applyRateLimit(request, "api", userId);
+  if (rateLimitResponse) {
+    return rateLimitResponse;
   }
 
   const url = new URL(request.url);

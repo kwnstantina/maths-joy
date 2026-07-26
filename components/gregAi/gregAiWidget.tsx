@@ -1,4 +1,4 @@
-import { useLocation } from "@remix-run/react";
+import { Link, useLocation } from "@remix-run/react";
 import { MathJaxContext, MathJax } from "better-react-mathjax";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -260,7 +260,7 @@ export default function GregAiWidget({ isLoggedIn }: GregAiWidgetProps) {
     abortRef.current?.abort();
   }
 
-  if (!mounted || !isLoggedIn) return null;
+  if (!mounted) return null;
 
   const showWelcome = messages.length === 0 && !streaming;
 
@@ -273,7 +273,7 @@ export default function GregAiWidget({ isLoggedIn }: GregAiWidgetProps) {
             aria-label={t("gregAi.openAria")}
             onClick={() => {
               setOpen(true);
-              loadSessions();
+              if (isLoggedIn) loadSessions();
             }}
             className="group flex items-center gap-2 rounded-full bg-orange-500 px-4 py-3 text-white shadow-lg transition hover:bg-orange-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-300"
           >
@@ -300,7 +300,7 @@ export default function GregAiWidget({ isLoggedIn }: GregAiWidgetProps) {
             <div className="flex items-center justify-between bg-gradient-to-r from-orange-500 to-amber-500 px-4 py-3 text-white">
               <div className="flex items-center gap-2">
                 <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white/20 text-lg font-bold">
-                  Γ
+                  G
                 </div>
                 <div className="leading-tight">
                   <div className="text-sm font-semibold">
@@ -312,28 +312,32 @@ export default function GregAiWidget({ isLoggedIn }: GregAiWidgetProps) {
                 </div>
               </div>
               <div className="flex items-center gap-1">
-                <button
-                  type="button"
-                  onClick={() => setShowHistory((v) => !v)}
-                  aria-label={t("gregAi.historyAria")}
-                  className="rounded p-1 hover:bg-white/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
-                >
-                  <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                    <circle cx="12" cy="12" r="10" />
-                    <polyline points="12 6 12 12 16 14" />
-                  </svg>
-                </button>
-                <button
-                  type="button"
-                  onClick={startNewChat}
-                  aria-label={t("gregAi.newChatAria")}
-                  className="rounded p-1 hover:bg-white/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
-                >
-                  <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                    <line x1="12" y1="5" x2="12" y2="19" />
-                    <line x1="5" y1="12" x2="19" y2="12" />
-                  </svg>
-                </button>
+                {isLoggedIn && (
+                  <>
+                    <button
+                      type="button"
+                      onClick={() => setShowHistory((v) => !v)}
+                      aria-label={t("gregAi.historyAria")}
+                      className="rounded p-1 hover:bg-white/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
+                    >
+                      <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                        <circle cx="12" cy="12" r="10" />
+                        <polyline points="12 6 12 12 16 14" />
+                      </svg>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={startNewChat}
+                      aria-label={t("gregAi.newChatAria")}
+                      className="rounded p-1 hover:bg-white/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
+                    >
+                      <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                        <line x1="12" y1="5" x2="12" y2="19" />
+                        <line x1="5" y1="12" x2="19" y2="12" />
+                      </svg>
+                    </button>
+                  </>
+                )}
                 <button
                   type="button"
                   onClick={() => setOpen(false)}
@@ -348,7 +352,19 @@ export default function GregAiWidget({ isLoggedIn }: GregAiWidgetProps) {
               </div>
             </div>
 
-            {showHistory ? (
+            {!isLoggedIn ? (
+              <div className="flex flex-1 flex-col items-center justify-center gap-4 bg-gray-50 p-6 text-center">
+                <div className="rounded-lg bg-white p-4 text-sm text-gray-700 shadow-sm">
+                  {t("gregAi.loginPrompt")}
+                </div>
+                <Link
+                  to="/login"
+                  className="rounded-lg bg-orange-500 px-4 py-2 text-sm font-semibold text-white transition hover:bg-orange-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-300"
+                >
+                  {t("gregAi.loginCta")}
+                </Link>
+              </div>
+            ) : showHistory ? (
               <div className="flex-1 overflow-y-auto bg-gray-50 p-3">
                 <h3 className="mb-2 text-sm font-semibold text-gray-700">
                   {t("gregAi.historyTitle")}
@@ -421,7 +437,7 @@ export default function GregAiWidget({ isLoggedIn }: GregAiWidgetProps) {
               </div>
             )}
 
-            {!showHistory && (
+            {isLoggedIn && !showHistory && (
               <form
                 onSubmit={sendMessage}
                 className="border-t border-gray-200 bg-white p-2"

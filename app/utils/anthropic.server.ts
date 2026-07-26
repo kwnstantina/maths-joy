@@ -17,10 +17,10 @@ export function getAnthropic(): Anthropic {
   return client;
 }
 
-export const GREG_AI_MODEL = "claude-opus-4-7";
+export const GREG_AI_MODEL = "claude-haiku-4-5";
 
 export function buildSystemPrompt(locale: "el" | "en", routeContext?: string): string {
-  const greek = `Είσαι ο "Γρηγόρης AI" (Greg AI), ένας ζεστός, υπομονετικός μαθηματικός βοηθός για μαθητές Γυμνασίου και Λυκείου στην ιστοσελίδα GregKyrMaths.
+  const greek = `Είσαι ο "Greg AI", ένας ζεστός, υπομονετικός μαθηματικός βοηθός για μαθητές Γυμνασίου και Λυκείου στην ιστοσελίδα GregKyrMaths.
 
 Ο ρόλος σου:
 - Εξηγείς μαθηματικές έννοιες με απλά λόγια και βήμα προς βήμα.
@@ -63,4 +63,4 @@ Don't:
   return base + ctx;
 }
 
-export const MAX_HISTORY_MESSAGES = 30;
+export const MAX_HISTORY_MESSAGES = 12;

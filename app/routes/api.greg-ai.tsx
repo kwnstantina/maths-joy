@@ -12,6 +12,7 @@ import {
   getRecentHistoryForLLM,
   ownsSession,
 } from "~/utils/gregChat.prisma";
+import { applyRateLimit } from "~/utils/ratelimit.server";
 
 interface ChatRequestBody {
   message?: unknown;
@@ -30,6 +31,11 @@ export async function action({ request }: ActionFunctionArgs) {
   const userId = await getUserId(request);
   if (!userId) {
     return json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const rateLimitResponse = applyRateLimit(request, "chat", userId);
+  if (rateLimitResponse) {
+    return rateLimitResponse;
   }
 
   let body: ChatRequestBody;
@@ -84,17 +90,14 @@ export async function action({ request }: ActionFunctionArgs) {
 
       let assistantText = "";
       try {
+        // No cache_control: Haiku 4.5's minimum cacheable prefix is 4096 tokens
+        // and the system prompt is well under that, so a breakpoint here is a
+        // no-op. No `thinking`: Haiku 4.5 does not support adaptive thinking,
+        // and omitting the field runs without thinking.
         const llmStream = anthropic.messages.stream({
           model: GREG_AI_MODEL,
           max_tokens: 4096,
-          system: [
-            {
-              type: "text",
-              text: systemPrompt,
-              cache_control: { type: "ephemeral" },
-            },
-          ],
-          thinking: { type: "adaptive" },
+          system: systemPrompt,
           messages: history,
         });
 

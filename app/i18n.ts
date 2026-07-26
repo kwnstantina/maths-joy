@@ -7,6 +7,10 @@ export default {
     lng: "el",
     // The default namespace of i18next is "translation", but you can customize it here
     defaultNS: "common",
+    // Translation keys are stored flat with literal dots (e.g. "gregAi.title",
+    // "nav.login"). Disable key nesting so i18next resolves the whole dotted
+    // string as one key instead of walking a non-existent nested object.
+    keySeparator: false as const,
     whitelist: ["el", "en"],
     // Disabling suspense is recommended
     react: { useSuspense: false },

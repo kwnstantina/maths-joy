@@ -72,29 +72,26 @@ const googleStrategyConfig: GoogleStrategyConfig = {
 let googleStrategy = new GoogleStrategy(
   googleStrategyConfig,
   async ({ profile }: { profile: GoogleProfile }) => {
-    // Get the user data from your DB or API using the tokens and profile
-    const user = await prisma.user.findUnique({
-      where: { email: profile.emails[0].value },
-    });
+    // remix-auth stores whatever this callback returns under its session key
+    // ("user"). It MUST include `id` so getUserId() can recognize the session —
+    // otherwise Google-authenticated users appear logged out app-wide.
+    const email = profile.emails[0].value;
+    let user = await prisma.user.findUnique({ where: { email } });
 
     if (!user) {
-      const newUser = {
-        email: profile.emails[0].value,
+      const created = await createUser({
+        email,
         password: "",
         firstName: profile.displayName,
         lastName: profile.name.givenName,
-        profilePicture: profile["_json"].picture
-      };
-      let userId = await createUser(newUser);
-      const session = await storage.getSession();
-      createUserSession(userId.id, "/");
-      session.set("userId", userId);
-      return newUser;
+        profilePicture: profile["_json"].picture,
+      });
+      user = await prisma.user.findUnique({ where: { id: created.id } });
     }
-    const session = await storage.getSession();
-    createUserSession(user.id, "/");
-    session.set("userId", user.id);
-    return user;
+
+    // Return a slim object (no password hash in the cookie); getUser() re-reads
+    // the full record from the DB by id.
+    return { id: user!.id, email: user!.email };
   }
 );
 
@@ -156,9 +153,8 @@ export async function requireUserId(
   request: Request,
   redirectTo: string = new URL(request.url).pathname
 ) {
-  const session = await getUserSession(request);
-  const userId = session.get("userId");
-  if (!userId || typeof userId !== "string") {
+  const userId = await getUserId(request);
+  if (!userId) {
     const searchParams = new URLSearchParams([["redirectTo", redirectTo]]);
     throw redirect(`/login?${searchParams}`);
   }
@@ -171,7 +167,16 @@ export async function getUserSession(request: Request) {
 
 export async function getUserId(request: Request) {
   const session = await getUserSession(request);
-  const userId = session.get("userId");
+  let userId = session.get("userId");
+  if (!userId || typeof userId !== "string") {
+    // Google OAuth (remix-auth) stores the authenticated user under the "user"
+    // session key rather than "userId". Bridge it so Google logins are
+    // recognized by getUser/requireUserId and the Greg AI widget.
+    const authUser = session.get("user");
+    if (authUser && typeof authUser.id === "string") {
+      userId = authUser.id;
+    }
+  }
   if (!userId || typeof userId !== "string") return null;
   return userId;
 }

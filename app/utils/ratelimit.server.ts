@@ -33,6 +33,7 @@ export const RATE_LIMITS = {
   api: { maxRequests: 100, windowMs: 60 * 1000 }, // 100 per minute
   auth: { maxRequests: 10, windowMs: 15 * 60 * 1000 }, // 10 per 15 minutes
   contact: { maxRequests: 3, windowMs: 60 * 60 * 1000 }, // 3 per hour
+  chat: { maxRequests: 30, windowMs: 10 * 60 * 1000 }, // 30 per 10 minutes
 } as const;
 
 export type RateLimitType = keyof typeof RATE_LIMITS;

@@ -1,6 +1,7 @@
 import type { ActionFunctionArgs } from "@remix-run/node";
 import { json } from "@remix-run/node";
 import { getUserId } from "~/utils/auth.prisma";
+import { isGregAiEnabled } from "~/utils/featureFlags.server";
 import { setMessageRating } from "~/utils/gregChat.prisma";
 import { applyRateLimit } from "~/utils/ratelimit.server";
 
@@ -10,6 +11,10 @@ interface FeedbackBody {
 }
 
 export async function action({ request }: ActionFunctionArgs) {
+  if (!isGregAiEnabled()) {
+    return json({ error: "Greg AI is disabled" }, { status: 404 });
+  }
+
   const userId = await getUserId(request);
   if (!userId) {
     return json({ error: "Unauthorized" }, { status: 401 });

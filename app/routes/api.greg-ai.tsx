@@ -6,6 +6,7 @@ import {
   GREG_AI_MODEL,
 } from "~/utils/anthropic.server";
 import { getUserId } from "~/utils/auth.prisma";
+import { isGregAiEnabled } from "~/utils/featureFlags.server";
 import {
   appendMessage,
   createSession,
@@ -25,6 +26,10 @@ interface ChatRequestBody {
 const MAX_MESSAGE_LENGTH = 4000;
 
 export async function action({ request }: ActionFunctionArgs) {
+  if (!isGregAiEnabled()) {
+    return json({ error: "Greg AI is disabled" }, { status: 404 });
+  }
+
   if (request.method !== "POST") {
     return json({ error: "Method not allowed" }, { status: 405 });
   }

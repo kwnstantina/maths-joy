@@ -1,6 +1,7 @@
 import type { ActionFunctionArgs, LoaderFunctionArgs } from "@remix-run/node";
 import { json } from "@remix-run/node";
 import { getUserId } from "~/utils/auth.prisma";
+import { isGregAiEnabled } from "~/utils/featureFlags.server";
 import {
   deleteSession,
   getSessionMessages,
@@ -9,6 +10,10 @@ import {
 import { applyRateLimit } from "~/utils/ratelimit.server";
 
 export async function loader({ request }: LoaderFunctionArgs) {
+  if (!isGregAiEnabled()) {
+    return json({ error: "Greg AI is disabled" }, { status: 404 });
+  }
+
   const userId = await getUserId(request);
   if (!userId) {
     return json({ error: "Unauthorized" }, { status: 401 });
@@ -35,6 +40,10 @@ export async function loader({ request }: LoaderFunctionArgs) {
 }
 
 export async function action({ request }: ActionFunctionArgs) {
+  if (!isGregAiEnabled()) {
+    return json({ error: "Greg AI is disabled" }, { status: 404 });
+  }
+
   const userId = await getUserId(request);
   if (!userId) {
     return json({ error: "Unauthorized" }, { status: 401 });

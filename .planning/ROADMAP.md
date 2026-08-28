@@ -8,6 +8,7 @@ This roadmap extends an existing Remix + MongoDB platform (exercises, auth, chat
 
 - ✅ **v1.0 Book Platform** — Phases 1-2 (shipped 2026-03-17)
 - 🚧 **v1.1 Platform Completion** — Phases 3-7 (in progress)
+- 📋 **v1.2 Greg AI Enhancement** — Phases 8-14 (planned) — see [v1.2-ROADMAP.md](v1.2-ROADMAP.md) / [v1.2-REQUIREMENTS.md](v1.2-REQUIREMENTS.md)
 
 ## Phases
 
@@ -34,6 +35,18 @@ See: [milestones/v1.0-ROADMAP.md](milestones/v1.0-ROADMAP.md)
 - [ ] **Phase 5: Video Tutorials** - Admin manages YouTube links and students browse video tutorials by category
 - [ ] **Phase 6: Exercise Improvements** - Bulk exercise upload, improved search, and server-side pagination
 - [ ] **Phase 7: i18n Completion** - Full Greek and English translations for all new features
+
+### 📋 v1.2 Greg AI Enhancement (Phases 8-14)
+
+Detailed design notes (technical approach, key files, risks) per phase: [v1.2-ROADMAP.md](v1.2-ROADMAP.md).
+
+- [ ] **Phase 8: Guardrails & Evidence** - Per-user daily message cap (Mongo-persisted) + 👍/👎 feedback on assistant messages
+- [ ] **Phase 9: Photo Input & Model Tiering** - Snap-a-photo of an exercise + route images/long chats to a stronger model
+- [ ] **Phase 10: Contextual Tutoring** - Exercise-aware system prompt + structured hint-ladder UX
+- [ ] **Phase 11: Site-Aware Tools** - Tool use to search exercises/videos/books and recommend real links
+- [ ] **Phase 12: Personalization & Prompt Caching** - UserProgress-driven system prompt + prompt caching
+- [ ] **Phase 13: Practice Mode** - Structured-output problem generation rendered as exercise cards, with checking
+- [ ] **Phase 14: Teacher Analytics Dashboard** - Admin aggregation of chat topics, hint depth, and give-up points
 
 ## Phase Details
 
@@ -114,11 +127,100 @@ Plans:
 - [ ] 07-03-PLAN.md — Admin Video upload form: swap to existing admin.videos.uploadButton/uploading keys (no new keys)
 - [ ] 07-04-PLAN.md — Public /exercises/:pdfId retrofit (useTranslation + getLocalizedContent) + fix double-t() bug in ExerciseUploadForm and BulkExerciseUploadForm
 
+### Phase 8: Guardrails & Evidence
+**Goal**: Greg AI is safe to launch — a student cannot run up an unbounded bill, and every answer can be rated so future tuning is evidence-based
+**Depends on**: Greg AI (shipped, commit 3f5b02b)
+**Requirements**: GREGAI-02, GREGAI-03
+**Success Criteria** (what must be TRUE):
+  1. A user who exceeds the daily message limit is blocked on the next message with a friendly localized "come back tomorrow" message, and the count resets at the day boundary
+  2. The quota persists across serverless cold starts (stored in Mongo, not the in-memory rate-limit map)
+  3. Each assistant message shows 👍/👎 controls; a click persists the rating against that message and visibly reflects the selection
+  4. Ratings and daily usage are queryable per user/session for later analytics (Phase 14)
+**Design notes**: v1.2-ROADMAP.md → Phase 8
+**Plans**: 3 plans
+
+Plans:
+- [ ] 08-01-PLAN.md — Schema + data layer: GregDailyUsage model, rating field, quota/rating helpers, CHAT_DAILY_LIMIT, blocking prisma push
+- [ ] 08-02-PLAN.md — Server enforcement: daily-cap 429 on chat endpoint + new api.greg-ai.feedback.tsx rating route
+- [ ] 08-03-PLAN.md — Widget: 👍/👎 rating controls + localized daily-limit UI + el/en locale strings
+
+### Phase 9: Photo Input & Model Tiering
+**Goal**: A student can photograph an exercise and get help on it, and image/hard conversations are routed to a stronger model automatically
+**Depends on**: Phase 8
+**Requirements**: GREGAI-01, GREGAI-10
+**Success Criteria** (what must be TRUE):
+  1. Student can capture a photo or select an image in the widget, preview it, and send with or without text
+  2. The image reaches the model as an image content block and Greg AI's reply references the pictured problem
+  3. Oversized/unsupported images are rejected client- and server-side with a localized error, and each image counts toward the daily cap
+  4. When an image is attached (or the conversation exceeds a turn threshold), a stronger model serves the request; plain short chats stay on Haiku
+**Design notes**: v1.2-ROADMAP.md → Phase 9
+**Plans**: TBD
+
+### Phase 10: Contextual Tutoring
+**Goal**: Greg AI knows which exercise/topic the student is on and offers a structured hint ladder instead of caving to "just give me the answer"
+**Depends on**: Phase 8
+**Requirements**: GREGAI-04, GREGAI-05
+**Success Criteria** (what must be TRUE):
+  1. On an exercise/training/book page, opening the widget shows a context-aware opener naming the current item
+  2. The system prompt includes the exercise's title/topic/level so hints are specific without re-typing the problem
+  3. Hint-ladder actions (hint → another → show solution) each send a hidden escalating directive
+  4. Hint depth per session/topic is recorded (feeds Phase 14)
+**Design notes**: v1.2-ROADMAP.md → Phase 10
+**Plans**: TBD
+
+### Phase 11: Site-Aware Tools
+**Goal**: Greg AI answers topic questions with a hint plus real links to the site's exercises, videos, and books
+**Depends on**: Phase 10
+**Requirements**: GREGAI-06
+**Success Criteria** (what must be TRUE):
+  1. Greg AI can call search_exercises, search_videos, and find_book tools backed by existing Prisma modules
+  2. A topic question yields a hint and, when relevant content exists, concrete links
+  3. Tool calls stream through the existing SSE pipeline without breaking the delta/append UX
+  4. Tools return only published/active content and never leak admin-only fields
+**Design notes**: v1.2-ROADMAP.md → Phase 11
+**Plans**: TBD
+
+### Phase 12: Personalization & Prompt Caching
+**Goal**: Greg AI adapts to the individual student using UserProgress, and the now-large system prompt is cached to control cost/latency
+**Depends on**: Phase 11
+**Requirements**: GREGAI-07, GREGAI-11
+**Success Criteria** (what must be TRUE):
+  1. The system prompt includes a one-line student summary from UserProgress when available
+  2. Difficulty/references in answers visibly reflect the student's level
+  3. With the enlarged prompt, cache_control is applied to the stable prefix and cache_read_input_tokens is non-zero on repeat turns
+  4. (Optional) Greg AI can persist a short observation back to the student's profile/memory
+**Design notes**: v1.2-ROADMAP.md → Phase 12
+**Plans**: TBD
+
+### Phase 13: Practice Mode
+**Goal**: A student can request practice problems on a topic, answer them, and get step-by-step checking, rendered as exercise cards
+**Depends on**: Phase 10
+**Requirements**: GREGAI-08
+**Success Criteria** (what must be TRUE):
+  1. A "give me N exercises on X" request produces N generated problems as structured JSON
+  2. Problems render as exercise-card UI, not raw chat text
+  3. The student submits an answer per problem and Greg AI checks step by step, marking correct/incorrect with guidance
+  4. Malformed generations are caught via schema validation and handled gracefully
+**Design notes**: v1.2-ROADMAP.md → Phase 13
+**Plans**: TBD
+
+### Phase 14: Teacher Analytics Dashboard
+**Goal**: Greg (the human) sees which topics generate the most questions, where students get stuck, and at what hint depth they give up
+**Depends on**: Phase 8, Phase 10
+**Requirements**: GREGAI-09
+**Success Criteria** (what must be TRUE):
+  1. An admin-only page aggregates chat sessions by topic/route context, message volume, and 👎 rate
+  2. It surfaces hint-depth distribution per topic
+  3. Access is restricted to admins (isAdmin) and the privacy policy discloses that chats may be reviewed
+  4. The dashboard is read-only aggregation with no new PII exposure
+**Design notes**: v1.2-ROADMAP.md → Phase 14
+**Plans**: TBD
+
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7
-Note: Phases 5 and 6 are independent of each other (both depend only on Phase 2).
+Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 → 9 → 10 → 11 → 12 → 13 → 14
+Note: Phases 5 and 6 are independent of each other (both depend only on Phase 2). v1.2 (8-14) depends on the shipped Greg AI chatbot, not on Phases 3-7.
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|

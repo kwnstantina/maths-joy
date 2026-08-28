@@ -19,6 +19,9 @@ export function getAnthropic(): Anthropic {
 
 export const GREG_AI_MODEL = "claude-haiku-4-5";
 
+// Max chat messages one user may send per UTC calendar day. Single source of truth — adjust here.
+export const CHAT_DAILY_LIMIT = 50;
+
 export function buildSystemPrompt(locale: "el" | "en", routeContext?: string): string {
   const greek = `Είσαι ο "Greg AI", ένας ζεστός, υπομονετικός μαθηματικός βοηθός για μαθητές Γυμνασίου και Λυκείου στην ιστοσελίδα GregKyrMaths.
 

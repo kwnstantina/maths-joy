@@ -510,5 +510,8 @@
   "gregAi.errorReply": "[Something went wrong. Try again.]",
   "gregAi.errorLoad": "Couldn't load conversation.",
   "gregAi.loginPrompt": "Log in to chat with Greg AI and save your conversations.",
-  "gregAi.loginCta": "Log in"
+  "gregAi.loginCta": "Log in",
+  "gregAi.limitReached": "You've reached today's message limit. Come back tomorrow! 👋",
+  "gregAi.thumbsUpAria": "Helpful answer",
+  "gregAi.thumbsDownAria": "Not helpful"
 }

@@ -510,5 +510,8 @@
   "gregAi.errorReply": "[Κάτι πήγε στραβά. Δοκίμασε ξανά.]",
   "gregAi.errorLoad": "Δεν μπόρεσα να φορτώσω τη συζήτηση.",
   "gregAi.loginPrompt": "Συνδέσου για να μιλήσεις με τον Greg AI και να αποθηκεύσεις τις συζητήσεις σου.",
-  "gregAi.loginCta": "Σύνδεση"
+  "gregAi.loginCta": "Σύνδεση",
+  "gregAi.limitReached": "Έφτασες το όριο μηνυμάτων για σήμερα. Τα λέμε αύριο! 👋",
+  "gregAi.thumbsUpAria": "Χρήσιμη απάντηση",
+  "gregAi.thumbsDownAria": "Μη χρήσιμη απάντηση"
 }

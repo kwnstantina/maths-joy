@@ -10,6 +10,7 @@ import {
   appendMessage,
   createSession,
   getRecentHistoryForLLM,
+  incrementDailyUsage,
   ownsSession,
 } from "~/utils/gregChat.prisma";
 import { applyRateLimit } from "~/utils/ratelimit.server";
@@ -51,6 +52,15 @@ export async function action({ request }: ActionFunctionArgs) {
   }
   if (message.length > MAX_MESSAGE_LENGTH) {
     return json({ error: "Message too long" }, { status: 400 });
+  }
+
+  // Daily quota (Mongo-persisted so it survives serverless cold starts). Runs
+  // after the in-memory burst limiter and message validation, before session
+  // handling, so malformed/empty requests don't consume quota. Error code only;
+  // the widget localizes the "come back tomorrow" message.
+  const usage = await incrementDailyUsage(userId);
+  if (usage.limitReached) {
+    return json({ error: "daily_limit_reached" }, { status: 429 });
   }
 
   const locale = body.locale === "en" ? "en" : "el";
@@ -114,11 +124,14 @@ export async function action({ request }: ActionFunctionArgs) {
           }
         }
 
+        let assistantMessageId: string | null = null;
         if (assistantText.length > 0) {
-          await appendMessage(sessionId, "assistant", assistantText);
+          const saved = await appendMessage(sessionId, "assistant", assistantText);
+          assistantMessageId = saved.id;
         }
 
         send("done", {
+          messageId: assistantMessageId,
           stopReason: finalMessage.stop_reason,
           usage: {
             input: finalMessage.usage.input_tokens,

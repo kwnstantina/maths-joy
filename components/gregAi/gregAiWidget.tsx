@@ -10,6 +10,7 @@ interface ChatMessage {
   role: Role;
   content: string;
   pending?: boolean;
+  rating?: number | null; // -1 / 1 / null
 }
 
 interface SessionSummary {
@@ -75,6 +76,7 @@ export default function GregAiWidget({ isLoggedIn }: GregAiWidgetProps) {
   const [input, setInput] = useState("");
   const [streaming, setStreaming] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [limitReached, setLimitReached] = useState(false);
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const abortRef = useRef<AbortController | null>(null);
@@ -112,12 +114,44 @@ export default function GregAiWidget({ isLoggedIn }: GregAiWidgetProps) {
           id: m.id,
           role: m.role,
           content: m.content,
+          rating: (m as { rating?: number | null }).rating ?? null,
         }))
       );
       setSessionId(id);
       setShowHistory(false);
+      setLimitReached(false);
     } catch {
       setError(t("gregAi.errorLoad"));
+    }
+  }
+
+  async function rateMessage(messageId: string, rating: 1 | -1) {
+    let previous: number | null = null;
+    setMessages((prev) =>
+      prev.map((m) => {
+        if (m.id !== messageId) return m;
+        previous = m.rating ?? null;
+        return { ...m, rating: m.rating === rating ? null : rating };
+      })
+    );
+    try {
+      const res = await fetch("/api/greg-ai/feedback", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ messageId, rating }),
+      });
+      if (!res.ok) throw new Error();
+      const data = (await res.json()) as { rating?: number | null };
+      setMessages((prev) =>
+        prev.map((m) =>
+          m.id === messageId ? { ...m, rating: data.rating ?? null } : m
+        )
+      );
+    } catch {
+      // revert optimistic change on failure
+      setMessages((prev) =>
+        prev.map((m) => (m.id === messageId ? { ...m, rating: previous } : m))
+      );
     }
   }
 
@@ -127,6 +161,7 @@ export default function GregAiWidget({ isLoggedIn }: GregAiWidgetProps) {
     setSessionId(null);
     setShowHistory(false);
     setError(null);
+    setLimitReached(false);
   }
 
   async function deleteSession(id: string) {
@@ -176,6 +211,27 @@ export default function GregAiWidget({ isLoggedIn }: GregAiWidgetProps) {
         signal: controller.signal,
       });
 
+      if (res.status === 429) {
+        // Read from a CLONE so the original res.body stays unconsumed for the
+        // existing `if (!res.ok || !res.body)` block below (burst 429s fall through).
+        const body = (await res.clone().json().catch(() => ({}))) as {
+          error?: string;
+        };
+        if (body.error === "daily_limit_reached") {
+          setLimitReached(true);
+          setMessages((prev) =>
+            prev.map((m) =>
+              m.id === assistantMsg.id
+                ? { ...m, pending: false, content: t("gregAi.limitReached") }
+                : m
+            )
+          );
+          setStreaming(false);
+          abortRef.current = null;
+          return;
+        }
+      }
+
       if (!res.ok || !res.body) {
         const errBody = await res.json().catch(() => ({}));
         throw new Error(
@@ -223,9 +279,13 @@ export default function GregAiWidget({ isLoggedIn }: GregAiWidgetProps) {
               )
             );
           } else if (eventName === "done") {
+            const doneId =
+              typeof parsed.messageId === "string" ? parsed.messageId : null;
             setMessages((prev) =>
               prev.map((m) =>
-                m.id === assistantMsg.id ? { ...m, pending: false } : m
+                m.id === assistantMsg.id
+                  ? { ...m, pending: false, id: doneId ?? m.id }
+                  : m
               )
             );
           } else if (eventName === "error") {
@@ -412,19 +472,53 @@ export default function GregAiWidget({ isLoggedIn }: GregAiWidgetProps) {
                       className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}
                     >
                       <div
-                        className={`max-w-[85%] rounded-2xl px-3 py-2 text-sm shadow-sm ${
-                          m.role === "user"
-                            ? "bg-orange-500 text-white"
-                            : "bg-white text-gray-800"
+                        className={`flex max-w-[85%] flex-col ${
+                          m.role === "user" ? "items-end" : "items-start"
                         }`}
                       >
-                        {m.role === "assistant" ? (
-                          <MathJax dynamic>
-                            {renderMessageContent(m.content || (m.pending ? "…" : ""))}
-                          </MathJax>
-                        ) : (
-                          renderMessageContent(m.content)
-                        )}
+                        <div
+                          className={`rounded-2xl px-3 py-2 text-sm shadow-sm ${
+                            m.role === "user"
+                              ? "bg-orange-500 text-white"
+                              : "bg-white text-gray-800"
+                          }`}
+                        >
+                          {m.role === "assistant" ? (
+                            <MathJax dynamic>
+                              {renderMessageContent(m.content || (m.pending ? "…" : ""))}
+                            </MathJax>
+                          ) : (
+                            renderMessageContent(m.content)
+                          )}
+                        </div>
+                        {m.role === "assistant" &&
+                          !m.pending &&
+                          !m.id.startsWith("local-") && (
+                            <div className="mt-1 flex items-center gap-1">
+                              <button
+                                type="button"
+                                onClick={() => rateMessage(m.id, 1)}
+                                aria-label={t("gregAi.thumbsUpAria")}
+                                aria-pressed={m.rating === 1}
+                                className={`rounded p-1 text-xs transition hover:bg-gray-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-300 ${
+                                  m.rating === 1 ? "text-orange-600" : "text-gray-400"
+                                }`}
+                              >
+                                👍
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => rateMessage(m.id, -1)}
+                                aria-label={t("gregAi.thumbsDownAria")}
+                                aria-pressed={m.rating === -1}
+                                className={`rounded p-1 text-xs transition hover:bg-gray-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-300 ${
+                                  m.rating === -1 ? "text-orange-600" : "text-gray-400"
+                                }`}
+                              >
+                                👎
+                              </button>
+                            </div>
+                          )}
                       </div>
                     </li>
                   ))}
@@ -456,9 +550,13 @@ export default function GregAiWidget({ isLoggedIn }: GregAiWidgetProps) {
                         sendMessage(e as unknown as React.FormEvent);
                       }
                     }}
-                    placeholder={t("gregAi.placeholder")}
+                    placeholder={
+                      limitReached
+                        ? t("gregAi.limitReached")
+                        : t("gregAi.placeholder")
+                    }
                     rows={1}
-                    disabled={streaming}
+                    disabled={streaming || limitReached}
                     className="flex-1 resize-none rounded-lg border border-gray-300 px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-400 disabled:bg-gray-100"
                   />
                   {streaming ? (
@@ -475,7 +573,7 @@ export default function GregAiWidget({ isLoggedIn }: GregAiWidgetProps) {
                   ) : (
                     <button
                       type="submit"
-                      disabled={!input.trim()}
+                      disabled={!input.trim() || limitReached}
                       aria-label={t("gregAi.sendAria")}
                       className="rounded-lg bg-orange-500 px-3 py-2 text-white hover:bg-orange-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-300 disabled:cursor-not-allowed disabled:opacity-50"
                     >

@@ -204,9 +204,21 @@ model GregChatMessage {
   session   GregChatSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
   role      String          // "user" | "assistant"
   content   String
+  rating    Int?            // -1 = down, 1 = up, null = unset
   createdAt DateTime        @db.Date
 
   @@index([sessionId, createdAt])
+}
+
+// Greg AI daily message quota — Mongo-persisted so it survives serverless cold starts
+model GregDailyUsage {
+  id     String @id @default(auto()) @map("_id") @db.ObjectId
+  userId String @db.ObjectId
+  date   String // UTC calendar date, YYYY-MM-DD
+  count  Int    @default(0)
+
+  @@unique([userId, date])
+  @@index([userId])
 }
 
 // Audit Logging for security

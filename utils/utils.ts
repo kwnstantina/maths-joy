@@ -84,3 +84,47 @@ const colors= ["#ff643e","#fc35a0","#f96e77",'#f5d300','#7777ff','#08f7fe'];
 const randomIndex = Math.floor(Math.random() * colors.length);
 return colors[randomIndex];
 }
+export const getYouTubeId = (url: string): string | null => {
+  const match = url?.match(
+    /(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([\w-]+)/
+  );
+  return match ? match[1] : null;
+};
+
+export const getYouTubeThumbnail = (
+  url: string,
+  quality: "default" | "mqdefault" | "hqdefault" | "maxresdefault" = "hqdefault"
+) => {
+  const id = getYouTubeId(url);
+  return id ? `https://img.youtube.com/vi/${id}/${quality}.jpg` : null;
+};
+
+export const getYouTubeEmbedUrl = (url: string) => {
+  const id = getYouTubeId(url);
+  return id ? `https://www.youtube.com/embed/${id}?autoplay=1` : url;
+};
+
+export const getCloudinaryVideoThumbnail = (
+  url: string,
+  transformation = "so_2,w_640,h_360,c_fill,q_auto"
+): string | null => {
+  if (!url?.includes("res.cloudinary.com") || !url.includes("/video/upload/")) {
+    return null;
+  }
+  const [prefix, rest] = url.split("/video/upload/");
+  const path = rest.replace(/\.[^/.]+$/, ""); // drop .mp4 / .webm / .mov
+  return `${prefix}/video/upload/${transformation}/${path}.jpg`;
+};
+
+export type VideoProvider = "youtube" | "cloudinary" | "other";
+
+export const getVideoProvider = (url: string): VideoProvider => {
+  if (getYouTubeId(url)) return "youtube";
+  if (url?.includes("res.cloudinary.com") && url.includes("/video/")) {
+    return "cloudinary";
+  }
+  return "other";
+};
+
+export const getVideoThumbnail = (url: string): string | null =>
+  getYouTubeThumbnail(url) ?? getCloudinaryVideoThumbnail(url);

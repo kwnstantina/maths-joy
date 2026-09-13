@@ -7,6 +7,7 @@ import { Category, Category_En } from "services/models/models";
 import i18next from "~/i18next.server";
 import { getLocalizedList, SupportedLanguage } from "~/utils/i18n.server";
 import { getAllVideos } from "~/utils/video.prisma";
+import { getVideoProvider, getVideoThumbnail } from "../../utils/utils";
 
 export const handle = { i18n: ["common"] };
 
@@ -24,11 +25,6 @@ interface Video {
 interface LoaderData {
   videos: Video[];
   locale: SupportedLanguage;
-}
-
-function extractYouTubeId(url: string): string | null {
-  const match = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\s]+)/);
-  return match ? match[1] : null;
 }
 
 export const loader: LoaderFunction = async ({ request }) => {
@@ -125,13 +121,25 @@ export default function VideosIndex() {
       {hasMatches && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredVideos.map((video) => {
-            const videoId = extractYouTubeId(video.url);
+            const provider = getVideoProvider(video.url);
+            const thumbnail = getVideoThumbnail(video.url);
             return (
               <div
                 key={video.id}
                 className="bg-white rounded-lg shadow-md overflow-hidden flex flex-col"
               >
-                {videoId ? (
+                {provider === "cloudinary" ? (
+                  <video
+                    className="w-full h-48 object-cover bg-black"
+                    src={video.url}
+                    poster={thumbnail ?? undefined}
+                    controls
+                    preload="none"
+                    playsInline
+                  >
+                    <track kind="captions" />
+                  </video>
+                ) : thumbnail ? (
                   <a
                     href={video.url}
                     target="_blank"
@@ -139,7 +147,7 @@ export default function VideosIndex() {
                     className="block"
                   >
                     <img
-                      src={`https://img.youtube.com/vi/${videoId}/mqdefault.jpg`}
+                      src={thumbnail}
                       alt={video.title}
                       loading="lazy"
                       className="w-full h-48 object-cover"
@@ -184,14 +192,16 @@ export default function VideosIndex() {
                       {video.description}
                     </p>
                   )}
-                  <a
-                    href={video.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="mt-4 inline-block text-sm font-medium text-orange-600 hover:text-orange-700"
-                  >
-                    {t("videos.watchOnYouTube", "Παρακολούθηση στο YouTube")} →
-                  </a>
+                  {provider === "youtube" && (
+                    <a
+                      href={video.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="mt-4 inline-block text-sm font-medium text-orange-600 hover:text-orange-700"
+                    >
+                      {t("videos.watchOnYouTube", "Παρακολούθηση στο YouTube")} →
+                    </a>
+                  )}
                 </div>
               </div>
             );

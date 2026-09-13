@@ -7,8 +7,8 @@ This roadmap extends an existing Remix + MongoDB platform (exercises, auth, chat
 ## Milestones
 
 - ✅ **v1.0 Book Platform** — Phases 1-2 (shipped 2026-03-17)
-- 🚧 **v1.1 Platform Completion** — Phases 3-7 (in progress)
-- 📋 **v1.2 Greg AI Enhancement** — Phases 8-14 (planned) — see [v1.2-ROADMAP.md](v1.2-ROADMAP.md) / [v1.2-REQUIREMENTS.md](v1.2-REQUIREMENTS.md)
+- ✅ **v1.1 Platform Completion** — Phases 3-7 (shipped 2026-04-25)
+- 🚧 **v1.2 Greg AI Enhancement** — Phases 8-14 (in progress) — see [v1.2-ROADMAP.md](v1.2-ROADMAP.md) / [v1.2-REQUIREMENTS.md](v1.2-REQUIREMENTS.md)
 
 ## Phases
 
@@ -28,19 +28,19 @@ See: [milestones/v1.0-ROADMAP.md](milestones/v1.0-ROADMAP.md)
 
 </details>
 
-### 🚧 v1.1 Platform Completion (Phases 3-7)
+### ✅ v1.1 Platform Completion (Phases 3-7)
 
 - [x] **Phase 3: Q&A Core** - Students ask questions, post answers, vote with security hardening, and accept best answers
 - [x] **Phase 4: Q&A Discovery** - Students search and filter questions by category, tags, and text
-- [ ] **Phase 5: Video Tutorials** - Admin manages YouTube links and students browse video tutorials by category
-- [ ] **Phase 6: Exercise Improvements** - Bulk exercise upload, improved search, and server-side pagination
-- [ ] **Phase 7: i18n Completion** - Full Greek and English translations for all new features
+- [x] **Phase 5: Video Tutorials** - Admin manages YouTube links and students browse video tutorials by category
+- [x] **Phase 6: Exercise Improvements** - Bulk exercise upload, improved search, and server-side pagination
+- [x] **Phase 7: i18n Completion** - Full Greek and English translations for all new features
 
-### 📋 v1.2 Greg AI Enhancement (Phases 8-14)
+### 🚧 v1.2 Greg AI Enhancement (Phases 8-14)
 
 Detailed design notes (technical approach, key files, risks) per phase: [v1.2-ROADMAP.md](v1.2-ROADMAP.md).
 
-- [ ] **Phase 8: Guardrails & Evidence** - Per-user daily message cap (Mongo-persisted) + 👍/👎 feedback on assistant messages
+- [x] **Phase 8: Guardrails & Evidence** - Per-user daily message cap (Mongo-persisted) + 👍/👎 feedback on assistant messages
 - [ ] **Phase 9: Photo Input & Model Tiering** - Snap-a-photo of an exercise + route images/long chats to a stronger model
 - [ ] **Phase 10: Contextual Tutoring** - Exercise-aware system prompt + structured hint-ladder UX
 - [ ] **Phase 11: Site-Aware Tools** - Tool use to search exercises/videos/books and recommend real links
@@ -228,6 +228,8 @@ Note: Phases 5 and 6 are independent of each other (both depend only on Phase 2)
 | 2. Book Commerce | v1.0 | 3/3 | Complete | 2026-03-14 |
 | 3. Q&A Core | v1.1 | 3/3 | Complete | 2026-03-17 |
 | 4. Q&A Discovery | v1.1 | 1/1 | Complete | 2026-03-17 |
-| 5. Video Tutorials | v1.1 | 1/2 | In progress | - |
-| 6. Exercise Improvements | v1.1 | 3/3 | Awaiting verification | - |
-| 7. i18n Completion | v1.1 | 0/TBD | Not started | - |
+| 5. Video Tutorials | v1.1 | 2/2 | Complete | 2026-04-21 |
+| 6. Exercise Improvements | v1.1 | 3/3 | Complete | 2026-04-21 |
+| 7. i18n Completion | v1.1 | 4/4 | Complete | 2026-04-25 |
+| 8. Guardrails & Evidence | v1.2 | 3/3 | Complete | 2026-08-28 |
+| 9. Photo Input & Model Tiering | v1.2 | 0/TBD | Not started | - |

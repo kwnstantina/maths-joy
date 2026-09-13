@@ -7,7 +7,7 @@ interface FormFieldProps {
   type?: string;
   value?: any;
   onChange?: (...args: any) => any;
-  error: string;
+  error?: string;
   labelStyle: string;
   typeOfField?: string;
   listCategories?: Array<any> | any;

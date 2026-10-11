@@ -1,4 +1,10 @@
-import { CHAT_DAILY_LIMIT, MAX_HISTORY_MESSAGES } from "./anthropic.server";
+import type { TokenUsage } from "./anthropic.server";
+import {
+  CHAT_DAILY_LIMIT,
+  CHAT_DAILY_SPEND_BUDGET,
+  costUnits,
+  MAX_HISTORY_MESSAGES,
+} from "./anthropic.server";
 import { prisma } from "./prisma.server";
 
 export type ChatRole = "user" | "assistant";
@@ -96,19 +102,69 @@ export async function appendMessage(
   return { id: created.id };
 }
 
-// Atomic per-user daily message quota. Increments first, then checks: the 50th
-// message (count 50) is allowed and the 51st (count 51) is blocked.
+/** UTC calendar date key, YYYY-MM-DD. */
+function usageDate(): string {
+  return new Date().toISOString().slice(0, 10);
+}
+
+export type QuotaReason = "messages" | "spend";
+
+// Atomic per-user daily quota. Increments the message counter first, then
+// checks both ceilings: the 50th message (count 50) is allowed and the 51st
+// (count 51) is blocked.
+//
+// The spend check uses what has been *recorded so far today* — a request is
+// only billed once it completes (see recordTokenUsage), so a user can cross
+// the budget by at most one exchange. That is a bounded overshoot of
+// MAX_OUTPUT_TOKENS and not worth a pre-flight token count to avoid.
 export async function incrementDailyUsage(
   userId: string
-): Promise<{ count: number; limitReached: boolean }> {
-  const date = new Date().toISOString().slice(0, 10); // UTC YYYY-MM-DD
+): Promise<{ count: number; spend: number; limitReached: boolean; reason?: QuotaReason }> {
   const usage = await prisma.gregDailyUsage.upsert({
-    where: { userId_date: { userId, date } },
-    create: { userId, date, count: 1 },
+    where: { userId_date: { userId, date: usageDate() } },
+    create: { userId, date: usageDate(), count: 1 },
     update: { count: { increment: 1 } },
-    select: { count: true },
+    select: { count: true, spend: true },
   });
-  return { count: usage.count, limitReached: usage.count > CHAT_DAILY_LIMIT };
+
+  if (usage.count > CHAT_DAILY_LIMIT) {
+    return { ...usage, limitReached: true, reason: "messages" };
+  }
+  if (usage.spend >= CHAT_DAILY_SPEND_BUDGET) {
+    return { ...usage, limitReached: true, reason: "spend" };
+  }
+  return { ...usage, limitReached: false };
+}
+
+// Bills a completed exchange against today's row. Called after the stream
+// finishes; failures are swallowed by the caller so a usage-write problem can
+// never break a reply the student has already received.
+export async function recordTokenUsage(
+  userId: string,
+  usage: TokenUsage
+): Promise<void> {
+  const date = usageDate();
+  await prisma.gregDailyUsage.upsert({
+    where: { userId_date: { userId, date } },
+    // The row is created by incrementDailyUsage earlier in the same request,
+    // so this create branch is effectively unreachable — present because
+    // upsert requires it, and it keeps the counters correct if the day rolls
+    // over between the two writes.
+    create: {
+      userId,
+      date,
+      count: 1,
+      inputTokens: usage.input + usage.cacheRead + usage.cacheCreate,
+      outputTokens: usage.output,
+      spend: costUnits(usage),
+    },
+    update: {
+      inputTokens: { increment: usage.input + usage.cacheRead + usage.cacheCreate },
+      outputTokens: { increment: usage.output },
+      spend: { increment: costUnits(usage) },
+    },
+    select: { id: true },
+  });
 }
 
 // Set/toggle a 👍/👎 rating on an assistant message the user owns. Re-applying
@@ -150,6 +206,23 @@ export async function deleteSession(sessionId: string, userId: string): Promise<
     where: { id: sessionId, userId },
   });
   return result.count > 0;
+}
+
+/** The ExerciseItem this conversation is working on, if any. */
+export async function getActiveItemId(sessionId: string): Promise<string | null> {
+  const session = await prisma.gregChatSession.findUnique({
+    where: { id: sessionId },
+    select: { activeItemId: true },
+  });
+  return session?.activeItemId ?? null;
+}
+
+export async function setActiveItemId(sessionId: string, itemId: string): Promise<void> {
+  await prisma.gregChatSession.update({
+    where: { id: sessionId },
+    data: { activeItemId: itemId },
+    select: { id: true },
+  });
 }
 
 export async function ownsSession(sessionId: string, userId: string): Promise<boolean> {

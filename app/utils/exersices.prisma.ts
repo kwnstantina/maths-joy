@@ -36,6 +36,128 @@ export const getExersiceById = async (id: string | undefined) => {
 }
 
 /**
+ * Metadata-only lookup used to give Greg AI context about the exercise the
+ * student is currently viewing. Deliberately separate from `getExersiceById`
+ * (which selects the fields the PDF viewer needs) so the two can diverge: this
+ * one wants the pedagogical fields and none of the file plumbing.
+ *
+ * Returns `null` for a missing id — an unknown id is not an error here, the
+ * chat just falls back to generic page context.
+ */
+export const getExerciseContextById = async (id: string | undefined) => {
+  // The id reaches us from a URL path segment, so it may be anything. Prisma
+  // throws on a malformed ObjectId rather than returning null — check first.
+  if (!id || !/^[0-9a-fA-F]{24}$/.test(id)) return null;
+  return prisma.exersice.findFirst({
+    select: {
+      title: true,
+      description: true,
+      category: true,
+      level: true,
+      tags: true,
+      translation: true,
+      gregSource: true,
+      cloudinaryPublicId: true,
+    },
+    where: { id },
+  });
+};
+
+/**
+ * Greg AI's table of contents for a booklet: one line per problem. The full
+ * text is fetched per problem (getExerciseItem) so a long booklet doesn't
+ * ride along on every chat message.
+ */
+export const getExerciseItemIndex = async (exerciseId: string) =>
+  prisma.exerciseItem.findMany({
+    where: { exerciseId },
+    select: { order: true, section: true, label: true, topic: true },
+    orderBy: { order: "asc" },
+  });
+
+/** One problem of a booklet by its 1-based position. */
+export const getExerciseItem = async (exerciseId: string, order: number) =>
+  prisma.exerciseItem.findFirst({
+    where: { exerciseId, order },
+    select: {
+      id: true,
+      order: true,
+      section: true,
+      label: true,
+      topic: true,
+      statement: true,
+      solution: true,
+    },
+  });
+
+/** One problem by id, scoped to its booklet so a stale id can't leak across. */
+export const getExerciseItemById = async (exerciseId: string, itemId: string) =>
+  prisma.exerciseItem.findFirst({
+    where: { id: itemId, exerciseId },
+    select: {
+      id: true,
+      order: true,
+      section: true,
+      label: true,
+      topic: true,
+      statement: true,
+      solution: true,
+    },
+  });
+
+/**
+ * Library search for Greg AI's `search_exercises` tool. Matches individual
+ * problems (topic + text) and booklet metadata, so "παράγωγος" finds the
+ * derivative problems inside a booklet titled just "Γ-Λυκείου". Never returns
+ * solutions.
+ */
+export async function searchExercisesForGreg(query: string, limit = 6) {
+  const q = query.trim();
+  if (!q) return [];
+
+  const matchingBooklets = await prisma.exersice.findMany({
+    where: {
+      OR: [
+        { title: { contains: q, mode: "insensitive" } },
+        { description: { contains: q, mode: "insensitive" } },
+        { category: { contains: q, mode: "insensitive" } },
+        { tags: { has: q } },
+      ],
+    },
+    select: { id: true },
+  });
+
+  const items = await prisma.exerciseItem.findMany({
+    where: {
+      OR: [
+        { topic: { contains: q, mode: "insensitive" } },
+        { statement: { contains: q, mode: "insensitive" } },
+        { section: { contains: q, mode: "insensitive" } },
+        { exerciseId: { in: matchingBooklets.map((b) => b.id) } },
+      ],
+    },
+    select: {
+      exerciseId: true,
+      order: true,
+      section: true,
+      label: true,
+      topic: true,
+      statement: true,
+    },
+    orderBy: [{ exerciseId: "asc" }, { order: "asc" }],
+    take: limit,
+  });
+
+  const booklets = await prisma.exersice.findMany({
+    where: { id: { in: [...new Set(items.map((i) => i.exerciseId))] } },
+    select: { id: true, title: true, category: true, level: true },
+  });
+  const bookletById = new Map(booklets.map((b) => [b.id, b]));
+
+  return items.map((item) => ({ ...item, booklet: bookletById.get(item.exerciseId) }));
+}
+
+/**
  * Get paginated exercises with optional filters.
  *
  * Filter semantics:

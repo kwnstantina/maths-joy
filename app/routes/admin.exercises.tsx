@@ -28,6 +28,7 @@ import {
   updateExercise,
   deleteExercise,
 } from "~/utils/exersices.prisma";
+import { transcribeExerciseInBackground } from "~/utils/exerciseTranscript.server";
 import { validateExerciseFields } from "~/utils/validators.server";
 import { createTranslation } from "~/utils/i18n.server";
 import { logAuditEvent, getClientInfo } from "~/utils/audit.server";
@@ -372,6 +373,10 @@ export const action = async ({ request }: ActionFunctionArgs) => {
         userAgent: userAgent ?? undefined,
       });
 
+      // Greg AI reads the PDF via its transcript. Not awaited — see
+      // transcribeExerciseInBackground for what happens if it doesn't finish.
+      transcribeExerciseInBackground(exercise.id);
+
       return data({ success: true, _action: "createExercise" });
     } catch (_error) {
       console.error("Error creating exercise:", _error);
@@ -495,6 +500,8 @@ export const action = async ({ request }: ActionFunctionArgs) => {
           userAgent: userAgent ?? undefined,
         });
 
+        transcribeExerciseInBackground(exercise.id);
+
         results.push({
           index: rec.index,
           title: titleEl,
@@ -583,6 +590,8 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 
     try {
       await updateExercise(exerciseId, updateData);
+      // A new PDF makes the old transcript stale; metadata-only edits don't.
+      if (pdfResult) transcribeExerciseInBackground(exerciseId);
 
       const { ipAddress, userAgent } = getClientInfo(request);
       await logAuditEvent({

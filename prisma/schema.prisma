@@ -31,6 +31,31 @@ model Exersice {
   cloudinaryPublicId String?
   cloudinaryUrl      String?
   fileSize           Int?
+  // Greg AI transcript bookkeeping. The transcript itself is the
+  // ExerciseItem rows (one per problem in the booklet), made by
+  // transcribeExercise() in exerciseTranscript.server.ts. `gregSource` is the
+  // file they were made from (see exerciseSourceKey) — when the PDF is
+  // replaced the two no longer match and the items are treated as stale.
+  gregSource         String?
+  gregTranscribedAt  DateTime? @db.Date
+}
+
+// One problem inside an exercise booklet PDF, transcribed for Greg AI.
+// Markdown + LaTeX, in the booklet's original language.
+model ExerciseItem {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  exerciseId String   @db.ObjectId
+  // 1-based position in the booklet. This is the number Greg and the
+  // get_exercise tool use — booklet labels repeat across chapters.
+  order      Int
+  section    String? // chapter / unit heading, when the booklet has one
+  label      String // as printed: "Άσκηση 5", "Θέμα Β", "3."
+  topic      String // one line, for Greg's table of contents and search
+  statement  String
+  solution   String? // tutor-only: Greg uses it to aim hints, never reveals it
+  createdAt  DateTime @db.Date
+
+  @@index([exerciseId, order])
 }
 
 // Book model for e-commerce
@@ -190,6 +215,10 @@ model GregChatSession {
   userId    String           @db.ObjectId
   title     String
   locale    String           @default("el")
+  // The ExerciseItem the student is currently working on, set when Greg
+  // opens one with get_exercise. Lets later turns carry that exercise in
+  // the prompt without another tool round.
+  activeItemId String?       @db.ObjectId
   createdAt DateTime         @db.Date
   updatedAt DateTime         @db.Date
   messages  GregChatMessage[]
@@ -216,6 +245,12 @@ model GregDailyUsage {
   userId String @db.ObjectId
   date   String // UTC calendar date, YYYY-MM-DD
   count  Int    @default(0)
+  // Cost accounting. `spend` is the weighted total in input-token equivalents
+  // (see costUnits() in anthropic.server.ts) — 1_000_000 units = $1 at Haiku
+  // 4.5 rates. The raw counters are kept for reporting.
+  inputTokens  Int @default(0)
+  outputTokens Int @default(0)
+  spend        Int @default(0)
 
   @@unique([userId, date])
   @@index([userId])

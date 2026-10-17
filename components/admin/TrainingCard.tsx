@@ -30,7 +30,7 @@ export default function TrainingCard({
   // Parse translation to get el/en fields for editing
   const translation = training.translation as {
     el?: { title?: string };
-    en?: { title?: string };
+    en?: { title?: string; searchableTitle?: string };
   } | null;
 
   // Exit edit mode on successful save
@@ -89,6 +89,19 @@ export default function TrainingCard({
                 type="text"
                 name="searchableTitle"
                 defaultValue={training.searchableTitle}
+                className="mt-1 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded focus:ring-orange-500 focus:border-orange-500 block w-full p-1.5"
+              />
+            </div>
+
+            {/* Searchable Title English */}
+            <div>
+              <label className="block text-xs font-medium text-gray-500">
+                {t("admin.training.searchableTitleEn")}
+              </label>
+              <input
+                type="text"
+                name="searchableTitle_en"
+                defaultValue={translation?.en?.searchableTitle || ""}
                 className="mt-1 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded focus:ring-orange-500 focus:border-orange-500 block w-full p-1.5"
               />
             </div>

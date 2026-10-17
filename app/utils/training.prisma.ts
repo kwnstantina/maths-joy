@@ -1,5 +1,6 @@
 import type { Prisma } from "@prisma/client";
 import { groupBy } from "../../utils/utils";
+import { getLocalizedContent, type SupportedLanguage } from "./i18n.server";
 import { prisma } from "./prisma.server";
 import { CreateTrainingExersice } from "./types.server";
 
@@ -19,19 +20,25 @@ export const createTrainingExercise = async (item: CreateTrainingExersice) => {
   return { id: newTrainingExersice.id };
 };
 
-export const getTrainingExercises = async () => {
-  let exersicesList = await prisma.training.findMany({
+export const getTrainingExercises = async (language: SupportedLanguage) => {
+  const exersicesList = await prisma.training.findMany({
     select: {
       id: true,
       title: true,
       tags: true,
       contentImage: true,
       solutionImage: true,
-      searchableTitle: true
+      searchableTitle: true,
+      translation: true,
     }
   }) as any;
   const key = "searchableTitle"
-  const arrayUniqueByKey = [...new Map(exersicesList.map((item: any) => [item[key], item])).values()];
+  const arrayUniqueByKey = [...new Map(exersicesList.map((item: any) => [item[key], item])).values()]
+    // `searchableTitle` stays the untranslated filter key; `label` is what we show.
+    .map((item: any) => {
+      const localized = getLocalizedContent(item, language);
+      return { ...localized, searchableTitle: item.searchableTitle, label: localized.searchableTitle };
+    });
   const searchableExersices = arrayUniqueByKey.map((item: any) => {
     return {
       id: item.id,
@@ -133,7 +140,10 @@ export async function deleteTraining(id: string) {
   return training;
 }
 
-export const getTraingingExerciseByTitle = async (searchableTitle: string | null) => {
+export const getTraingingExerciseByTitle = async (
+  searchableTitle: string | null,
+  language: SupportedLanguage
+) => {
   const exersiceByTitle = await prisma.training.findMany({
     where: {
       searchableTitle: {
@@ -141,5 +151,7 @@ export const getTraingingExerciseByTitle = async (searchableTitle: string | null
       }
     },
   });
-  return exersiceByTitle;
+  return exersiceByTitle.map((item) =>
+    getLocalizedContent(item as unknown as Parameters<typeof getLocalizedContent>[0], language)
+  );
 }

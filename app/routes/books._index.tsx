@@ -3,7 +3,11 @@ import { data } from "@remix-run/node";
 import { useLoaderData, Link } from "@remix-run/react";
 import { prisma } from "~/utils/prisma.server";
 import { useTranslation } from "react-i18next";
-import { getLocalizedList, SupportedLanguage } from "~/utils/i18n.server";
+import {
+  getLocalizedList,
+  SupportedLanguage,
+  translateTerm,
+} from "~/utils/i18n.server";
 import i18next from "~/i18next.server";
 
 export const handle = { i18n: ["common"] };
@@ -23,7 +27,7 @@ interface Book {
 interface LoaderData {
   books: Book[];
   locale: string;
-  categories: string[];
+  categories: { value: string; label: string }[];
   selectedCategory: string | null;
 }
 
@@ -58,7 +62,10 @@ export const loader: LoaderFunction = async ({ request }) => {
     select: { category: true },
     distinct: ["category"],
   });
-  const categoryList = categories.map((c) => c.category);
+  const categoryList = categories.map((c) => ({
+    value: c.category,
+    label: translateTerm(c.category, locale as SupportedLanguage),
+  }));
 
   // Apply translations if needed
   const localizedBooks = getLocalizedList(
@@ -79,7 +86,7 @@ function CategoryFilter({
   selected,
   allLabel,
 }: {
-  categories: string[];
+  categories: { value: string; label: string }[];
   selected: string | null;
   allLabel: string;
 }) {
@@ -95,7 +102,7 @@ function CategoryFilter({
       >
         {allLabel}
       </Link>
-      {categories.map((cat) => (
+      {categories.map(({ value: cat, label }) => (
         <Link
           key={cat}
           to={`/books?category=${encodeURIComponent(cat)}`}
@@ -105,7 +112,7 @@ function CategoryFilter({
               : "bg-gray-100 text-gray-600 hover:bg-gray-200"
           }`}
         >
-          {cat}
+          {label}
         </Link>
       ))}
     </div>

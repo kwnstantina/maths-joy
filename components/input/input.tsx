@@ -8,7 +8,7 @@ const Input = ({ value, onChange, placeholder = "Αναζήτηση" }: Props) =
   return (
     <div className="flex items-center">
       <label htmlFor="simple-search" className="hidden">
-        Αναζήτηση
+        {placeholder}
       </label>
       <div className="relative w-full">
         <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">

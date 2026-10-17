@@ -3,7 +3,11 @@ import VideoList from "components/video/videoList";
 import { LoaderFunction } from "@remix-run/node";
 import { useFetcher, useLoaderData } from "@remix-run/react";
 import { useEffect, useRef, useState } from "react";
+import i18next from "~/i18next.server";
+import { getLocalizedList, SupportedLanguage } from "~/utils/i18n.server";
 import { getTutorialsWithPagination } from "../utils/tutorial.server";
+
+export const handle = { i18n: ["common"] };
 
 interface TutorialItem {
   id: string;
@@ -23,8 +27,15 @@ interface LoaderData {
 export const loader: LoaderFunction = async (remixContext) => {
   const url = new URL(remixContext.request.url);
   const page = url.searchParams.get("page") || 0;
+  const locale = (await i18next.getLocale(remixContext.request)) as SupportedLanguage;
   const items = await getTutorialsWithPagination(Number(page));
-  return items;
+  return {
+    ...items,
+    data: getLocalizedList(
+      items.data as unknown as Parameters<typeof getLocalizedList>[0],
+      locale
+    ),
+  };
 };
 
 const InfiniteScroller = (props: {

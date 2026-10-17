@@ -92,6 +92,21 @@ export default function TrainingUploadForm({
               )}
             </div>
 
+            <div className="mb-6">
+              <label
+                htmlFor="searchableTitle_en"
+                className="block text-sm font-medium text-gray-700"
+              >
+                {t("admin.training.searchableTitleEn")}
+              </label>
+              <input
+                type="text"
+                id="searchableTitle_en"
+                name="searchableTitle_en"
+                className="mt-1 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-orange-500 focus:border-orange-500 block w-full p-2.5"
+              />
+            </div>
+
             {/* Category + Tags */}
             <div className="mb-6">
               <CategorySelect

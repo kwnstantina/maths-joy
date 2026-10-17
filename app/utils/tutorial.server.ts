@@ -9,7 +9,8 @@ export const getTutorialsWithPagination = async(page: number) =>{
             title: true,
             description:true,
             creatorName:true,
-            tags: true, createdAt: true, 
+            tags: true, createdAt: true,
+            translation: true,
         },
         take: 5,
         skip: page===0? 0 :page

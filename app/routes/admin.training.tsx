@@ -200,6 +200,15 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     const category = (formData.get("category") as string) || "";
     const tags = (formData.get("tags") as string) || "";
     const searchableTitle = (formData.get("searchableTitle") as string) || "";
+    const searchableTitle_en =
+      (formData.get("searchableTitle_en") as string) || "";
+    const englishContent =
+      title_en || searchableTitle_en
+        ? {
+            title: title_en,
+            ...(searchableTitle_en && { searchableTitle: searchableTitle_en }),
+          }
+        : undefined;
 
     if (actionType === "createTraining") {
       // Validate required fields
@@ -241,7 +250,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
       // Build translation object
       const translation = createTranslation(
         { title: title_el },
-        title_en ? { title: title_en } : undefined
+        englishContent
       );
 
       try {
@@ -311,10 +320,10 @@ export const action = async ({ request }: ActionFunctionArgs) => {
       }
 
       // Handle translation update
-      if (title_el || title_en) {
+      if (title_el || title_en || searchableTitle_en) {
         const translation = createTranslation(
           { title: title_el || "" },
-          title_en ? { title: title_en || "" } : undefined
+          englishContent
         );
         updateData.translation =
           translation as unknown as Prisma.InputJsonValue;

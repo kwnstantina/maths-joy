@@ -18,6 +18,8 @@ interface Video {
   url: string;
   creatorName: string;
   category: string | null;
+  /** Untranslated category, used as the filter key. */
+  categoryKey: string | null;
   tags: string[];
   translation?: unknown;
 }
@@ -34,7 +36,10 @@ export const loader: LoaderFunction = async ({ request }) => {
   const localizedVideos = getLocalizedList(
     videos as unknown as Parameters<typeof getLocalizedList>[0],
     locale
-  ) as unknown as Video[];
+  ).map((video, i) => ({
+    ...video,
+    categoryKey: videos[i].category,
+  })) as unknown as Video[];
 
   return data({ videos: localizedVideos, locale });
 };
@@ -58,7 +63,7 @@ export default function VideosIndex() {
 
   const filteredVideos = useMemo(() => {
     if (!selectedCategory) return videos;
-    return videos.filter((v) => v.category === selectedCategory);
+    return videos.filter((v) => v.categoryKey === selectedCategory);
   }, [videos, selectedCategory]);
 
   const setCategory = (value: string | null) => {

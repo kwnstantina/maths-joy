@@ -30,9 +30,9 @@ export interface TrainingOutletContext {
   items: TrainingItem[];
 }
 
-/** "Θέμα 12 · Κλίση εφαπτομένης" → { number: "12", name: "Κλίση εφαπτομένης" } */
+/** "Θέμα 9.12 · Κλίση εφαπτομένης" → { number: "9.12", name: "Κλίση εφαπτομένης" } */
 function splitLabel(label: string) {
-  const match = label.match(/^\D*?(\d+)\s*·\s*(.+)$/);
+  const match = label.match(/^\D*?(\d+(?:\.\d+)?)\s*·\s*(.+)$/);
   return match ? { number: match[1], name: match[2] } : { number: null, name: label };
 }
 

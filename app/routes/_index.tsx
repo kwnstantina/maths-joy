@@ -193,9 +193,9 @@ export default function Index() {
       </div>
 
       {/* About Us Section */}
-      <section>
+      {/* <section>
         <AboutUsHoc />
-      </section>
+      </section> */}
 
       {/* Newsletter Section */}
       <section className="bg-white my-20">

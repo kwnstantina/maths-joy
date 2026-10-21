@@ -51,9 +51,11 @@ const Footer = () => {
             <Link to="/videos" className="hover:text-orange-300 transition-colors">
               {t('footer.tutorials')}
             </Link>
+            {/* Books section temporarily hidden
             <Link to="/books" className="hover:text-orange-300 transition-colors">
               {t('footer.books')}
             </Link>
+            */}
             <Link to="/testYourself" className="hover:text-orange-300 transition-colors">
               {t('footer.training')}
             </Link>

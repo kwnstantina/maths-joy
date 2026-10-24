@@ -1,4 +1,5 @@
 import { CONTACT_CARD_MARKER_PATTERN } from "./anthropic.server";
+import type { AnalyticsWindow } from "./gregAnalytics";
 import { prisma } from "./prisma.server";
 
 /**
@@ -6,9 +7,6 @@ import { prisma } from "./prisma.server";
  * stuck, and what it costs. Read-only aggregation over data the chat already
  * records — no model calls.
  */
-
-export const ANALYTICS_WINDOWS = [7, 30, 90] as const;
-export type AnalyticsWindow = (typeof ANALYTICS_WINDOWS)[number];
 
 export interface TopicRow {
   page: string | null;

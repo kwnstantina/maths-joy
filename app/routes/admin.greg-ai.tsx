@@ -3,8 +3,9 @@ import { data, redirect } from "@remix-run/node";
 import { Link, useLoaderData } from "@remix-run/react";
 import { useTranslation } from "react-i18next";
 import { getUser } from "~/utils/auth.prisma";
-import type { AnalyticsWindow } from "~/utils/gregAnalytics.server";
-import { ANALYTICS_WINDOWS, getGregAnalytics } from "~/utils/gregAnalytics.server";
+import type { AnalyticsWindow } from "~/utils/gregAnalytics";
+import { ANALYTICS_WINDOWS } from "~/utils/gregAnalytics";
+import { getGregAnalytics } from "~/utils/gregAnalytics.server";
 import { isAdmin } from "~/utils/roles";
 
 export const handle = { i18n: ["common"] };

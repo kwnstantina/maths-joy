@@ -62,8 +62,8 @@ async function main() {
     const group = groupOf.get(n);
     if (!group) throw new Error(`Exercise ${n} has no group`);
     const name = spec.exercises[String(n)];
-    const searchableTitle = `Θέμα ${n} · ${name.el}`;
-    const searchableTitleEn = `Problem ${n} · ${name.en}`;
+    const searchableTitle = `Θέμα ${spec.chapter}.${n} · ${name.el}`;
+    const searchableTitleEn = `Problem ${spec.chapter}.${n} · ${name.en}`;
 
     const dir = join(chapterDir, `th${pad(n)}`);
     const meta = JSON.parse(readFileSync(join(dir, "meta.json"), "utf-8"));

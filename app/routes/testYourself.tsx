@@ -94,7 +94,7 @@ const TestYourself = () => {
         >
           {item.number && (
             <span
-              className={`mt-0.5 inline-flex h-6 min-w-[1.5rem] shrink-0 items-center justify-center rounded-md px-1 text-xs font-semibold ${
+              className={`mt-0.5 inline-flex h-6 min-w-[2.5rem] shrink-0 items-center justify-center rounded-md px-1 text-xs font-semibold ${
                 isActive ? "bg-orange-500 text-white" : "bg-gray-100 text-gray-600"
               }`}
             >

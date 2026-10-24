@@ -812,10 +812,14 @@ export default function GregAiWidget({ isLoggedIn, contact, grade: savedGrade }:
                               : "bg-white text-gray-800"
                           }`}
                         >
-                          {m.role === "assistant" ? (
-                            <MathJax dynamic>
-                              {renderMessageContent(bodyText || (m.pending ? "…" : ""))}
-                            </MathJax>
+                          {/* MathJax rewrites the DOM it typesets, so React must never
+                              patch inside it — that throws and crashes the page. Plain
+                              text while streaming; once done, keyed on the text so any
+                              change remounts instead of patching. */}
+                          {m.role === "assistant" && m.pending ? (
+                            renderMessageContent(bodyText || "…")
+                          ) : m.role === "assistant" ? (
+                            <MathJax key={bodyText}>{renderMessageContent(bodyText)}</MathJax>
                           ) : (
                             renderMessageContent(m.content)
                           )}

@@ -145,7 +145,8 @@ export default function PracticePanel({ locale, onAskGreg }: PracticePanelProps)
             {[problem.section, problem.label].filter(Boolean).join(" — ")}
           </div>
           <div className="mt-2 text-gray-800">
-            <MathJax dynamic>{renderMessageContent(problem.statement)}</MathJax>
+            {/* Keyed so a new problem remounts: React patching DOM that MathJax rewrote crashes the page. */}
+            <MathJax key={problem.id}>{renderMessageContent(problem.statement)}</MathJax>
           </div>
 
           {!result && (
@@ -176,7 +177,7 @@ export default function PracticePanel({ locale, onAskGreg }: PracticePanelProps)
           {result && (
             <div role="status" className={`mt-3 rounded-lg px-3 py-2 text-xs ${VERDICT_STYLE[result.verdict]}`}>
               <div className="font-semibold">{t(`gregAi.practice.verdict.${result.verdict}`)}</div>
-              <MathJax dynamic>{renderMessageContent(result.feedback)}</MathJax>
+              <MathJax key={result.feedback}>{renderMessageContent(result.feedback)}</MathJax>
             </div>
           )}
 

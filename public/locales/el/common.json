@@ -559,5 +559,11 @@
   "gregAi.contact.limited": "Έστειλες αρκετά μηνύματα πρόσφατα. Δοκίμασε ξανά σε μία ώρα ή πάρε τηλέφωνο.",
   "gregAi.contact.book": "Κλείσε μάθημα",
   "gregAi.contact.call": "Κλήση",
-  "gregAi.contactAria": "Επικοινωνία με τον Greg"
+  "gregAi.contactAria": "Επικοινωνία με τον Greg",
+  "gregAi.hint.button1": "💡 Hint",
+  "gregAi.hint.button2": "💡 Κι άλλο hint",
+  "gregAi.hint.button3": "✅ Δείξε τη λύση",
+  "gregAi.hint.level1": "💡 Δώσε μου ένα μικρό hint",
+  "gregAi.hint.level2": "💡 Δώσε μου ένα μεγαλύτερο hint",
+  "gregAi.hint.level3": "✅ Δείξε μου τη λύση βήμα-βήμα"
 }

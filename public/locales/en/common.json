@@ -559,5 +559,11 @@
   "gregAi.contact.limited": "You've sent several messages recently. Please try again in an hour, or call instead.",
   "gregAi.contact.book": "Book a lesson",
   "gregAi.contact.call": "Call",
-  "gregAi.contactAria": "Contact Greg"
+  "gregAi.contactAria": "Contact Greg",
+  "gregAi.hint.button1": "💡 Hint",
+  "gregAi.hint.button2": "💡 Another hint",
+  "gregAi.hint.button3": "✅ Show solution",
+  "gregAi.hint.level1": "💡 Give me a small hint",
+  "gregAi.hint.level2": "💡 Give me a bigger hint",
+  "gregAi.hint.level3": "✅ Show me the solution step by step"
 }

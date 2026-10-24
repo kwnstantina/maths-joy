@@ -9,6 +9,7 @@ import {
   getAnthropic,
   GREG_AI_MODEL,
   isChatPage,
+  isHintLevel,
   MAX_OUTPUT_TOKENS,
   MAX_TOOL_ROUNDS,
   SEARCH_EXERCISES_TOOL,
@@ -34,6 +35,7 @@ import {
 } from "~/utils/gregChat.prisma";
 import { getLocalizedContent } from "~/utils/i18n.server";
 import { applyRateLimit } from "~/utils/ratelimit.server";
+import { getTrainingContextByTitle } from "~/utils/training.prisma";
 
 interface ChatRequestBody {
   message?: unknown;
@@ -43,6 +45,20 @@ interface ChatRequestBody {
   page?: unknown;
   /** Exercise id, when `page` is "exercise". Resolved server-side. */
   exerciseId?: unknown;
+  /** Training searchableTitle, when `page` is "training". Resolved server-side. */
+  trainingTitle?: unknown;
+  /** Which hint button sent this message (1–3), for the teacher dashboard. */
+  hint?: unknown;
+}
+
+const MAX_TRAINING_TITLE_LENGTH = 200;
+
+function trainingTitleOf(body: ChatRequestBody): string | null {
+  return typeof body.trainingTitle === "string" &&
+    body.trainingTitle.length > 0 &&
+    body.trainingTitle.length <= MAX_TRAINING_TITLE_LENGTH
+    ? body.trainingTitle
+    : null;
 }
 
 /**
@@ -57,6 +73,13 @@ async function resolveChatContext(
   activeItemId: string | null
 ): Promise<{ context: ChatContext; bookletId: string | null }> {
   const page = isChatPage(body.page) ? body.page : "other";
+
+  const trainingTitle = page === "training" ? trainingTitleOf(body) : null;
+  if (trainingTitle) {
+    const training = await getTrainingContextByTitle(trainingTitle, locale);
+    return { context: { page, training }, bookletId: null };
+  }
+
   if (page !== "exercise" || typeof body.exerciseId !== "string") {
     return { context: { page }, bookletId: null };
   }
@@ -221,7 +244,17 @@ export async function action({ request }: ActionFunctionArgs) {
     sessionId = newSession.id;
   }
 
-  await appendMessage(sessionId, "user", message);
+  const page = isChatPage(body.page) ? body.page : "other";
+  await appendMessage(sessionId, "user", message, {
+    hintLevel: isHintLevel(body.hint) ? body.hint : null,
+    page,
+    contextKey:
+      page === "exercise" && typeof body.exerciseId === "string"
+        ? body.exerciseId.slice(0, 24)
+        : page === "training"
+          ? trainingTitleOf(body)
+          : null,
+  });
   const [history, activeItemId] = await Promise.all([
     getRecentHistoryForLLM(sessionId),
     getActiveItemId(sessionId),

@@ -38,6 +38,8 @@ interface PageContext {
   page: ChatPage;
   /** Set on an exercise page so the server can look the exercise up. */
   exerciseId?: string;
+  /** Set on a training page with a problem open. */
+  trainingTitle?: string;
 }
 
 /**
@@ -45,12 +47,15 @@ interface PageContext {
  * one exists) rather than a sentence — the server owns the wording, and the
  * exercise details are read from the database, not from the browser.
  */
-function derivePageContext(pathname: string): PageContext {
+function derivePageContext(pathname: string, search: string): PageContext {
   if (pathname.startsWith("/exercises/")) {
     const id = pathname.slice("/exercises/".length).split("/")[0];
     return { page: "exercise", exerciseId: id || undefined };
   }
-  if (pathname.startsWith("/testYourself")) return { page: "training" };
+  if (pathname.startsWith("/testYourself")) {
+    const title = new URLSearchParams(search).get("searchableTitle");
+    return { page: "training", trainingTitle: title || undefined };
+  }
   if (pathname.startsWith("/books/")) return { page: "book" };
   if (pathname.startsWith("/qa")) return { page: "qa" };
   if (pathname === "/" || pathname === "") return { page: "home" };
@@ -281,6 +286,8 @@ export default function GregAiWidget({ isLoggedIn, contact }: GregAiWidgetProps)
   const [streaming, setStreaming] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [limitReached, setLimitReached] = useState(false);
+  // How far down the hint ladder this conversation is (0 = no hint yet).
+  const [hintDepth, setHintDepth] = useState(0);
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
@@ -297,8 +304,8 @@ export default function GregAiWidget({ isLoggedIn, contact }: GregAiWidgetProps)
 
   const locale = (i18n.language?.startsWith("en") ? "en" : "el") as "el" | "en";
   const pageContext = useMemo(
-    () => derivePageContext(location.pathname),
-    [location.pathname]
+    () => derivePageContext(location.pathname, location.search),
+    [location.pathname, location.search]
   );
 
   async function loadSessions() {
@@ -328,6 +335,7 @@ export default function GregAiWidget({ isLoggedIn, contact }: GregAiWidgetProps)
       setSessionId(id);
       setShowHistory(false);
       setLimitReached(false);
+      setHintDepth(0);
     } catch {
       setError(t("gregAi.errorLoad"));
     }
@@ -370,6 +378,7 @@ export default function GregAiWidget({ isLoggedIn, contact }: GregAiWidgetProps)
     setShowHistory(false);
     setError(null);
     setLimitReached(false);
+    setHintDepth(0);
   }
 
   async function deleteSession(id: string) {
@@ -389,9 +398,22 @@ export default function GregAiWidget({ isLoggedIn, contact }: GregAiWidgetProps)
     e.preventDefault();
     const text = input.trim();
     if (!text || streaming) return;
-
-    setError(null);
     setInput("");
+    await sendText(text);
+  }
+
+  /**
+   * Hint ladder. The button's text is itself the request ("Give me a small
+   * hint"), so it costs no more than the student typing it.
+   */
+  async function sendHint(level: 1 | 2 | 3) {
+    if (streaming) return;
+    setHintDepth((d) => Math.max(d, level));
+    await sendText(t(`gregAi.hint.level${level}`), level);
+  }
+
+  async function sendText(text: string, hint?: 1 | 2 | 3) {
+    setError(null);
 
     const userMsg: ChatMessage = { id: newId(), role: "user", content: text };
     const assistantMsg: ChatMessage = {
@@ -416,6 +438,8 @@ export default function GregAiWidget({ isLoggedIn, contact }: GregAiWidgetProps)
           locale,
           page: pageContext.page,
           exerciseId: pageContext.exerciseId,
+          trainingTitle: pageContext.trainingTitle,
+          hint,
         }),
         signal: controller.signal,
       });
@@ -801,6 +825,19 @@ export default function GregAiWidget({ isLoggedIn, contact }: GregAiWidgetProps)
                   <div className="mt-3 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700">
                     {error}
                   </div>
+                )}
+              </div>
+            )}
+
+            {isLoggedIn && !showHistory && messages.length > 0 && !streaming && !limitReached && (
+              <div className="flex flex-wrap gap-2 border-t border-gray-200 bg-white px-2 pt-2">
+                <button type="button" onClick={() => sendHint(hintDepth === 0 ? 1 : 2)} className={starterChip}>
+                  {t(hintDepth === 0 ? "gregAi.hint.button1" : "gregAi.hint.button2")}
+                </button>
+                {hintDepth > 0 && (
+                  <button type="button" onClick={() => sendHint(3)} className={starterChip}>
+                    {t("gregAi.hint.button3")}
+                  </button>
                 )}
               </div>
             )}

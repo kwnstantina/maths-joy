@@ -83,15 +83,31 @@ export async function getSessionMessages(
   }));
 }
 
+/** Where a student message was sent from, kept for the teacher dashboard. */
+export interface MessageMeta {
+  hintLevel?: number | null;
+  page?: string | null;
+  contextKey?: string | null;
+}
+
 export async function appendMessage(
   sessionId: string,
   role: ChatRole,
-  content: string
+  content: string,
+  meta: MessageMeta = {}
 ): Promise<{ id: string }> {
   const now = new Date();
   const [created] = await prisma.$transaction([
     prisma.gregChatMessage.create({
-      data: { sessionId, role, content, createdAt: now },
+      data: {
+        sessionId,
+        role,
+        content,
+        hintLevel: meta.hintLevel ?? null,
+        page: meta.page ?? null,
+        contextKey: meta.contextKey ?? null,
+        createdAt: now,
+      },
       select: { id: true },
     }),
     prisma.gregChatSession.update({

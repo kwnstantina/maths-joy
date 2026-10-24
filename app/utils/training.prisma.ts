@@ -52,6 +52,23 @@ export const getTrainingExercises = async (language: SupportedLanguage) => {
 
 
 /**
+ * What Greg AI is told about the training problem on screen. The problem
+ * itself is an image, so this is only its chapter and name.
+ */
+export async function getTrainingContextByTitle(
+  searchableTitle: string,
+  language: SupportedLanguage
+): Promise<{ chapter: string; label: string } | null> {
+  const row = await prisma.training.findFirst({
+    where: { searchableTitle },
+    select: { title: true, searchableTitle: true, translation: true },
+  });
+  if (!row) return null;
+  const localized = getLocalizedContent(row as any, language) as any;
+  return { chapter: localized.title, label: localized.searchableTitle };
+}
+
+/**
  * Get paginated training exercises for admin
  */
 export async function getPaginatedTraining(page = 1, limit = 12) {

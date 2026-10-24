@@ -234,6 +234,11 @@ model GregChatMessage {
   role      String          // "user" | "assistant"
   content   String
   rating    Int?            // -1 = down, 1 = up, null = unset
+  // Student messages only, for the teacher dashboard: which hint button was
+  // pressed (1 hint, 2 bigger hint, 3 show solution) and where they were.
+  hintLevel  Int?
+  page       String?         // one of CHAT_PAGES
+  contextKey String?         // exercise id or training title on that page
   createdAt DateTime        @db.Date
 
   @@index([sessionId, createdAt])

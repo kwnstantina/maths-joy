@@ -143,6 +143,21 @@ export function formatExerciseItem(item: ExerciseItemText, locale: "el" | "en"):
 export interface ChatContext {
   page: ChatPage;
   exercise?: ExerciseContext | null;
+  /** The training problem on screen (localized, from the database). */
+  training?: { chapter: string; label: string } | null;
+}
+
+/** The hint buttons in the widget: 1 hint, 2 bigger hint, 3 show solution. */
+export const HINT_LEVELS = [1, 2, 3] as const;
+
+export function isHintLevel(value: unknown): value is (typeof HINT_LEVELS)[number] {
+  return value === 1 || value === 2 || value === 3;
+}
+
+function formatTraining(training: { chapter: string; label: string }, locale: "el" | "en"): string {
+  return locale === "en"
+    ? `The student is on the practice problem "${training.label}" (chapter: ${training.chapter}). Its statement is an image you cannot see — if you need it, ask the student to type it.`
+    : `Ο μαθητής είναι στην άσκηση εξάσκησης «${training.label}» (κεφάλαιο: ${training.chapter}). Η εκφώνηση είναι εικόνα που δεν βλέπεις — αν τη χρειάζεσαι, ζήτα από τον μαθητή να σου τη γράψει.`;
 }
 
 function formatExercise(exercise: ExerciseContext, locale: "el" | "en"): string {
@@ -257,6 +272,7 @@ export function buildSystemPrompt(
 - ΠΟΤΕ μη δίνεις απευθείας τη λύση. Πρώτα κάνε καθοδηγητικές ερωτήσεις (Σωκρατική μέθοδος) για να καταλάβει ο μαθητής μόνος του.
 - Όταν ο μαθητής κολλάει, δίνεις ένα μικρό hint, όχι όλη τη λύση.
 - Ενθαρρύνεις και επιβραβεύεις την προσπάθεια.
+- Εξαίρεση: όταν ο μαθητής στείλει «✅ Δείξε μου τη λύση βήμα-βήμα», δώσε την πλήρη λύση βήμα-βήμα.
 - Όταν ο μαθητής ζητάει εξάσκηση ή μια παρόμοια άσκηση, ψάχνεις στις ασκήσεις του site με το εργαλείο search_exercises και δίνεις σύνδεσμο με τη μορφή [τίτλος](/exercises/<id>). Προτείνεις μόνο ασκήσεις που επέστρεψε το εργαλείο — ποτέ μην επινοείς συνδέσμους.
 
 Ο Greg (ο πραγματικός καθηγητής του site, κάνει και ιδιαίτερα):
@@ -280,6 +296,7 @@ Your role:
 - NEVER give the full solution upfront. Use the Socratic method — ask guiding questions first.
 - When the student is stuck, give a small hint, not the whole answer.
 - Encourage and praise effort.
+- Exception: when the student sends "✅ Show me the solution step by step", give the full step-by-step solution.
 - When the student asks for practice or a similar exercise, search the site's exercises with the search_exercises tool and link to them as [title](/exercises/<id>). Only recommend exercises the tool returned — never invent links.
 
 Greg (the site's real teacher, also gives private lessons):
@@ -302,6 +319,9 @@ Don't:
   const parts = [PAGE_CONTEXT[context.page]];
   if (context.exercise) {
     parts.push(formatExercise(context.exercise, locale));
+  }
+  if (context.training) {
+    parts.push(formatTraining(context.training, locale));
   }
 
   return `${base}\n\n${parts.join("\n\n")}`;

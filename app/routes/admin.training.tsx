@@ -28,6 +28,7 @@ import {
 import { validateTrainingFields } from "~/utils/validators.server";
 import { createTranslation } from "~/utils/i18n.server";
 import { logAuditEvent, getClientInfo } from "~/utils/audit.server";
+import { transcribeTrainingInBackground } from "~/utils/trainingTranscript.server";
 import TrainingUploadForm from "components/admin/TrainingUploadForm";
 import TrainingCard from "components/admin/TrainingCard";
 import AdminPageHeader from "components/admin/AdminPageHeader";
@@ -275,6 +276,10 @@ export const action = async ({ request }: ActionFunctionArgs) => {
           userAgent: userAgent ?? undefined,
         });
 
+        // Greg AI reads text, not images: transcribe once, now, so no
+        // chat turn ever pays for the images.
+        transcribeTrainingInBackground(training.id);
+
         return data({ success: true, _action: "createTraining" });
       } catch (_error) {
         console.error("Error creating training:", _error);
@@ -331,6 +336,8 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 
       try {
         await updateTraining(trainingId, updateData);
+        // No-op unless an image was replaced (the transcript is keyed on them).
+        if (contentResult || solutionResult) transcribeTrainingInBackground(trainingId);
 
         const { ipAddress, userAgent } = getClientInfo(request);
         await logAuditEvent({

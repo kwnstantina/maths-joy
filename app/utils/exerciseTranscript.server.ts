@@ -17,7 +17,7 @@ import { prisma } from "./prisma.server";
 
 // One-off and accuracy-sensitive: a misread exponent or sign makes every
 // hint Greg gives about the exercise wrong.
-const TRANSCRIBE_MODEL = "claude-opus-5-5";
+export const TRANSCRIBE_MODEL = "claude-opus-5-5";
 
 // ~8 pages of dense maths is ~10k output tokens — well inside max_tokens.
 // A chunk that still overflows is split in half and retried.

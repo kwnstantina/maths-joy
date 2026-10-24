@@ -14,6 +14,8 @@ interface ChatMessage {
   content: string;
   pending?: boolean;
   rating?: number | null; // -1 / 1 / null
+  /** A photo the student sent this visit (not stored on the server). */
+  image?: string;
 }
 
 interface SessionSummary {
@@ -30,6 +32,27 @@ const mathJaxConfig = {
     packages: { "[+]": ["ams"] },
   },
 };
+
+// Long side of a photo sent to Greg. Enough to read a printed or handwritten
+// problem; an image costs about (width × height) / 750 tokens.
+const PHOTO_MAX_SIDE = 1280;
+
+/** Downscales a photo in the browser and returns it as a JPEG data URL. */
+async function shrinkPhoto(file: File): Promise<string> {
+  const bitmap = await createImageBitmap(file);
+  const scale = Math.min(1, PHOTO_MAX_SIDE / Math.max(bitmap.width, bitmap.height));
+  const canvas = document.createElement("canvas");
+  canvas.width = Math.round(bitmap.width * scale);
+  canvas.height = Math.round(bitmap.height * scale);
+  const ctx = canvas.getContext("2d");
+  if (!ctx) throw new Error("no canvas");
+  // White under transparent PNGs, which JPEG would otherwise turn black.
+  ctx.fillStyle = "#fff";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+  bitmap.close();
+  return canvas.toDataURL("image/jpeg", 0.85);
+}
 
 function newId() {
   return `local-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
@@ -184,7 +207,14 @@ function ContactCard({ kind, sessionId, contact }: ContactCardProps) {
         />
         {(status === "error" || status === "limited") && (
           <p role="alert" className="text-xs text-red-700">
-            {t(status === "limited" ? "gregAi.contact.limited" : "gregAi.contact.error")}
+            {t(status === "limited" ? "gregAi.contact.limited" : "gregAi.contact.error")}{" "}
+            {/* Fallback that needs no server: the student's own mail app. */}
+            <a
+              href={`mailto:${contact.email}?subject=${encodeURIComponent(t("gregAi.contact.helpTitle"))}&body=${encodeURIComponent(note)}`}
+              className="font-semibold underline"
+            >
+              {t("gregAi.contact.emailDirect", { email: contact.email })}
+            </a>
           </p>
         )}
         <button
@@ -257,10 +287,12 @@ export default function GregAiWidget({ isLoggedIn, contact, grade: savedGrade }:
   const [hintDepth, setHintDepth] = useState(0);
   const [grade, setGrade] = useState<string | null>(savedGrade);
   const [practice, setPractice] = useState(false);
+  const [photo, setPhoto] = useState<string | null>(null);
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const abortRef = useRef<AbortController | null>(null);
+  const photoInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     setMounted(true);
@@ -366,9 +398,24 @@ export default function GregAiWidget({ isLoggedIn, contact, grade: savedGrade }:
   async function sendMessage(e: React.FormEvent) {
     e.preventDefault();
     const text = input.trim();
-    if (!text || streaming) return;
+    if ((!text && !photo) || streaming) return;
+    const image = photo ?? undefined;
     setInput("");
-    await sendText(text);
+    setPhoto(null);
+    await sendText(text || t("gregAi.photo.defaultText"), undefined, image);
+  }
+
+  async function pickPhoto(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    setError(null);
+    try {
+      setPhoto(await shrinkPhoto(file));
+      inputRef.current?.focus();
+    } catch {
+      setError(t("gregAi.photo.error"));
+    }
   }
 
   /**
@@ -381,10 +428,10 @@ export default function GregAiWidget({ isLoggedIn, contact, grade: savedGrade }:
     await sendText(t(`gregAi.hint.level${level}`), level);
   }
 
-  async function sendText(text: string, hint?: 1 | 2 | 3) {
+  async function sendText(text: string, hint?: 1 | 2 | 3, image?: string) {
     setError(null);
 
-    const userMsg: ChatMessage = { id: newId(), role: "user", content: text };
+    const userMsg: ChatMessage = { id: newId(), role: "user", content: text, image };
     const assistantMsg: ChatMessage = {
       id: newId(),
       role: "assistant",
@@ -409,6 +456,7 @@ export default function GregAiWidget({ isLoggedIn, contact, grade: savedGrade }:
           exerciseId: pageContext.exerciseId,
           trainingTitle: pageContext.trainingTitle,
           hint,
+          image,
         }),
         signal: controller.signal,
       });
@@ -821,7 +869,16 @@ export default function GregAiWidget({ isLoggedIn, contact, grade: savedGrade }:
                           ) : m.role === "assistant" ? (
                             <MathJax key={bodyText}>{renderMessageContent(bodyText)}</MathJax>
                           ) : (
-                            renderMessageContent(m.content)
+                            <>
+                              {m.image && (
+                                <img
+                                  src={m.image}
+                                  alt={t("gregAi.photo.alt")}
+                                  className="mb-1 max-h-48 rounded-lg"
+                                />
+                              )}
+                              {renderMessageContent(m.content)}
+                            </>
                           )}
                         </div>
                         {!m.pending &&
@@ -887,7 +944,41 @@ export default function GregAiWidget({ isLoggedIn, contact, grade: savedGrade }:
                 onSubmit={sendMessage}
                 className="border-t border-gray-200 bg-white p-2"
               >
+                {photo && (
+                  <div className="mb-2 flex items-start gap-2">
+                    <img src={photo} alt={t("gregAi.photo.alt")} className="h-16 rounded-lg border border-gray-200" />
+                    <button
+                      type="button"
+                      onClick={() => setPhoto(null)}
+                      className="rounded px-2 py-1 text-xs text-gray-600 hover:bg-gray-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-400"
+                    >
+                      ✕ {t("gregAi.photo.remove")}
+                    </button>
+                  </div>
+                )}
                 <div className="flex items-end gap-2">
+                  <input
+                    ref={photoInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={pickPhoto}
+                    className="hidden"
+                    tabIndex={-1}
+                    aria-hidden="true"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => photoInputRef.current?.click()}
+                    disabled={streaming || limitReached}
+                    aria-label={t("gregAi.photo.attach")}
+                    title={t("gregAi.photo.attach")}
+                    className="rounded-lg px-2 py-2 text-gray-500 hover:bg-gray-100 hover:text-orange-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-400 disabled:opacity-50"
+                  >
+                    <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                      <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
+                      <circle cx="12" cy="13" r="4" />
+                    </svg>
+                  </button>
                   <label htmlFor="greg-ai-input" className="sr-only">
                     {t("gregAi.inputLabel")}
                   </label>
@@ -925,7 +1016,7 @@ export default function GregAiWidget({ isLoggedIn, contact, grade: savedGrade }:
                   ) : (
                     <button
                       type="submit"
-                      disabled={!input.trim() || limitReached}
+                      disabled={(!input.trim() && !photo) || limitReached}
                       aria-label={t("gregAi.sendAria")}
                       className="rounded-lg bg-orange-500 px-3 py-2 text-white hover:bg-orange-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-300 disabled:cursor-not-allowed disabled:opacity-50"
                     >

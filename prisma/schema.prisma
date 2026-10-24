@@ -117,6 +117,13 @@ model Training {
   title           String
   updatedAt       DateTime @db.Date
   translation     Json?
+  // Greg AI's text of the two images, made once by transcribeTraining() in
+  // trainingTranscript.server.ts. `gregSource` is the image pair it was made
+  // from (see trainingSourceKey) — a replaced image makes it stale.
+  gregStatement     String?
+  gregSolution      String?
+  gregSource        String?
+  gregTranscribedAt DateTime? @db.Date
 }
 
 model User {

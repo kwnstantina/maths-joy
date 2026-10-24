@@ -4,7 +4,7 @@
   "sideEffects": false,
   "type": "module",
   "scripts": {
-    "build": "prisma generate && remix vite:build",
+    "build": "prisma generate && remix vite:build && npm run greg:transcribe:deploy",
     "dev": "remix vite:dev",
     "start": "remix-serve ./build/server/index.js",
     "typecheck": "tsc",
@@ -16,7 +16,8 @@
     "prisma:studio": "prisma studio",
     "prisma:seed": "npx tsx prisma/seed.ts",
     "prisma:backfill-greg-usage": "npx tsx prisma/backfill-greg-usage.ts",
-    "greg:transcribe": "npx tsx --env-file=.env prisma/transcribe-exercises.ts"
+    "greg:transcribe": "npx tsx --env-file=.env prisma/transcribe-exercises.ts",
+    "greg:transcribe:deploy": "tsx prisma/transcribe-exercises.ts --deploy"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.96.0",

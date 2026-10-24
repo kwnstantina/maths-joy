@@ -39,6 +39,7 @@ import { getLocalizedContent } from "~/utils/i18n.server";
 import { prisma } from "~/utils/prisma.server";
 import { applyRateLimit } from "~/utils/ratelimit.server";
 import { getTrainingContextByTitle } from "~/utils/training.prisma";
+import { transcribeTrainingInBackground } from "~/utils/trainingTranscript.server";
 import { searchVideosForGreg } from "~/utils/video.prisma";
 
 interface ChatRequestBody {
@@ -53,6 +54,23 @@ interface ChatRequestBody {
   trainingTitle?: unknown;
   /** Which hint button sent this message (1–3), for the teacher dashboard. */
   hint?: unknown;
+  /** A photo for this message only, as a data URL (downscaled by the widget). */
+  image?: unknown;
+}
+
+// The widget sends JPEGs of at most 1280px a side (~200–400 KB); this bounds
+// what a hand-made request can push into one model call.
+const MAX_IMAGE_BASE64_CHARS = 1_500_000;
+const IMAGE_DATA_URL = /^data:(image\/(?:jpeg|png|webp));base64,([A-Za-z0-9+/=]+)$/;
+
+type ImageMediaType = "image/jpeg" | "image/png" | "image/webp";
+
+function parseImage(value: unknown): { mediaType: ImageMediaType; data: string } | null | "invalid" {
+  if (value === undefined || value === null || value === "") return null;
+  if (typeof value !== "string" || value.length > MAX_IMAGE_BASE64_CHARS + 30) return "invalid";
+  const match = value.match(IMAGE_DATA_URL);
+  if (!match) return "invalid";
+  return { mediaType: match[1] as ImageMediaType, data: match[2] };
 }
 
 const MAX_TRAINING_TITLE_LENGTH = 200;
@@ -81,6 +99,9 @@ async function resolveChatContext(
   const trainingTitle = page === "training" ? trainingTitleOf(body) : null;
   if (trainingTitle) {
     const training = await getTrainingContextByTitle(trainingTitle, locale);
+    // Uploads transcribe in the background; if that didn't happen, start it
+    // now so the next message has the text.
+    training?.problems.filter((p) => p.stale).forEach((p) => transcribeTrainingInBackground(p.id));
     return { context: { page, training }, bookletId: null };
   }
 
@@ -219,8 +240,12 @@ export async function action({ request }: ActionFunctionArgs) {
     return json({ error: "Invalid JSON" }, { status: 400 });
   }
 
+  const image = parseImage(body.image);
+  if (image === "invalid") {
+    return json({ error: "Invalid image" }, { status: 400 });
+  }
   const message = typeof body.message === "string" ? body.message.trim() : "";
-  if (!message) {
+  if (!message && !image) {
     return json({ error: "Message required" }, { status: 400 });
   }
   if (message.length > MAX_MESSAGE_LENGTH) {
@@ -252,12 +277,15 @@ export async function action({ request }: ActionFunctionArgs) {
       return json({ error: "Session not found" }, { status: 404 });
     }
   } else {
-    const newSession = await createSession(userId, message, locale);
+    const newSession = await createSession(userId, message || "📷", locale);
     sessionId = newSession.id;
   }
 
   const page = isChatPage(body.page) ? body.page : "other";
-  await appendMessage(sessionId, "user", message, {
+  // The photo itself isn't stored (privacy, and it would be re-sent and
+  // re-billed every turn). Greg restates the problem in text instead.
+  const storedMessage = image ? `📷 ${message}`.trim() : message;
+  await appendMessage(sessionId, "user", storedMessage, {
     hintLevel: isHintLevel(body.hint) ? body.hint : null,
     page,
     contextKey:
@@ -317,6 +345,16 @@ export async function action({ request }: ActionFunctionArgs) {
         // no-op. No `thinking`: Haiku 4.5 does not support adaptive thinking,
         // and omitting the field runs without thinking.
         const messages: Anthropic.MessageParam[] = [...history];
+        const last = messages[messages.length - 1];
+        if (image && last?.role === "user") {
+          messages[messages.length - 1] = {
+            role: "user",
+            content: [
+              { type: "image", source: { type: "base64", media_type: image.mediaType, data: image.data } },
+              { type: "text", text: message || "📷" },
+            ],
+          };
+        }
         let finalMessage: Anthropic.Message | undefined;
 
         for (let round = 0; round < MAX_TOOL_ROUNDS; round++) {

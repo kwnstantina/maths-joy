@@ -144,7 +144,7 @@ export interface ChatContext {
   page: ChatPage;
   exercise?: ExerciseContext | null;
   /** The training problem on screen (localized, from the database). */
-  training?: { chapter: string; label: string } | null;
+  training?: TrainingContext | null;
   student?: StudentContext | null;
 }
 
@@ -178,10 +178,42 @@ export function isHintLevel(value: unknown): value is (typeof HINT_LEVELS)[numbe
   return value === 1 || value === 2 || value === 3;
 }
 
-function formatTraining(training: { chapter: string; label: string }, locale: "el" | "en"): string {
-  return locale === "en"
-    ? `The student is on the practice problem "${training.label}" (chapter: ${training.chapter}). Its statement is an image you cannot see — if you need it, ask the student to type it.`
-    : `Ο μαθητής είναι στην άσκηση εξάσκησης «${training.label}» (κεφάλαιο: ${training.chapter}). Η εκφώνηση είναι εικόνα που δεν βλέπεις — αν τη χρειάζεσαι, ζήτα από τον μαθητή να σου τη γράψει.`;
+export interface TrainingContext {
+  chapter: string;
+  label: string;
+  /** Transcribed text of the problem image(s); null statement = not transcribed yet. */
+  problems: { statement: string | null; solution: string | null }[];
+}
+
+function formatTraining(training: TrainingContext, locale: "el" | "en"): string {
+  const en = locale === "en";
+  const header = en
+    ? `The student is on the "test yourself" problem "${training.label}" (chapter: ${training.chapter}). They see it as an image.`
+    : `Ο μαθητής είναι στην άσκηση «${training.label}» της ενότητας «Τεστ» (κεφάλαιο: ${training.chapter}). Τη βλέπει ως εικόνα.`;
+
+  const known = training.problems.filter((p) => p.statement);
+  if (known.length === 0) {
+    // Say so explicitly, or the model invents the problem the title implies.
+    return `${header}\n${
+      en
+        ? "You do NOT have its text yet. If you need it, ask the student to type it or send a photo. Never guess what it says."
+        : "ΔΕΝ έχεις ακόμα το κείμενό της. Αν το χρειάζεσαι, ζήτα από τον μαθητή να τη γράψει ή να στείλει φωτογραφία. Ποτέ μη μαντεύεις τι λέει."
+    }`;
+  }
+
+  const blocks = known.map((p, i) => {
+    const title = known.length > 1 ? (en ? `Problem ${i + 1}:\n` : `Άσκηση ${i + 1}:\n`) : "";
+    const parts = [`${title}<exercise>\n${p.statement}\n</exercise>`];
+    if (p.solution) {
+      parts.push(
+        en
+          ? `The official solution — FOR YOU ONLY. Use it to check the student's work and aim your hints, but never reveal it, quote it, or give the final answer. Guide the student one step at a time.\n<solution>\n${p.solution}\n</solution>`
+          : `Η επίσημη λύση — ΜΟΝΟ ΓΙΑ ΣΕΝΑ. Χρησιμοποίησέ τη για να ελέγχεις τη δουλειά του μαθητή και να στοχεύεις τα hints σου, αλλά ποτέ μην την αποκαλύψεις, μην την παραθέσεις και μη δώσεις το τελικό αποτέλεσμα. Καθοδήγησε τον μαθητή ένα βήμα τη φορά.\n<solution>\n${p.solution}\n</solution>`
+      );
+    }
+    return parts.join("\n\n");
+  });
+  return `${header}\n\n${blocks.join("\n\n")}`;
 }
 
 function formatExercise(exercise: ExerciseContext, locale: "el" | "en"): string {
@@ -337,6 +369,7 @@ export function buildSystemPrompt(
 - Όταν ο μαθητής κολλάει, δίνεις ένα μικρό hint, όχι όλη τη λύση.
 - Ενθαρρύνεις και επιβραβεύεις την προσπάθεια.
 - Εξαίρεση: όταν ο μαθητής στείλει «✅ Δείξε μου τη λύση βήμα-βήμα», δώσε την πλήρη λύση βήμα-βήμα.
+- Όταν ο μαθητής στέλνει φωτογραφία, ξεκίνα γράφοντας σύντομα την άσκηση όπως τη διαβάζεις (για να συμφωνείτε τι λέει — η φωτογραφία δεν μένει στη συζήτηση) και μετά βοήθησε κανονικά. Αν δεν διαβάζεται, ζήτα πιο καθαρή φωτογραφία.
 - Όταν ο μαθητής ζητάει εξάσκηση ή μια παρόμοια άσκηση, ψάχνεις στις ασκήσεις του site με το εργαλείο search_exercises και δίνεις σύνδεσμο με τη μορφή [τίτλος](/exercises/<id>). Προτείνεις μόνο ασκήσεις που επέστρεψε το εργαλείο — ποτέ μην επινοείς συνδέσμους.
 
 Ο Greg (ο πραγματικός καθηγητής του site, κάνει και ιδιαίτερα):
@@ -361,6 +394,7 @@ Your role:
 - When the student is stuck, give a small hint, not the whole answer.
 - Encourage and praise effort.
 - Exception: when the student sends "✅ Show me the solution step by step", give the full step-by-step solution.
+- When the student sends a photo, start by briefly writing out the problem as you read it (so you agree on what it says — the photo isn't kept in the conversation), then help as usual. If it's unreadable, ask for a clearer photo.
 - When the student asks for practice or a similar exercise, search the site's exercises with the search_exercises tool and link to them as [title](/exercises/<id>). Only recommend exercises the tool returned — never invent links.
 
 Greg (the site's real teacher, also gives private lessons):

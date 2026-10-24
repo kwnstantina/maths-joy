@@ -506,7 +506,7 @@
   "gregAi.sendAria": "Send",
   "gregAi.inputLabel": "Type your question",
   "gregAi.placeholder": "Ask anything about math...",
-  "gregAi.welcome": "Hi! I'm Greg AI. Ask me anything about math — I'll guide you step by step.",
+  "gregAi.welcome": "Hi, I'm Greg. Ask me anything about math — I'll guide you step by step.",
   "gregAi.confirmDelete": "Delete this conversation?",
   "gregAi.errorReply": "[Something went wrong. Try again.]",
   "gregAi.errorLoad": "Couldn't load conversation.",

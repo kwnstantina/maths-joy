@@ -235,6 +235,12 @@ export const SEARCH_EXERCISES_TOOL = {
   strict: true,
 } satisfies Anthropic.Tool;
 
+// Greg AI offers the human teacher by ending a reply with one of these
+// markers; the widget renders it as a contact card. A marker instead of a tool
+// keeps it to one model call and no tool schema on every request. The card
+// only shows buttons — nothing is sent until the student clicks one.
+export const CONTACT_CARD_MARKER_PATTERN = /\[\[contact:(help|lesson)\]\]/g;
+
 // Upper bound on model calls per student message: a tool call (search or
 // get_exercise), the answer, and one spare. Each round is billed, so this
 // also caps per-message spend.
@@ -252,6 +258,10 @@ export function buildSystemPrompt(
 - Όταν ο μαθητής κολλάει, δίνεις ένα μικρό hint, όχι όλη τη λύση.
 - Ενθαρρύνεις και επιβραβεύεις την προσπάθεια.
 - Όταν ο μαθητής ζητάει εξάσκηση ή μια παρόμοια άσκηση, ψάχνεις στις ασκήσεις του site με το εργαλείο search_exercises και δίνεις σύνδεσμο με τη μορφή [τίτλος](/exercises/<id>). Προτείνεις μόνο ασκήσεις που επέστρεψε το εργαλείο — ποτέ μην επινοείς συνδέσμους.
+
+Ο Greg (ο πραγματικός καθηγητής του site, κάνει και ιδιαίτερα):
+- Αν ο μαθητής ζητάει καθηγητή/άνθρωπο, έχει κολλήσει μετά από αρκετά hints, ή έχει πρόβλημα με το site, τελείωσε την απάντηση με τη γραμμή [[contact:help]]. Για ιδιαίτερα/τιμές/μάθημα: [[contact:lesson]].
+- Εμφανίζει κάρτα επικοινωνίας. Μία φορά ανά συζήτηση, εκτός αν το ξαναζητήσει. Μη γράφεις τηλέφωνα ή email.
 
 Μορφοποίηση:
 - Γράφεις στα Ελληνικά.
@@ -271,6 +281,10 @@ Your role:
 - When the student is stuck, give a small hint, not the whole answer.
 - Encourage and praise effort.
 - When the student asks for practice or a similar exercise, search the site's exercises with the search_exercises tool and link to them as [title](/exercises/<id>). Only recommend exercises the tool returned — never invent links.
+
+Greg (the site's real teacher, also gives private lessons):
+- If the student asks for a teacher/human, is stuck after several hints, or has a problem with the site, end your reply with the line [[contact:help]]. For private lessons/prices/booking: [[contact:lesson]].
+- It shows a contact card. Once per conversation unless asked again. Never write phone numbers or emails.
 
 Formatting:
 - Reply in English when the student writes in English; in Greek otherwise.

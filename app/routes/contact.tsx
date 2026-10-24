@@ -1,7 +1,10 @@
 import { ActionFunctionArgs, LoaderFunctionArgs, data } from "@remix-run/node";
 import { Form, useActionData, useLoaderData, useNavigation } from "@remix-run/react";
 import { useTranslation } from "react-i18next";
+import type { ContactInfo } from "~/utils/contactInfo.server";
+import { getContactInfo } from "~/utils/contactInfo.server";
 import { getCSRFToken, validateCSRFToken } from "~/utils/csrf.server";
+import { sendContactEmail } from "~/utils/email.server";
 import { applyRateLimit } from "~/utils/ratelimit.server";
 import { validateEmail, validateRequiredField } from "~/utils/validators.server";
 
@@ -18,13 +21,14 @@ interface ActionData {
 
 interface LoaderData {
   csrfToken: string;
+  contact: ContactInfo;
 }
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   const { token, headers } = await getCSRFToken(request);
 
   return data<LoaderData>(
-    { csrfToken: token },
+    { csrfToken: token, contact: getContactInfo() },
     { headers }
   );
 };
@@ -75,12 +79,17 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     return data<ActionData>({ errors }, { status: 400 });
   }
 
-  // In a real application, you would send an email here
-  // For now, we'll just log it and return success
-  console.log("Contact form submission:", { name, email, subject, message });
+  const sent = await sendContactEmail({ name, email, subject, message });
 
   // Generate new CSRF token for next submission
   const { headers } = await getCSRFToken(request);
+
+  if (!sent.ok) {
+    return data<ActionData>(
+      { errors: { form: sent.errorKey ?? "contact.error" } },
+      { status: 502, headers }
+    );
+  }
 
   return data<ActionData>(
     { success: true },
@@ -256,10 +265,48 @@ export default function ContactPage() {
               </svg>
             </div>
             <h3 className="text-lg font-medium text-gray-900 dark:text-white">Email</h3>
-            <p className="mt-2 text-gray-600 dark:text-gray-400">gregkirmaths@gmail.com</p>
+            <a href={`mailto:${loaderData.contact.email}`} className="mt-2 block text-blue-600 dark:text-blue-400 hover:underline">
+              {loaderData.contact.email}
+            </a>
           </div>
 
+          <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6 text-center">
+            <div className="w-12 h-12 mx-auto mb-4 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center">
+              <svg className="w-6 h-6 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+              </svg>
+            </div>
+            <h3 className="text-lg font-medium text-gray-900 dark:text-white">{t('contact.phoneLabel')}</h3>
+            <a href={`tel:${loaderData.contact.phone}`} className="mt-2 block text-blue-600 dark:text-blue-400 hover:underline">
+              {loaderData.contact.phone}
+            </a>
+            {loaderData.contact.whatsapp && (
+              <a
+                href={`https://wa.me/${loaderData.contact.whatsapp}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-1 block text-sm text-green-600 dark:text-green-400 hover:underline"
+              >
+                WhatsApp
+              </a>
+            )}
+          </div>
         </div>
+
+        {loaderData.contact.bookingUrl && (
+          <div className="mt-6 bg-white dark:bg-gray-800 shadow rounded-lg p-6 text-center">
+            <h3 className="text-lg font-medium text-gray-900 dark:text-white">{t('contact.bookTitle')}</h3>
+            <p className="mt-2 text-gray-600 dark:text-gray-400">{t('contact.bookText')}</p>
+            <a
+              href={loaderData.contact.bookingUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-4 inline-block rounded-lg bg-blue-600 px-5 py-2 text-sm font-medium text-white hover:bg-blue-700"
+            >
+              {t('contact.bookCta')}
+            </a>
+          </div>
+        )}
       </div>
     </div>
   );

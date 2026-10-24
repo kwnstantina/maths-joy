@@ -23,6 +23,7 @@ import i18next from "~/i18next.server";
 import { i18nCookie } from "../services/cookies/cookies";
 import useScrollToTop from "hooks/useScrollToTop";
 import { getUser } from "~/utils/auth.prisma";
+import { getContactInfo } from "~/utils/contactInfo.server";
 import { getFeatureFlags } from "~/utils/featureFlags.server";
 import GregAiWidget from "components/gregAi/gregAiWidget";
 
@@ -56,7 +57,8 @@ export async function loader({ request }: LoaderFunctionArgs) {
       locale,
       ENV: { VERCEL_ANALYTICS_ID: process.env.VERCEL_ANALYTICS_ID },
       user,
-      features: getFeatureFlags()
+      features: getFeatureFlags(),
+      contact: getContactInfo()
     },
     { headers: { "Set-Cookie": await i18nCookie.serialize(locale) } }
   );
@@ -153,7 +155,7 @@ export function AppLayout({ children }: AppLayoutProps) {
       </main>
       <Footer />
       {rootData?.features?.gregAi && (
-        <GregAiWidget isLoggedIn={Boolean(rootData.user)} />
+        <GregAiWidget isLoggedIn={Boolean(rootData.user)} contact={rootData.contact} />
       )}
     </div>
   );

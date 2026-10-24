@@ -10,6 +10,7 @@ Built with Remix 2, React 18, Prisma, MongoDB, Tailwind CSS, and deployed on Ver
 - **Tutorials**: Video tutorials and educational content
 - **Q&A System**: Stack Overflow-style questions and answers
 - **E-commerce**: Purchase and download math textbooks via Stripe
+- **Greg AI**: AI math tutor with hints, practice mode, site search, teacher contact and an admin dashboard. See [GREG_AI.md](GREG_AI.md)
 - **Internationalization**: Full Greek and English support
 - **Cloud Storage**: Cloudinary for file storage
 
@@ -67,6 +68,10 @@ CLOUDINARY_API_SECRET="your-api-secret"
 STRIPE_SECRET_KEY="sk_test_..."
 STRIPE_PUBLISHABLE_KEY="pk_test_..."
 STRIPE_WEBHOOK_SECRET="whsec_..."
+
+# Greg AI + emails (see GREG_AI.md for all options)
+ANTHROPIC_API_KEY="sk-ant-..."
+RESEND_API_KEY="re_..."
 
 # App
 APP_URL="http://localhost:3000"

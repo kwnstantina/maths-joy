@@ -36,6 +36,27 @@ export async function trackExerciseView(
 }
 
 /**
+ * Track a practice-mode answer checked by Greg AI: 100 correct, 50 partly,
+ * 0 incorrect.
+ */
+export async function trackPracticeResult(
+  userId: string,
+  exerciseId: string,
+  score: number
+): Promise<void> {
+  await prisma.userProgress.create({
+    data: {
+      userId,
+      exerciseId,
+      type: "quiz_score",
+      score,
+      completedAt: new Date(),
+      createdAt: new Date(),
+    },
+  });
+}
+
+/**
  * Track when a user completes a training exercise
  */
 export async function trackTrainingCompletion(

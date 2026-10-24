@@ -1,8 +1,10 @@
-import { Link, useLocation } from "@remix-run/react";
+import { Link, useLocation, useNavigate } from "@remix-run/react";
 import { MathJaxContext, MathJax } from "better-react-mathjax";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { GRADES, isGrade } from "~/utils/grades";
+import { renderMessageContent } from "./messageContent";
+import PracticePanel from "./practicePanel";
 
 type Role = "user" | "assistant";
 
@@ -61,45 +63,6 @@ function derivePageContext(pathname: string, search: string): PageContext {
   if (pathname.startsWith("/qa")) return { page: "qa" };
   if (pathname === "/" || pathname === "") return { page: "home" };
   return { page: "other" };
-}
-
-// Markdown links Greg emits for exercise recommendations. Only same-site
-// paths ("/exercises/…") become links — anything else (http:, javascript:,
-// protocol-relative "//") stays plain text, so model output can never send
-// a student off-site.
-const LINK_PATTERN = /(\[[^\]]+\]\(\/(?!\/)[^)\s]*\))/g;
-
-function renderInline(text: string, key: number): React.ReactNode {
-  const parts = text.split(/(\*\*[^*]+\*\*)/g).map((part, j) => {
-    if (part.startsWith("**") && part.endsWith("**")) {
-      return <strong key={j}>{part.slice(2, -2)}</strong>;
-    }
-    return <span key={j}>{part}</span>;
-  });
-  return <span key={key}>{parts}</span>;
-}
-
-function renderMessageContent(text: string): React.ReactNode {
-  const lines = text.split("\n");
-  return lines.map((line, i) => {
-    const boldRendered = line.split(LINK_PATTERN).map((part, j) => {
-      const link = part.match(/^\[([^\]]+)\]\((\/[^)\s]*)\)$/);
-      if (link) {
-        return (
-          <Link key={j} to={link[2]} className="font-medium text-blue-600 underline hover:text-blue-800">
-            {link[1]}
-          </Link>
-        );
-      }
-      return renderInline(part, j);
-    });
-    return (
-      <span key={i}>
-        {boldRendered}
-        {i < lines.length - 1 && <br />}
-      </span>
-    );
-  });
 }
 
 type ContactKind = "help" | "lesson";
@@ -278,6 +241,7 @@ interface GregAiWidgetProps {
 export default function GregAiWidget({ isLoggedIn, contact, grade: savedGrade }: GregAiWidgetProps) {
   const { t, i18n } = useTranslation();
   const location = useLocation();
+  const navigate = useNavigate();
 
   const [mounted, setMounted] = useState(false);
   const [open, setOpen] = useState(false);
@@ -292,6 +256,7 @@ export default function GregAiWidget({ isLoggedIn, contact, grade: savedGrade }:
   // How far down the hint ladder this conversation is (0 = no hint yet).
   const [hintDepth, setHintDepth] = useState(0);
   const [grade, setGrade] = useState<string | null>(savedGrade);
+  const [practice, setPractice] = useState(false);
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
@@ -573,6 +538,13 @@ export default function GregAiWidget({ isLoggedIn, contact, grade: savedGrade }:
     ]);
   }
 
+  /** From practice mode: open the problem's booklet and ask Greg about it. */
+  function askGregAboutProblem(problem: { exerciseId: string; order: number }) {
+    setPractice(false);
+    navigate(`/exercises/${problem.exerciseId}`);
+    prefillInput(t("gregAi.practice.askText", { n: problem.order }));
+  }
+
   /** Saved once, then Greg pitches explanations at this level. */
   async function saveGrade(value: string) {
     if (!isGrade(value)) return;
@@ -647,6 +619,23 @@ export default function GregAiWidget({ isLoggedIn, contact, grade: savedGrade }:
               <div className="flex items-center gap-1">
                 {isLoggedIn && (
                   <>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowHistory(false);
+                        setPractice((v) => !v);
+                      }}
+                      aria-label={t("gregAi.practice.aria")}
+                      aria-pressed={practice}
+                      title={t("gregAi.practice.aria")}
+                      className="rounded p-1 hover:bg-white/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
+                    >
+                      <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                        <circle cx="12" cy="12" r="10" />
+                        <circle cx="12" cy="12" r="6" />
+                        <circle cx="12" cy="12" r="2" />
+                      </svg>
+                    </button>
                     <button
                       type="button"
                       onClick={() => setShowHistory((v) => !v)}
@@ -745,6 +734,8 @@ export default function GregAiWidget({ isLoggedIn, contact, grade: savedGrade }:
                   </ul>
                 )}
               </div>
+            ) : practice ? (
+              <PracticePanel locale={locale} onAskGreg={askGregAboutProblem} />
             ) : (
               <div ref={scrollRef} className="flex-1 overflow-y-auto bg-gray-50 p-3">
                 {showWelcome && (
@@ -785,6 +776,9 @@ export default function GregAiWidget({ isLoggedIn, contact, grade: savedGrade }:
                       </button>
                       <button type="button" onClick={() => prefillInput(t("gregAi.starters.practiceText"))} className={starterChip}>
                         {t("gregAi.starters.practice")}
+                      </button>
+                      <button type="button" onClick={() => setPractice(true)} className={starterChip}>
+                        {t("gregAi.starters.practiceMode")}
                       </button>
                       <button type="button" onClick={() => showContactCard("help")} className={starterChip}>
                         {t("gregAi.starters.teacher")}
@@ -871,7 +865,7 @@ export default function GregAiWidget({ isLoggedIn, contact, grade: savedGrade }:
               </div>
             )}
 
-            {isLoggedIn && !showHistory && messages.length > 0 && !streaming && !limitReached && (
+            {isLoggedIn && !showHistory && !practice && messages.length > 0 && !streaming && !limitReached && (
               <div className="flex flex-wrap gap-2 border-t border-gray-200 bg-white px-2 pt-2">
                 <button type="button" onClick={() => sendHint(hintDepth === 0 ? 1 : 2)} className={starterChip}>
                   {t(hintDepth === 0 ? "gregAi.hint.button1" : "gregAi.hint.button2")}
@@ -884,7 +878,7 @@ export default function GregAiWidget({ isLoggedIn, contact, grade: savedGrade }:
               </div>
             )}
 
-            {isLoggedIn && !showHistory && (
+            {isLoggedIn && !showHistory && !practice && (
               <form
                 onSubmit={sendMessage}
                 className="border-t border-gray-200 bg-white p-2"

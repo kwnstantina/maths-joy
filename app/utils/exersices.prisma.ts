@@ -106,15 +106,10 @@ export const getExerciseItemById = async (exerciseId: string, itemId: string) =>
   });
 
 /**
- * Library search for Greg AI's `search_exercises` tool. Matches individual
- * problems (topic + text) and booklet metadata, so "παράγωγος" finds the
- * derivative problems inside a booklet titled just "Γ-Λυκείου". Never returns
- * solutions.
+ * Problems matching a keyword: in their own topic/text/section, or anywhere
+ * in a booklet whose title/description/category/tags match.
  */
-export async function searchExercisesForGreg(query: string, limit = 6) {
-  const q = query.trim();
-  if (!q) return [];
-
+async function itemSearchFilter(q: string): Promise<Prisma.ExerciseItemWhereInput> {
   const matchingBooklets = await prisma.exersice.findMany({
     where: {
       OR: [
@@ -126,16 +121,70 @@ export async function searchExercisesForGreg(query: string, limit = 6) {
     },
     select: { id: true },
   });
+  return {
+    OR: [
+      { topic: { contains: q, mode: "insensitive" } },
+      { statement: { contains: q, mode: "insensitive" } },
+      { section: { contains: q, mode: "insensitive" } },
+      { exerciseId: { in: matchingBooklets.map((b) => b.id) } },
+    ],
+  };
+}
+
+const OBJECT_ID = /^[0-9a-fA-F]{24}$/;
+
+/**
+ * A random problem for practice mode, optionally on a topic, skipping ones
+ * the student has already seen. Only problems with an official solution,
+ * since checking an answer needs one. The solution is not returned.
+ */
+export async function getPracticeProblem(query: string, excludeIds: string[]) {
+  const q = query.trim();
+  const where: Prisma.ExerciseItemWhereInput = {
+    AND: [
+      { solution: { not: null } },
+      { id: { notIn: excludeIds.filter((id) => OBJECT_ID.test(id)) } },
+      ...(q ? [await itemSearchFilter(q)] : []),
+    ],
+  };
+  const count = await prisma.exerciseItem.count({ where });
+  if (count === 0) return null;
+
+  const item = await prisma.exerciseItem.findFirst({
+    where,
+    skip: Math.floor(Math.random() * count),
+    select: { id: true, exerciseId: true, order: true, section: true, label: true, topic: true, statement: true },
+  });
+  if (!item) return null;
+
+  const booklet = await prisma.exersice.findUnique({
+    where: { id: item.exerciseId },
+    select: { title: true },
+  });
+  return { ...item, bookletTitle: booklet?.title ?? "" };
+}
+
+/** A practice problem with its solution, for checking an answer. */
+export async function getPracticeItemWithSolution(id: string) {
+  if (!OBJECT_ID.test(id)) return null;
+  return prisma.exerciseItem.findUnique({
+    where: { id },
+    select: { id: true, exerciseId: true, statement: true, solution: true },
+  });
+}
+
+/**
+ * Library search for Greg AI's `search_exercises` tool. Matches individual
+ * problems (topic + text) and booklet metadata, so "παράγωγος" finds the
+ * derivative problems inside a booklet titled just "Γ-Λυκείου". Never returns
+ * solutions.
+ */
+export async function searchExercisesForGreg(query: string, limit = 6) {
+  const q = query.trim();
+  if (!q) return [];
 
   const items = await prisma.exerciseItem.findMany({
-    where: {
-      OR: [
-        { topic: { contains: q, mode: "insensitive" } },
-        { statement: { contains: q, mode: "insensitive" } },
-        { section: { contains: q, mode: "insensitive" } },
-        { exerciseId: { in: matchingBooklets.map((b) => b.id) } },
-      ],
-    },
+    where: await itemSearchFilter(q),
     select: {
       exerciseId: true,
       order: true,

@@ -565,5 +565,14 @@
   "gregAi.hint.button3": "✅ Show solution",
   "gregAi.hint.level1": "💡 Give me a small hint",
   "gregAi.hint.level2": "💡 Give me a bigger hint",
-  "gregAi.hint.level3": "✅ Show me the solution step by step"
+  "gregAi.hint.level3": "✅ Show me the solution step by step",
+  "gregAi.grade.question": "What grade are you in? Greg will explain at your level.",
+  "gregAi.grade.choose": "Choose your grade",
+  "gregAi.grade.g1": "7th grade (Α' Γυμνασίου)",
+  "gregAi.grade.g2": "8th grade (Β' Γυμνασίου)",
+  "gregAi.grade.g3": "9th grade (Γ' Γυμνασίου)",
+  "gregAi.grade.l1": "10th grade (Α' Λυκείου)",
+  "gregAi.grade.l2": "11th grade (Β' Λυκείου)",
+  "gregAi.grade.l3": "12th grade (Γ' Λυκείου)",
+  "gregAi.grade.uni": "University"
 }

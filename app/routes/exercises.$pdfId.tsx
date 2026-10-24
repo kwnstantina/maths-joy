@@ -7,9 +7,11 @@ import { pageNavigationPlugin } from "@react-pdf-viewer/page-navigation";
 import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
 import i18next from "~/i18next.server";
+import { getUserId } from "~/utils/auth.prisma";
 import { getExersiceById } from "~/utils/exersices.prisma";
 import { getLocalizedContent } from "~/utils/i18n.server";
 import type { SupportedLanguage } from "~/utils/i18n.server";
+import { trackExerciseView } from "~/utils/progress.server";
 import "@react-pdf-viewer/core/lib/styles/index.css";
 import "@react-pdf-viewer/default-layout/lib/styles/index.css";
 
@@ -32,6 +34,16 @@ export const loader: LoaderFunction = async ({ request, params }) => {
 
   if (!pdf) {
     throw new Response("PDF not found", { status: 404 });
+  }
+
+  const userId = await getUserId(request);
+  if (userId && pdfId) {
+    // Progress is a nice-to-have: never fail the page over it.
+    try {
+      await trackExerciseView(userId, pdfId);
+    } catch (err) {
+      console.error("[progress] trackExerciseView failed:", err);
+    }
   }
 
   const locale = (await i18next.getLocale(request)) as SupportedLanguage;

@@ -32,6 +32,7 @@ export interface RootUser {
   email: string;
   role: string;
   profile: { firstName: string; lastName: string } | null;
+  grade: string | null;
 }
 
 export async function loader({ request }: LoaderFunctionArgs) {
@@ -45,7 +46,8 @@ export async function loader({ request }: LoaderFunctionArgs) {
         id: dbUser.id,
         email: dbUser.email,
         role: dbUser.role,
-        profile: dbUser.profile
+        profile: dbUser.profile,
+        grade: dbUser.grade ?? null
       };
     }
   } catch {
@@ -155,7 +157,11 @@ export function AppLayout({ children }: AppLayoutProps) {
       </main>
       <Footer />
       {rootData?.features?.gregAi && (
-        <GregAiWidget isLoggedIn={Boolean(rootData.user)} contact={rootData.contact} />
+        <GregAiWidget
+          isLoggedIn={Boolean(rootData.user)}
+          contact={rootData.contact}
+          grade={rootData.user?.grade ?? null}
+        />
       )}
     </div>
   );

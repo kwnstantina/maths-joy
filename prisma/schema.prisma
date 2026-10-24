@@ -128,6 +128,8 @@ model User {
   role      String
   updatedAt DateTime     @db.Date
   isActive  Boolean      @default(false)
+  // School grade picked in the Greg AI widget — one of GRADES in app/utils/grades.ts
+  grade     String?
 }
 
 model Video {

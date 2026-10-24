@@ -217,6 +217,61 @@ export async function getRecentHistoryForLLM(
     .map((m) => ({ role: m.role as "user" | "assistant", content: m.content }));
 }
 
+const STRUGGLE_WINDOW_DAYS = 30;
+
+/**
+ * Where the student recently pressed "bigger hint" or "show solution": up to
+ * `limit` distinct exercise booklet titles / training problem names, newest
+ * first. Feeds one line of Greg AI's prompt.
+ */
+export async function getRecentStruggles(userId: string, limit = 3): Promise<string[]> {
+  const since = new Date(Date.now() - STRUGGLE_WINDOW_DAYS * 24 * 60 * 60 * 1000);
+  const sessions = await prisma.gregChatSession.findMany({
+    where: { userId, updatedAt: { gte: since } },
+    select: { id: true },
+    orderBy: { updatedAt: "desc" },
+    take: 20,
+  });
+  if (sessions.length === 0) return [];
+
+  const messages = await prisma.gregChatMessage.findMany({
+    where: {
+      sessionId: { in: sessions.map((s) => s.id) },
+      role: "user",
+      hintLevel: { gte: 2 },
+      contextKey: { not: null },
+      createdAt: { gte: since },
+    },
+    select: { page: true, contextKey: true },
+    orderBy: { createdAt: "desc" },
+    take: 30,
+  });
+
+  const seen = new Set<string>();
+  const picks: { page: string | null; key: string }[] = [];
+  for (const m of messages) {
+    if (!m.contextKey || seen.has(m.contextKey)) continue;
+    seen.add(m.contextKey);
+    picks.push({ page: m.page, key: m.contextKey });
+    if (picks.length >= limit) break;
+  }
+
+  const exerciseIds = picks
+    .filter((p) => p.page === "exercise" && /^[0-9a-fA-F]{24}$/.test(p.key))
+    .map((p) => p.key);
+  const booklets = exerciseIds.length
+    ? await prisma.exersice.findMany({
+        where: { id: { in: exerciseIds } },
+        select: { id: true, title: true },
+      })
+    : [];
+  const titleById = new Map(booklets.map((b) => [b.id, b.title]));
+
+  return picks
+    .map((p) => (p.page === "exercise" ? titleById.get(p.key) : p.key))
+    .filter((title): title is string => Boolean(title));
+}
+
 export async function deleteSession(sessionId: string, userId: string): Promise<boolean> {
   const result = await prisma.gregChatSession.deleteMany({
     where: { id: sessionId, userId },

@@ -145,6 +145,30 @@ export interface ChatContext {
   exercise?: ExerciseContext | null;
   /** The training problem on screen (localized, from the database). */
   training?: { chapter: string; label: string } | null;
+  student?: StudentContext | null;
+}
+
+/** What Greg knows about the student — all from the database. */
+export interface StudentContext {
+  firstName?: string | null;
+  /** Already a display label, e.g. "Β' Λυκείου". */
+  grade?: string | null;
+  /** Booklets/problems where they recently needed big hints. */
+  struggles?: string[];
+}
+
+function formatStudent(student: StudentContext, locale: "el" | "en"): string | null {
+  const bits: string[] = [];
+  if (locale === "en") {
+    if (student.firstName) bits.push(`name ${student.firstName}`);
+    if (student.grade) bits.push(`grade: ${student.grade} — pitch explanations at this level`);
+    if (student.struggles?.length) bits.push(`recently needed big hints on: ${student.struggles.join("; ")}`);
+    return bits.length ? `About the student: ${bits.join(", ")}.` : null;
+  }
+  if (student.firstName) bits.push(`όνομα ${student.firstName}`);
+  if (student.grade) bits.push(`τάξη: ${student.grade} — προσάρμοσε τις εξηγήσεις σε αυτό το επίπεδο`);
+  if (student.struggles?.length) bits.push(`χρειάστηκε πρόσφατα μεγάλα hints σε: ${student.struggles.join("; ")}`);
+  return bits.length ? `Για τον μαθητή: ${bits.join(", ")}.` : null;
 }
 
 /** The hint buttons in the widget: 1 hint, 2 bigger hint, 3 show solution. */
@@ -323,6 +347,8 @@ Don't:
   if (context.training) {
     parts.push(formatTraining(context.training, locale));
   }
+  const studentLine = context.student ? formatStudent(context.student, locale) : null;
+  if (studentLine) parts.push(studentLine);
 
   return `${base}\n\n${parts.join("\n\n")}`;
 }

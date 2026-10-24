@@ -2,6 +2,7 @@ import { Link, useLocation } from "@remix-run/react";
 import { MathJaxContext, MathJax } from "better-react-mathjax";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { GRADES, isGrade } from "~/utils/grades";
 
 type Role = "user" | "assistant";
 
@@ -270,9 +271,11 @@ function ContactCard({ kind, sessionId, contact }: ContactCardProps) {
 interface GregAiWidgetProps {
   isLoggedIn: boolean;
   contact: ContactInfo;
+  /** The student's saved school grade, if they've picked one. */
+  grade: string | null;
 }
 
-export default function GregAiWidget({ isLoggedIn, contact }: GregAiWidgetProps) {
+export default function GregAiWidget({ isLoggedIn, contact, grade: savedGrade }: GregAiWidgetProps) {
   const { t, i18n } = useTranslation();
   const location = useLocation();
 
@@ -288,6 +291,7 @@ export default function GregAiWidget({ isLoggedIn, contact }: GregAiWidgetProps)
   const [limitReached, setLimitReached] = useState(false);
   // How far down the hint ladder this conversation is (0 = no hint yet).
   const [hintDepth, setHintDepth] = useState(0);
+  const [grade, setGrade] = useState<string | null>(savedGrade);
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
@@ -569,6 +573,22 @@ export default function GregAiWidget({ isLoggedIn, contact }: GregAiWidgetProps)
     ]);
   }
 
+  /** Saved once, then Greg pitches explanations at this level. */
+  async function saveGrade(value: string) {
+    if (!isGrade(value)) return;
+    setGrade(value);
+    try {
+      const res = await fetch("/api/greg-ai/profile", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ grade: value }),
+      });
+      if (!res.ok) throw new Error();
+    } catch {
+      setGrade(null);
+    }
+  }
+
   function stopStreaming() {
     abortRef.current?.abort();
   }
@@ -732,6 +752,28 @@ export default function GregAiWidget({ isLoggedIn, contact }: GregAiWidgetProps)
                     <div className="rounded-lg bg-white p-3 text-sm text-gray-700 shadow-sm">
                       {t("gregAi.welcome")}
                     </div>
+                    {!grade && (
+                      <div className="mt-3 rounded-lg bg-white p-3 text-sm text-gray-700 shadow-sm">
+                        <label htmlFor="greg-ai-grade" className="block text-xs font-semibold">
+                          🎓 {t("gregAi.grade.question")}
+                        </label>
+                        <select
+                          id="greg-ai-grade"
+                          defaultValue=""
+                          onChange={(e) => saveGrade(e.target.value)}
+                          className="mt-1 w-full rounded-lg border border-gray-300 px-2 py-1 text-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-400"
+                        >
+                          <option value="" disabled>
+                            {t("gregAi.grade.choose")}
+                          </option>
+                          {GRADES.map((g) => (
+                            <option key={g} value={g}>
+                              {t(`gregAi.grade.${g}`)}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    )}
                     <div className="mt-3 flex flex-wrap gap-2">
                       {pageContext.page === "exercise" && (
                         <button type="button" onClick={() => prefillInput(t("gregAi.starters.thisExerciseText"))} className={starterChip}>

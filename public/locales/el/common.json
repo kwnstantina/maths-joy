@@ -565,5 +565,14 @@
   "gregAi.hint.button3": "✅ Δείξε τη λύση",
   "gregAi.hint.level1": "💡 Δώσε μου ένα μικρό hint",
   "gregAi.hint.level2": "💡 Δώσε μου ένα μεγαλύτερο hint",
-  "gregAi.hint.level3": "✅ Δείξε μου τη λύση βήμα-βήμα"
+  "gregAi.hint.level3": "✅ Δείξε μου τη λύση βήμα-βήμα",
+  "gregAi.grade.question": "Σε ποια τάξη πας; Ο Greg θα εξηγεί στο επίπεδό σου.",
+  "gregAi.grade.choose": "Διάλεξε τάξη",
+  "gregAi.grade.g1": "Α' Γυμνασίου",
+  "gregAi.grade.g2": "Β' Γυμνασίου",
+  "gregAi.grade.g3": "Γ' Γυμνασίου",
+  "gregAi.grade.l1": "Α' Λυκείου",
+  "gregAi.grade.l2": "Β' Λυκείου",
+  "gregAi.grade.l3": "Γ' Λυκείου",
+  "gregAi.grade.uni": "Πανεπιστήμιο"
 }

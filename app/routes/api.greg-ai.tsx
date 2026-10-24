@@ -23,10 +23,12 @@ import {
   searchExercisesForGreg,
 } from "~/utils/exersices.prisma";
 import { isGregAiEnabled } from "~/utils/featureFlags.server";
+import { GRADE_PROMPT_LABEL, isGrade } from "~/utils/grades";
 import {
   appendMessage,
   createSession,
   getActiveItemId,
+  getRecentStruggles,
   getRecentHistoryForLLM,
   incrementDailyUsage,
   ownsSession,
@@ -34,6 +36,7 @@ import {
   setActiveItemId,
 } from "~/utils/gregChat.prisma";
 import { getLocalizedContent } from "~/utils/i18n.server";
+import { prisma } from "~/utils/prisma.server";
 import { applyRateLimit } from "~/utils/ratelimit.server";
 import { getTrainingContextByTitle } from "~/utils/training.prisma";
 import { searchVideosForGreg } from "~/utils/video.prisma";
@@ -264,15 +267,25 @@ export async function action({ request }: ActionFunctionArgs) {
           ? trainingTitleOf(body)
           : null,
   });
-  const [history, activeItemId] = await Promise.all([
+  const [history, activeItemId, student, struggles] = await Promise.all([
     getRecentHistoryForLLM(sessionId),
     getActiveItemId(sessionId),
+    prisma.user.findUnique({
+      where: { id: userId },
+      select: { grade: true, profile: { select: { firstName: true } } },
+    }),
+    getRecentStruggles(userId),
   ]);
   const { context: chatContext, bookletId } = await resolveChatContext(
     body,
     locale,
     activeItemId
   );
+  chatContext.student = {
+    firstName: student?.profile?.firstName || null,
+    grade: isGrade(student?.grade) ? GRADE_PROMPT_LABEL[student.grade][locale] : null,
+    struggles,
+  };
 
   const anthropic = getAnthropic();
   const systemPrompt = buildSystemPrompt(locale, chatContext);

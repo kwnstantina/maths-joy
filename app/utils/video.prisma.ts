@@ -43,6 +43,27 @@ export async function getVideoById(id: string) {
   });
 }
 
+/**
+ * Greg AI's video search: same keyword match as the exercise search, over
+ * the fields a student would describe a video by.
+ */
+export async function searchVideosForGreg(query: string, limit = 3) {
+  const q = query.trim();
+  if (!q) return [];
+  return prisma.video.findMany({
+    where: {
+      OR: [
+        { title: { contains: q, mode: "insensitive" } },
+        { description: { contains: q, mode: "insensitive" } },
+        { category: { contains: q, mode: "insensitive" } },
+        { tags: { has: q } },
+      ],
+    },
+    select: { id: true, title: true, category: true },
+    take: limit,
+  });
+}
+
 export async function getAllVideos() {
   return prisma.video.findMany({
     orderBy: { createdAt: "desc" },

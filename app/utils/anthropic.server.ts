@@ -235,7 +235,7 @@ export const GET_EXERCISE_TOOL = {
 export const SEARCH_EXERCISES_TOOL = {
   name: "search_exercises",
   description:
-    "Search the GregKyrMaths exercise library. Use it when the student asks for practice, a similar exercise, or an exercise on a topic. Matches a single keyword or short phrase against individual problems (topic and text) and booklet titles, categories and tags. Results are problems inside booklets: recommend them as \"problem <label> in [<booklet title>](<link>)\". The library is in Greek — search with Greek terms (e.g. \"παράγωγος\", \"ολοκλήρωμα\", \"τριγωνομετρία\").",
+    "Search the GregKyrMaths library of exercises and video lessons. Use it when the student asks for practice, a similar exercise, an exercise on a topic, or a video explaining a topic. Matches a single keyword or short phrase. Exercise results are problems inside booklets: recommend them as \"problem <label> in [<booklet title>](<link>)\". Video results: recommend as [<title>](<link>). The library is in Greek — search with Greek terms (e.g. \"παράγωγος\", \"ολοκλήρωμα\", \"τριγωνομετρία\").",
   input_schema: {
     type: "object" as const,
     properties: {

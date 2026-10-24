@@ -1,7 +1,7 @@
 import type { LoaderFunction } from "@remix-run/node";
 import { data } from "@remix-run/node";
 import { useLoaderData, useSearchParams } from "@remix-run/react";
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { Category, Category_En } from "services/models/models";
 import i18next from "~/i18next.server";
@@ -51,6 +51,15 @@ export default function VideosIndex() {
 
   const isEnglish = i18n.language === "en";
   const selectedCategory = searchParams.get("category");
+  // Greg AI links to one video as /videos?video=<id>.
+  const focusedVideoId = searchParams.get("video");
+
+  useEffect(() => {
+    if (!focusedVideoId) return;
+    document
+      .getElementById(`video-${focusedVideoId}`)
+      ?.scrollIntoView({ behavior: "smooth", block: "center" });
+  }, [focusedVideoId]);
 
   const categoryOptions = useMemo(() => {
     const greek = Object.values(Category.byId).filter((c) => !c.unavailable);
@@ -131,7 +140,10 @@ export default function VideosIndex() {
             return (
               <div
                 key={video.id}
-                className="bg-white rounded-lg shadow-md overflow-hidden flex flex-col"
+                id={`video-${video.id}`}
+                className={`bg-white rounded-lg shadow-md overflow-hidden flex flex-col ${
+                  video.id === focusedVideoId ? "ring-4 ring-orange-400" : ""
+                }`}
               >
                 {provider === "cloudinary" ? (
                   <video

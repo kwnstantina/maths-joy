@@ -36,6 +36,7 @@ import {
 import { getLocalizedContent } from "~/utils/i18n.server";
 import { applyRateLimit } from "~/utils/ratelimit.server";
 import { getTrainingContextByTitle } from "~/utils/training.prisma";
+import { searchVideosForGreg } from "~/utils/video.prisma";
 
 interface ChatRequestBody {
   message?: unknown;
@@ -137,11 +138,19 @@ async function runSearchExercises(input: unknown): Promise<string> {
     input && typeof input === "object" && "query" in input && typeof input.query === "string"
       ? input.query.slice(0, 100)
       : "";
-  const results = await searchExercisesForGreg(query);
-  if (results.length === 0) {
-    return JSON.stringify({ results: [], note: "No exercises matched. Try a broader or different Greek keyword." });
+  const [results, videos] = await Promise.all([
+    searchExercisesForGreg(query),
+    searchVideosForGreg(query),
+  ]);
+  if (results.length === 0 && videos.length === 0) {
+    return JSON.stringify({ results: [], note: "Nothing matched. Try a broader or different Greek keyword." });
   }
   return JSON.stringify({
+    videos: videos.map((video) => ({
+      title: video.title,
+      category: video.category,
+      link: `/videos?video=${video.id}`,
+    })),
     results: results.map((item) => ({
       booklet: item.booklet?.title ?? null,
       category: item.booklet?.category ?? null,

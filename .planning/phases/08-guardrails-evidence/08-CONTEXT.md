@@ -56,7 +56,7 @@ Out of scope: photo input, tools, personalization, analytics dashboard UI (those
 ### Project conventions
 - `CLAUDE.md` — data-access via `*.prisma.ts`, `.server.ts` suffix, i18n flat keys, security chain (CSRF/rate-limit/audit)
 - `app/utils/i18n.server.ts` — localization helpers
-- Design notes: `.planning/v1.2-ROADMAP.md` → Phase 8
+- Design notes: `.planning/milestones/v1.2-ROADMAP.md` → Phase 8
 
 </canonical_refs>
 

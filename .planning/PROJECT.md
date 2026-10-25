@@ -33,14 +33,18 @@ Students can find, practice, and learn mathematics through exercises, videos, an
 - ✓ Idempotent webhook with purchase records and download tokens — v1.0
 - ✓ Download enforcement (count limit, token expiry, rate limiting) — v1.0
 
+- ✓ Q&A with voting, accepted answers, search and filters — v1.1
+- ✓ Video tutorials (YouTube links, categories, public listing) — v1.1
+- ✓ Bulk exercise upload, exercise search, server-side pagination — v1.1
+- ✓ Full Greek/English translations for v1.1 features — v1.1
+- ✓ Greg AI tutor: daily message/spend cap, 👍/👎, photo input, page-aware hints, hint ladder — v1.2
+- ✓ Greg AI exercise/video search, personalization, practice mode, teacher dashboard — v1.2
+- ✓ Privacy policy discloses Greg AI, Anthropic/Resend processors and teacher chat review — v1.2
+- ✓ Vercel Analytics (cookie-less page views) — v1.2
+
 ### Active
 
-- [ ] Q&A system: ask questions, answer, vote (up/down), accept answers — Stack Overflow style
-- [ ] Q&A search and filtering by category, tags, text
-- [ ] Video tutorials: upload/manage YouTube video links with categories and tags
-- [ ] Bulk exercise upload: batch upload multiple PDFs at once
-- [ ] Improved exercise search by title, category, or tags
-- [ ] Full Greek/English translations for all new features
+- [ ] To be defined for v1.3 (candidates: Greg AI credit packs, bring books back, more transcribed booklets, tests for money/limit paths, model tiering & prompt caching)
 
 ### Out of Scope
 
@@ -50,15 +54,9 @@ Students can find, practice, and learn mathematics through exercises, videos, an
 - Payment methods beyond Stripe — Stripe covers Greek/EU cards
 - Video hosting — videos stay on YouTube, platform embeds them
 
-## Current Milestone: v1.1 Platform Completion
+## Current Milestone
 
-**Goal:** Complete the remaining platform capabilities — Q&A community, video management, exercise improvements, and full i18n.
-
-**Target features:**
-- Q&A system with questions, answers, voting, and search/filtering
-- Admin video management (YouTube links with metadata)
-- Bulk exercise upload and improved search
-- Full Greek/English translations for all new features
+None — v1.2 Greg AI Enhancement shipped 2026-10-25. v1.3 not yet defined.
 
 ## Context
 
@@ -87,15 +85,18 @@ Key patterns established in v1.0:
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
 | Free exercises, paid books | Exercises drive traffic, books generate revenue | ✓ Good — v1.0 shipped |
-| Stack Overflow-style Q&A | Open community where anyone asks and answers, voting determines quality | — Pending |
-| YouTube for video hosting | No need to host videos, embed YouTube links | — Pending |
-| Bulk upload for exercises | One-by-one is too slow for the teacher | — Pending |
+| Stack Overflow-style Q&A | Open community where anyone asks and answers, voting determines quality | ✓ Shipped — v1.1 |
+| YouTube for video hosting | No need to host videos, embed YouTube links | ✓ Shipped — v1.1 |
+| Bulk upload for exercises | One-by-one is too slow for the teacher | ✓ Shipped — v1.1 |
 | Greek as primary language | Target audience is Greek math students | ✓ Good |
 | Streaming Cloudinary upload | Handles large PDFs without memory issues | ✓ Good — v1.0 |
 | Multi-action handler pattern | Single route handles CRUD via _action discriminator | ✓ Good — v1.0 |
 | Public Cloudinary URLs for books | Books use public access_mode, no signed URLs needed | ✓ Good — v1.0 |
 | Idempotent webhooks | DB check before Stripe API avoids unnecessary external calls | ✓ Good — v1.0 |
 | IP-based rate limiting on downloads | Download route is unauthenticated (token-based) | ✓ Good — v1.0 |
+| Greg AI on Haiku 4.5 with daily cap | Cheap default model; Mongo-persisted cap bounds the bill | ✓ Good — v1.2 |
+| Photos never stored | Sent once, transcribed into the reply — no image storage, no token compounding | ✓ Good — v1.2 |
+| Zero-token buttons / reply markers over tools | Every tool adds tokens to every request | ✓ Good — v1.2 |
 
 ---
-*Last updated: 2026-03-17 after v1.1 milestone start*
+*Last updated: 2026-10-25 after v1.2 milestone*

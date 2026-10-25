@@ -35,7 +35,7 @@ Requirements for current milestone. Each maps to roadmap phases.
 
 ## v1.2 Requirements (Greg AI Enhancement)
 
-Requirements for the Greg AI tutor milestone (Phases 8-14). Detailed design notes: `v1.2-ROADMAP.md`.
+Requirements for the Greg AI tutor milestone (Phases 8-14). Detailed design notes: `milestones/v1.2-ROADMAP.md`.
 
 ### Greg AI
 

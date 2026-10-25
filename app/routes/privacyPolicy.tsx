@@ -13,7 +13,7 @@ export const meta: MetaFunction = () => [
   },
 ];
 
-const LAST_UPDATED = "2026-04-25";
+const LAST_UPDATED = "2026-10-25";
 
 const PrivacyPolicy = () => {
   const { i18n } = useTranslation();
@@ -110,6 +110,58 @@ const GreekPolicy = () => (
       </li>
     </ul>
 
+    <h3>2.4 Greg AI (ψηφιακός βοηθός μαθηματικών)</h3>
+    <p>
+      Το Greg AI είναι βοηθός τεχνητής νοημοσύνης, διαθέσιμος μόνο σε
+      συνδεδεμένους χρήστες. Όταν το χρησιμοποιείτε:
+    </p>
+    <ul>
+      <li>
+        <strong>Αποθηκεύουμε τις συνομιλίες σας</strong> (τα μηνύματά σας και
+        τις απαντήσεις του Greg AI), ώστε να μπορείτε να τις ξανανοίξετε από το
+        ιστορικό.
+      </li>
+      <li>
+        <strong>Φωτογραφίες:</strong> αν στείλετε φωτογραφία άσκησης, αυτή
+        σμικρύνεται στη συσκευή σας και αποστέλλεται μία φορά στον πάροχο
+        τεχνητής νοημοσύνης μαζί με το μήνυμα.{" "}
+        <strong>Δεν την αποθηκεύουμε</strong> — αποθηκεύεται μόνο η απάντηση
+        του Greg AI.
+      </li>
+      <li>
+        <strong>Εξατομίκευση:</strong> την τάξη που δηλώνετε, το μικρό σας
+        όνομα, τις ασκήσεις που έχετε δει, τις βαθμολογίες της εξάσκησης και τα
+        θέματα όπου ζητήσατε πρόσφατα βοήθεια, ώστε οι εξηγήσεις να ταιριάζουν
+        στο επίπεδό σας.
+      </li>
+      <li>
+        <strong>Αξιολογήσεις και χρήση:</strong> τα 👍/👎 που δίνετε στις
+        απαντήσεις και τον ημερήσιο αριθμό μηνυμάτων (για το όριο χρήσης).
+      </li>
+      <li>
+        <strong>Ανασκόπηση από τον καθηγητή:</strong> ο Γρηγόρης Κυρίτσης, ως
+        καθηγητής, μπορεί να διαβάζει τις συνομιλίες και τις αξιολογήσεις για
+        να βελτιώνει το εκπαιδευτικό υλικό, να εντοπίζει λάθη του Greg AI και
+        να διασφαλίζει την ασφαλή χρήση. Οι συνομιλίες δεν δημοσιεύονται και δεν
+        κοινοποιούνται σε τρίτους.
+      </li>
+      <li>
+        <strong>Αποστολή στον καθηγητή:</strong> μια συνομιλία αποστέλλεται με
+        email στον καθηγητή <strong>μόνο</strong> αν πατήσετε εσείς «Στείλε αυτή
+        τη συζήτηση στον Greg».
+      </li>
+      <li>
+        Τα μηνύματα επεξεργάζεται η Anthropic (βλ. ενότητα 4), η οποία δεν
+        χρησιμοποιεί δεδομένα από την υπηρεσία μας για την εκπαίδευση των
+        μοντέλων της. Μην γράφετε στο Greg AI ευαίσθητα προσωπικά στοιχεία.
+      </li>
+      <li>
+        Οι απαντήσεις του Greg AI παράγονται αυτόματα και μπορεί να περιέχουν
+        λάθη. Δεν λαμβάνονται αυτοματοποιημένες αποφάσεις με νομικές ή
+        παρόμοιες συνέπειες για εσάς (άρθρ. 22 GDPR).
+      </li>
+    </ul>
+
     <h2>3. Σκοποί και νομική βάση επεξεργασίας</h2>
     <table className="text-sm">
       <thead>
@@ -130,6 +182,16 @@ const GreekPolicy = () => (
         <tr>
           <td>Δημοσίευση ερωτήσεων/απαντήσεων στο Q&amp;A</td>
           <td>Συγκατάθεση + εκτέλεση σύμβασης</td>
+        </tr>
+        <tr>
+          <td>Παροχή του Greg AI (συνομιλίες, φωτογραφίες, εξατομίκευση)</td>
+          <td>Εκτέλεση σύμβασης (παρ. 1β)</td>
+        </tr>
+        <tr>
+          <td>
+            Ανασκόπηση συνομιλιών από τον καθηγητή, βελτίωση υλικού, όριο χρήσης
+          </td>
+          <td>Έννομο συμφέρον (παρ. 1στ)</td>
         </tr>
         <tr>
           <td>Ασφάλεια, αποτροπή κατάχρησης, audit log</td>
@@ -170,6 +232,16 @@ const GreekPolicy = () => (
         <strong>Supabase Inc.:</strong> υπηρεσία πραγματικού χρόνου για το chat.
       </li>
       <li>
+        <strong>Anthropic PBC:</strong> μοντέλα τεχνητής νοημοσύνης (Claude)
+        για το Greg AI. Λαμβάνει τα μηνύματα, τις φωτογραφίες και το απαραίτητο
+        πλαίσιο κάθε συνομιλίας· δεν τα χρησιμοποιεί για εκπαίδευση μοντέλων και
+        τα διατηρεί μόνο για περιορισμένο διάστημα για την αποτροπή κατάχρησης.
+      </li>
+      <li>
+        <strong>Resend, Inc.:</strong> αποστολή email (φόρμα επικοινωνίας,
+        αποστολή συνομιλίας στον καθηγητή).
+      </li>
+      <li>
         <strong>Google LLC:</strong> προαιρετική σύνδεση μέσω Google OAuth.
       </li>
     </ul>
@@ -196,6 +268,11 @@ const GreekPolicy = () => (
       </li>
       <li>
         <strong>Μηνύματα φόρμας επικοινωνίας:</strong> 24 μήνες.
+      </li>
+      <li>
+        <strong>Συνομιλίες Greg AI:</strong> μέχρι να τις διαγράψετε από το
+        ιστορικό (🕘) ή να διαγράψετε τον λογαριασμό σας. Οι φωτογραφίες δεν
+        αποθηκεύονται.
       </li>
       <li>
         <strong>Δημοσιεύσεις Q&amp;A:</strong> διατηρούνται όσο υπάρχει η
@@ -361,6 +438,55 @@ const EnglishPolicy = () => (
       </li>
     </ul>
 
+    <h3>2.4 Greg AI (math tutoring assistant)</h3>
+    <p>
+      Greg AI is an artificial-intelligence assistant available only to
+      logged-in users. When you use it:
+    </p>
+    <ul>
+      <li>
+        <strong>We store your conversations</strong> (your messages and Greg
+        AI&rsquo;s replies) so you can reopen them from your history.
+      </li>
+      <li>
+        <strong>Photos:</strong> if you send a photo of a problem, it is shrunk
+        on your device and sent once to our AI provider with that message.{" "}
+        <strong>We do not store it</strong> — only Greg AI&rsquo;s reply is
+        saved.
+      </li>
+      <li>
+        <strong>Personalisation:</strong> the grade you select, your first
+        name, the exercises you have viewed, your practice scores and the
+        topics where you recently needed help, so explanations match your
+        level.
+      </li>
+      <li>
+        <strong>Ratings and usage:</strong> the 👍/👎 you give to replies and
+        your daily message count (for the usage limit).
+      </li>
+      <li>
+        <strong>Review by the teacher:</strong> Grigoris Kyritsis, as the
+        teacher, may read conversations and ratings to improve the learning
+        material, spot mistakes by Greg AI and keep the service safe.
+        Conversations are never published or shared with third parties.
+      </li>
+      <li>
+        <strong>Sending to the teacher:</strong> a conversation is emailed to
+        the teacher <strong>only</strong> if you press &ldquo;Send this
+        conversation to Greg&rdquo;.
+      </li>
+      <li>
+        Messages are processed by Anthropic (see section 4), which does not use
+        data from our service to train its models. Please do not share
+        sensitive personal information with Greg AI.
+      </li>
+      <li>
+        Greg AI&rsquo;s replies are generated automatically and may contain
+        mistakes. No automated decisions with legal or similarly significant
+        effects are made about you (GDPR Art. 22).
+      </li>
+    </ul>
+
     <h2>3. Purposes and legal basis</h2>
     <table className="text-sm">
       <thead>
@@ -381,6 +507,14 @@ const EnglishPolicy = () => (
         <tr>
           <td>Posting questions/answers in Q&amp;A</td>
           <td>Consent + contract performance</td>
+        </tr>
+        <tr>
+          <td>Providing Greg AI (conversations, photos, personalisation)</td>
+          <td>Contract performance (1(b))</td>
+        </tr>
+        <tr>
+          <td>Teacher review of conversations, improving material, usage limit</td>
+          <td>Legitimate interest (1(f))</td>
         </tr>
         <tr>
           <td>Security, abuse prevention, audit log</td>
@@ -419,6 +553,16 @@ const EnglishPolicy = () => (
         <strong>Supabase Inc.:</strong> real-time service for chat.
       </li>
       <li>
+        <strong>Anthropic PBC:</strong> AI models (Claude) that power Greg AI.
+        It receives the messages, photos and necessary context of each
+        conversation; it does not use them to train models and keeps them only
+        for a limited period for abuse prevention.
+      </li>
+      <li>
+        <strong>Resend, Inc.:</strong> email delivery (contact form, sending a
+        conversation to the teacher).
+      </li>
+      <li>
         <strong>Google LLC:</strong> optional Google OAuth sign-in.
       </li>
     </ul>
@@ -445,6 +589,10 @@ const EnglishPolicy = () => (
       </li>
       <li>
         <strong>Contact-form messages:</strong> 24 months.
+      </li>
+      <li>
+        <strong>Greg AI conversations:</strong> until you delete them from your
+        history (🕘) or delete your account. Photos are not stored.
       </li>
       <li>
         <strong>Q&amp;A posts:</strong> retained while the service exists

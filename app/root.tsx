@@ -11,6 +11,7 @@ import {
   useRouteError,
   isRouteErrorResponse,
 } from "@remix-run/react";
+import { Analytics, type BeforeSend } from "@vercel/analytics/remix";
 import Footer from "components/footer/footer";
 import NavList from "components/navs/navList";
 import "./styles/app.css";
@@ -57,7 +58,6 @@ export async function loader({ request }: LoaderFunctionArgs) {
   return data(
     {
       locale,
-      ENV: { VERCEL_ANALYTICS_ID: process.env.VERCEL_ANALYTICS_ID },
       user,
       features: getFeatureFlags(),
       contact: getContactInfo()
@@ -102,6 +102,15 @@ export default function App() {
   );
 }
 
+// Checkout/OAuth/reset links carry one-time secrets in the query string; keep them out of analytics.
+const SECRET_PARAMS = ["session_id", "token", "code", "state"];
+
+const stripSecretParams: BeforeSend = (event) => {
+  const url = new URL(event.url);
+  SECRET_PARAMS.forEach((param) => url.searchParams.delete(param));
+  return { ...event, url: url.toString() };
+};
+
 interface DocumentProps {
   children: React.ReactNode;
 }
@@ -120,13 +129,7 @@ function Document({ children }: DocumentProps) {
         {children}
         <ScrollRestoration />
         <Scripts />
-        {data?.ENV && (
-          <script
-            dangerouslySetInnerHTML={{
-              __html: `window.ENV = ${JSON.stringify(data.ENV)}`,
-            }}
-          />
-        )}
+        <Analytics beforeSend={stripSecretParams} />
       </body>
     </html>
   );

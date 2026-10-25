@@ -53,7 +53,7 @@
     "remix-auth-google": "^2.0.0",
     "remix-i18next": "^6.4.1",
     "resend": "^6.12.2",
-    "stripe": "^17.4.0",
+    "stripe": "^23.0.1",
     "xss": "^1.0.15"
   },
   "devDependencies": {

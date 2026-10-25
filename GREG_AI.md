@@ -109,7 +109,26 @@ Nothing is emailed unless the **student clicks** "Send". The AI can only show th
 - **Starter buttons** on the welcome screen: help with a problem here, explain a concept, practice exercises, practice mode, talk to Greg, private lessons
 - **Conversation history** (🕘): reopen or delete past chats
 - **👍 / 👎** on every answer. These feed the teacher dashboard.
-- **Daily limit**: 50 messages and a cost budget per student per day; it resets at midnight UTC.
+- **Daily limit**: 50 messages and a cost budget per student per day; it resets at midnight UTC. With Greg AI Pro switched on, the limit depends on the plan (below).
+
+### 10. Greg AI Pro (subscriptions) — built, switched off
+
+`GREG_PRO_ENABLED=true` turns on the `/pro` page and the plan limits. Off (default), everyone keeps the 50-message limit and `/pro` is a 404.
+
+| Plan | Price (VAT incl.) | Messages / day | AI cost cap |
+|---|---|---|---|
+| Free | €0 | 5 | ~$0.06/day |
+| Pro | €5.99/month or €49/year | 40 | ~$0.30/day and ~$3 per billing period |
+| Admins | — | 40 | none |
+
+- `/pro`: plans, monthly/yearly, two required checkboxes (the payer is a parent/guardian or an adult paying for themselves; auto-renewal + immediate start + 14-day withdrawal), then Stripe Checkout. Needs accepted Terms (`/consent`).
+- `/account`: plan, renewal date, cancel / keep, Stripe portal (card, invoices), and the **"Withdraw from contract here"** button for 14 days → `/account/withdraw` (separate confirm step, no reason asked) → ends the subscription and refunds in full.
+- Deleting the account cancels the subscription first (and refuses to delete if Stripe is down).
+- Free students who hit the limit get a link to `/pro` in the chat.
+- Stripe is the source of truth: webhooks (`customer.subscription.*`, `checkout.session.completed`) and the success page re-read the subscription and mirror it onto `User.subscription*`.
+- Product and prices are created in Stripe automatically on the first checkout (lookup keys `greg_pro_monthly_eur`, `greg_pro_yearly_eur`, tax code AI-as-a-service).
+- `STRIPE_MANAGED_PAYMENTS=true` makes Stripe (Link) the merchant of record. Enable Managed Payments in the Stripe Dashboard first.
+- Code: `app/utils/subscription.server.ts`, `app/utils/plans.ts`, `app/routes/pro.tsx`, `pro_.success.tsx`, `account.tsx`, `account_.withdraw.tsx`.
 
 ---
 
@@ -147,6 +166,8 @@ CONTACT_PUBLIC_EMAIL="gregkirmaths@gmail.com" # shown on the contact page
 CONTACT_PHONE="+306987495775"           # Call buttons
 CONTACT_WHATSAPP="+306987495775"        # defaults to CONTACT_PHONE; "off" hides WhatsApp
 BOOKING_URL="https://cal.com/..."       # enables "Book a lesson" (https only)
+GREG_PRO_ENABLED="false"                # Greg AI Pro subscriptions + Free/Pro limits
+STRIPE_MANAGED_PAYMENTS="false"         # Stripe (Link) as merchant of record
 ```
 
 > `CONTACT_EMAIL_FROM` defaults to Resend's test sender (`onboarding@resend.dev`), which only delivers to the Resend account owner's address. Verify your domain in Resend for real use.

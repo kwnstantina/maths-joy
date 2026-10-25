@@ -39,6 +39,7 @@ import {
 import { getLocalizedContent } from "~/utils/i18n.server";
 import { prisma } from "~/utils/prisma.server";
 import { applyRateLimit } from "~/utils/ratelimit.server";
+import { getGregLimits } from "~/utils/subscription.server";
 import { getTrainingContextByTitle } from "~/utils/training.prisma";
 import { transcribeTrainingInBackground } from "~/utils/trainingTranscript.server";
 import { searchVideosForGreg } from "~/utils/video.prisma";
@@ -259,13 +260,14 @@ export async function action({ request }: ActionFunctionArgs) {
   // after the in-memory burst limiter and message validation, before session
   // handling, so malformed/empty requests don't consume quota. Error code only;
   // the widget localizes the "come back tomorrow" message.
-  const usage = await incrementDailyUsage(userId);
+  const limits = await getGregLimits(userId);
+  const usage = await incrementDailyUsage(userId, limits);
   if (usage.limitReached) {
     // One error code for both ceilings — to the student "message limit" and
     // "spend budget" mean the same thing (come back tomorrow), and the widget
     // already localizes it. `reason` is for logs and the admin view.
     return json(
-      { error: "daily_limit_reached", reason: usage.reason },
+      { error: "daily_limit_reached", reason: usage.reason, plan: limits.plan },
       { status: 429 }
     );
   }

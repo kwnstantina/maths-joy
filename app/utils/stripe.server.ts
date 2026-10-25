@@ -9,7 +9,7 @@ if (!stripeSecretKey) {
 }
 
 export const stripe = stripeSecretKey
-  ? new Stripe(stripeSecretKey, { apiVersion: '2025-02-24.acacia' })
+  ? new Stripe(stripeSecretKey, { apiVersion: '2026-09-30.endive' })
   : null;
 
 // Types
@@ -100,7 +100,7 @@ export async function createCheckoutSession({
       name: book.title,
       description: book.description,
       images: book.thumbnailUrl ? [book.thumbnailUrl] : [],
-      tax_code: 'txcd_10010001',
+      tax_code: 'txcd_10302000', // Digital Books - downloaded - permanent rights
       metadata: {
         bookId: book.id,
       },

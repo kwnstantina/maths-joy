@@ -2,7 +2,7 @@ import { prisma } from "~/utils/prisma.server";
 import type { Prisma } from "@prisma/client";
 
 export type AuditAction = "upload" | "download" | "purchase" | "login" | "logout" | "update" | "delete";
-export type AuditResource = "exercise" | "book" | "training" | "video" | "user" | "question" | "answer";
+export type AuditResource = "exercise" | "book" | "training" | "video" | "user" | "question" | "answer" | "subscription";
 
 interface AuditEventParams {
   userId: string;

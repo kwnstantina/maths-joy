@@ -7,6 +7,7 @@ import {
   handleChargeRefunded,
   handleDisputeCreated,
 } from '~/utils/stripe.server';
+import { syncSubscription } from '~/utils/subscription.server';
 
 const jsonResponse = (body: Record<string, unknown>, status = 200) =>
   new Response(JSON.stringify(body), {
@@ -37,7 +38,14 @@ export const action: ActionFunction = async ({ request }) => {
     switch (event.type) {
       case 'checkout.session.completed': {
         const session = event.data.object;
-        if (session.payment_status === 'paid') {
+        if (session.mode === 'subscription') {
+          // Greg AI Pro
+          const subId =
+            typeof session.subscription === 'string'
+              ? session.subscription
+              : session.subscription?.id;
+          if (subId) await syncSubscription(subId);
+        } else if (session.payment_status === 'paid') {
           await handlePaymentSuccess(session.id);
         }
         break;
@@ -45,7 +53,18 @@ export const action: ActionFunction = async ({ request }) => {
 
       case 'checkout.session.expired': {
         const session = event.data.object;
-        await handlePaymentFailure(session.id);
+        if (session.mode === 'payment') {
+          await handlePaymentFailure(session.id);
+        }
+        break;
+      }
+
+      // Greg AI Pro: renewals, cancellations, failed payments. syncSubscription
+      // re-reads the subscription from Stripe, so event order doesn't matter.
+      case 'customer.subscription.created':
+      case 'customer.subscription.updated':
+      case 'customer.subscription.deleted': {
+        await syncSubscription(event.data.object.id);
         break;
       }
 

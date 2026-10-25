@@ -1,11 +1,7 @@
 import type { TokenUsage } from "./anthropic.server";
-import {
-  CHAT_DAILY_LIMIT,
-  CHAT_DAILY_SPEND_BUDGET,
-  costUnits,
-  MAX_HISTORY_MESSAGES,
-} from "./anthropic.server";
+import { costUnits, MAX_HISTORY_MESSAGES } from "./anthropic.server";
 import { prisma } from "./prisma.server";
+import type { GregLimits } from "./subscription.server";
 
 export type ChatRole = "user" | "assistant";
 
@@ -123,18 +119,20 @@ function usageDate(): string {
   return new Date().toISOString().slice(0, 10);
 }
 
-export type QuotaReason = "messages" | "spend";
+export type QuotaReason = "messages" | "spend" | "period";
 
 // Atomic per-user daily quota. Increments the message counter first, then
-// checks both ceilings: the 50th message (count 50) is allowed and the 51st
-// (count 51) is blocked.
+// checks the ceilings for the user's plan (getGregLimits): with a 50-message
+// limit the 50th message (count 50) is allowed and the 51st is blocked. Pro
+// also has a per-billing-period spend cap.
 //
 // The spend check uses what has been *recorded so far today* — a request is
 // only billed once it completes (see recordTokenUsage), so a user can cross
 // the budget by at most one exchange. That is a bounded overshoot of
 // MAX_OUTPUT_TOKENS and not worth a pre-flight token count to avoid.
 export async function incrementDailyUsage(
-  userId: string
+  userId: string,
+  limits: GregLimits
 ): Promise<{ count: number; spend: number; limitReached: boolean; reason?: QuotaReason }> {
   const usage = await prisma.gregDailyUsage.upsert({
     where: { userId_date: { userId, date: usageDate() } },
@@ -143,11 +141,20 @@ export async function incrementDailyUsage(
     select: { count: true, spend: true },
   });
 
-  if (usage.count > CHAT_DAILY_LIMIT) {
+  if (usage.count > limits.dailyMessages) {
     return { ...usage, limitReached: true, reason: "messages" };
   }
-  if (usage.spend >= CHAT_DAILY_SPEND_BUDGET) {
+  if (usage.spend >= limits.dailySpend) {
     return { ...usage, limitReached: true, reason: "spend" };
+  }
+  if (limits.periodSpend !== null && limits.periodStart) {
+    const period = await prisma.gregDailyUsage.aggregate({
+      where: { userId, date: { gte: limits.periodStart } },
+      _sum: { spend: true },
+    });
+    if ((period._sum.spend ?? 0) >= limits.periodSpend) {
+      return { ...usage, limitReached: true, reason: "period" };
+    }
   }
   return { ...usage, limitReached: false };
 }

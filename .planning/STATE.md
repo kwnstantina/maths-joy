@@ -21,7 +21,7 @@ progress:
 See: .planning/PROJECT.md (updated 2026-10-25)
 
 **Core value:** Students can find, practice, and learn mathematics through exercises, videos, and books
-**Current focus:** Defining v1.3
+**Current focus:** v1.3 Greg AI Pro subscriptions (built behind `GREG_PRO_ENABLED`, off)
 
 ## Current Position
 
@@ -47,6 +47,8 @@ Decisions are logged in PROJECT.md Key Decisions table. Greg AI specifics:
 
 ### Pending Todos
 
+- Greg AI Pro go-live checklist (owner has no business yet — see GREG_AI.md §10): test in Stripe test mode → accountant + έναρξη → legal details + Terms/Privacy subscription sections + bump `CONSENT_VERSION` → Stripe live + Managed Payments approved → add `customer.subscription.*` to the webhook endpoint → `GREG_PRO_ENABLED=true`
+
 - Enable **Web Analytics** for the project in the Vercel dashboard (the component only sends data once it is enabled)
 - Set `GREG_AI_ENABLED` explicitly in Vercel and confirm `ANTHROPIC_API_KEY` and `RESEND_API_KEY` are present in production; verify a domain in Resend for `CONTACT_EMAIL_FROM`
 - Legal compliance follow-ups in `docs/legal/COMPLIANCE.md` §4 (legal details in `app/utils/legalEntity.ts`, processor DPAs, Kit double opt-in, Stripe receipts, lawyer review)
@@ -55,7 +57,7 @@ Decisions are logged in PROJECT.md Key Decisions table. Greg AI specifics:
 
 ### Backlog
 
-- `backlog/greg-credit-packs.md` — paid Greg AI usage via Stripe (dependencies now committed)
+- `backlog/greg-credit-packs.md` — superseded by Greg AI Pro subscriptions (keep for a possible top-up pack later)
 - `backlog/greg-model-tiering-and-caching.md` — GREGAI-10/11
 
 ### Blockers/Concerns

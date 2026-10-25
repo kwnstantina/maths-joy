@@ -1,5 +1,6 @@
 import { logAuditEvent } from "~/utils/audit.server";
 import { prisma } from "~/utils/prisma.server";
+import { cancelSubscriptionForDeletion } from "~/utils/subscription.server";
 import supabase from "../../utils/supabase";
 
 /** Q&A posts outlive the account but lose the link to the person (privacy policy §5). */
@@ -14,6 +15,10 @@ const DELETED_AUTHOR_NAME = "—";
 export async function deleteAccount(userId: string, reason: "user" | "parent_declined"): Promise<void> {
   const user = await prisma.user.findUnique({ where: { id: userId }, select: { id: true } });
   if (!user) return;
+
+  // Stop future Greg AI Pro charges first. If Stripe is unreachable this throws
+  // and the account is kept, so we never keep charging a deleted account.
+  await cancelSubscriptionForDeletion(userId);
 
   const sessions = await prisma.gregChatSession.findMany({ where: { userId }, select: { id: true } });
   const sessionIds = sessions.map((s) => s.id);
@@ -74,6 +79,12 @@ export async function exportAccountData(userId: string) {
         isUnder15: true,
         parentEmail: true,
         parentConsentAt: true,
+        subscriptionStatus: true,
+        subscriptionInterval: true,
+        subscriptionStartedAt: true,
+        subscriptionPeriodEnd: true,
+        subscriptionCancelAtPeriodEnd: true,
+        payerConfirmedAt: true,
       },
     }),
     prisma.gregChatSession.findMany({

@@ -17,6 +17,7 @@ import { isGregAiEnabled } from "~/utils/featureFlags.server";
 import { incrementDailyUsage, recordTokenUsage } from "~/utils/gregChat.prisma";
 import { trackPracticeResult } from "~/utils/progress.server";
 import { applyRateLimit } from "~/utils/ratelimit.server";
+import { getGregLimits } from "~/utils/subscription.server";
 
 const MAX_EXCLUDE = 50;
 const MAX_ANSWER_LENGTH = 2000;
@@ -91,9 +92,13 @@ export async function action({ request }: ActionFunctionArgs) {
     return json({ error: "Problem not found" }, { status: 404 });
   }
 
-  const usage = await incrementDailyUsage(userId);
+  const limits = await getGregLimits(userId);
+  const usage = await incrementDailyUsage(userId, limits);
   if (usage.limitReached) {
-    return json({ error: "daily_limit_reached", reason: usage.reason }, { status: 429 });
+    return json(
+      { error: "daily_limit_reached", reason: usage.reason, plan: limits.plan },
+      { status: 429 }
+    );
   }
 
   const locale = body.locale === "en" ? "en" : "el";

@@ -84,9 +84,10 @@ export default function PracticePanel({ locale, onAskGreg }: PracticePanelProps)
         verdict?: Verdict;
         feedback?: string;
         error?: string;
+        plan?: string;
       };
       if (res.status === 429 && data.error === "daily_limit_reached") {
-        setMessage(t("gregAi.limitReached"));
+        setMessage(t(data.plan === "free" ? "gregAi.limitReachedFree" : "gregAi.limitReached"));
       } else if (!res.ok || !data.verdict) {
         setMessage(t("gregAi.practice.error"));
       } else {
@@ -212,7 +213,7 @@ export default function PracticePanel({ locale, onAskGreg }: PracticePanelProps)
 
       {message && (
         <p role="alert" className="mt-3 rounded-lg bg-white p-3 text-xs text-gray-700 shadow-sm">
-          {message}
+          {renderMessageContent(message)}
         </p>
       )}
     </div>

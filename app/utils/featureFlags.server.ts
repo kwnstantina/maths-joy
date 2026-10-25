@@ -29,14 +29,25 @@ function envFlag(name: string, defaultValue: boolean): boolean {
 export interface FeatureFlags {
   /** Greg AI chat widget: renders in the UI and serves the /api/greg-ai routes. */
   gregAi: boolean;
+  /**
+   * Greg AI Pro subscriptions: the /pro page, checkout, and the Free/Pro
+   * message limits. Off = everyone keeps the original limits. Off by default:
+   * turn on only once the owner can legally take payments.
+   */
+  gregPro: boolean;
 }
 
 export function getFeatureFlags(): FeatureFlags {
   return {
     gregAi: envFlag("GREG_AI_ENABLED", true),
+    gregPro: envFlag("GREG_PRO_ENABLED", false),
   };
 }
 
 export function isGregAiEnabled(): boolean {
   return getFeatureFlags().gregAi;
+}
+
+export function isGregProEnabled(): boolean {
+  return getFeatureFlags().gregPro;
 }

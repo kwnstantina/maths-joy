@@ -151,6 +151,21 @@ model User {
   // sha256 of the one-time link token emailed to the parent
   parentConsentTokenHash String?
   parentConsentSentAt    DateTime? @db.Date
+
+  // Greg AI Pro — a mirror of the Stripe subscription (Stripe is the source of
+  // truth; see app/utils/subscription.server.ts)
+  stripeCustomerId              String?
+  subscriptionId                String?
+  // Stripe status: active | trialing | past_due | canceled | unpaid | incomplete ...
+  subscriptionStatus            String?
+  subscriptionInterval          String?
+  subscriptionPeriodStart       DateTime? @db.Date
+  subscriptionPeriodEnd         DateTime? @db.Date
+  subscriptionCancelAtPeriodEnd Boolean?
+  // First paid start of the current subscription: opens the 14-day withdrawal window
+  subscriptionStartedAt         DateTime? @db.Date
+  // The payer confirmed they are the parent/guardian or an adult paying for themselves
+  payerConfirmedAt              DateTime? @db.Date
 }
 
 model Video {

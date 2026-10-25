@@ -475,14 +475,15 @@ export default function GregAiWidget({
         // existing `if (!res.ok || !res.body)` block below (burst 429s fall through).
         const body = (await res.clone().json().catch(() => ({}))) as {
           error?: string;
+          plan?: string;
         };
         if (body.error === "daily_limit_reached") {
           setLimitReached(true);
+          // Free plan: the message carries a same-site [link](/pro) to upgrade.
+          const content = t(body.plan === "free" ? "gregAi.limitReachedFree" : "gregAi.limitReached");
           setMessages((prev) =>
             prev.map((m) =>
-              m.id === assistantMsg.id
-                ? { ...m, pending: false, content: t("gregAi.limitReached") }
-                : m
+              m.id === assistantMsg.id ? { ...m, pending: false, content } : m
             )
           );
           setStreaming(false);

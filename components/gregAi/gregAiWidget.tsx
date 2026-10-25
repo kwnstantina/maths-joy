@@ -266,9 +266,18 @@ interface GregAiWidgetProps {
   contact: ContactInfo;
   /** The student's saved school grade, if they've picked one. */
   grade: string | null;
+  /** Terms + age (and, under 15, a parent's confirmation) — Greg AI stays locked until "ok". */
+  consent: "needs_terms" | "awaiting_parent" | "ok" | null;
 }
 
-export default function GregAiWidget({ isLoggedIn, contact, grade: savedGrade }: GregAiWidgetProps) {
+export default function GregAiWidget({
+  isLoggedIn: loggedIn,
+  contact,
+  grade: savedGrade,
+  consent,
+}: GregAiWidgetProps) {
+  const needsConsent = loggedIn && consent !== "ok";
+  const isLoggedIn = loggedIn && !needsConsent;
   const { t, i18n } = useTranslation();
   const location = useLocation();
   const navigate = useNavigate();
@@ -736,7 +745,19 @@ export default function GregAiWidget({ isLoggedIn, contact, grade: savedGrade }:
               </div>
             </div>
 
-            {!isLoggedIn ? (
+            {needsConsent ? (
+              <div className="flex flex-1 flex-col items-center justify-center gap-4 bg-gray-50 p-6 text-center">
+                <div className="rounded-lg bg-white p-4 text-sm text-gray-700 shadow-sm">
+                  {t(consent === "awaiting_parent" ? "gregAi.consentAwaitingParent" : "gregAi.consentPrompt")}
+                </div>
+                <Link
+                  to={`/consent?redirectTo=${encodeURIComponent(location.pathname)}`}
+                  className="rounded-lg bg-orange-500 px-4 py-2 text-sm font-semibold text-white transition hover:bg-orange-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-300"
+                >
+                  {t(consent === "awaiting_parent" ? "gregAi.consentAwaitingCta" : "gregAi.consentCta")}
+                </Link>
+              </div>
+            ) : !isLoggedIn ? (
               <div className="flex flex-1 flex-col items-center justify-center gap-4 bg-gray-50 p-6 text-center">
                 <div className="rounded-lg bg-white p-4 text-sm text-gray-700 shadow-sm">
                   {t("gregAi.loginPrompt")}
@@ -791,6 +812,13 @@ export default function GregAiWidget({ isLoggedIn, contact, grade: savedGrade }:
                     <div className="rounded-lg bg-white p-3 text-sm text-gray-700 shadow-sm">
                       {t("gregAi.welcome")}
                     </div>
+                    {/* EU AI Act art. 50: say up front that this is an AI, not Greg himself */}
+                    <p className="mt-2 px-1 text-[11px] leading-snug text-gray-500">
+                      {t("gregAi.aiNotice")}{" "}
+                      <Link to="/privacyPolicy" className="underline hover:text-gray-700">
+                        {t("gregAi.aiNoticeLink")}
+                      </Link>
+                    </p>
                     {!grade && (
                       <div className="mt-3 rounded-lg bg-white p-3 text-sm text-gray-700 shadow-sm">
                         <label htmlFor="greg-ai-grade" className="block text-xs font-semibold">

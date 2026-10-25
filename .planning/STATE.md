@@ -49,7 +49,7 @@ Decisions are logged in PROJECT.md Key Decisions table. Greg AI specifics:
 
 - Enable **Web Analytics** for the project in the Vercel dashboard (the component only sends data once it is enabled)
 - Set `GREG_AI_ENABLED` explicitly in Vercel and confirm `ANTHROPIC_API_KEY` and `RESEND_API_KEY` are present in production; verify a domain in Resend for `CONTACT_EMAIL_FROM`
-- Decide the minimum age: privacy policy and terms say 16+ (or parental consent), but the Greg AI grade picker starts at Α' Γυμνασίου (~12)
+- Legal compliance follow-ups in `docs/legal/COMPLIANCE.md` §4 (legal details in `app/utils/legalEntity.ts`, processor DPAs, Kit double opt-in, Stripe receipts, lawyer review)
 - Human-verify Greg AI in a browser: daily cap state, 👍/👎 persistence, photo send, hint ladder, practice mode, `/admin/greg-ai`
 - Human-verify the 6 items in `.planning/phases/06-exercise-improvements/06-VERIFICATION.md`
 

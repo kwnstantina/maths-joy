@@ -9,8 +9,11 @@ import {
   ActionFunction,
   data,
 } from "@remix-run/node";
+import { useTranslation } from "react-i18next";
+import i18next from "~/i18next.server";
 import { register } from "~/utils/auth.prisma";
 import Alerts from "components/alerts/alerts";
+import { recordConsent } from "~/utils/consent.server";
 
 interface ActionData {
   errors?: {
@@ -18,6 +21,9 @@ interface ActionData {
     password?: string;
     firstName?: string;
     lastName?: string;
+    age?: string;
+    parentEmail?: string;
+    accept?: string;
   };
   error?: string;
   fields?: {
@@ -36,6 +42,9 @@ export const action: ActionFunction = async ({ request }) => {
   const password = form.get("password");
   let firstName = form.get("firstName");
   let lastName = form.get("lastName");
+  const age = form.get("age");
+  const parentEmail = String(form.get("parentEmail") ?? "").trim().toLowerCase();
+  const isUnder15 = age === "under15";
 
   // If not all data was passed, error
   if (
@@ -53,6 +62,15 @@ export const action: ActionFunction = async ({ request }) => {
     password: validatePassword(password),
     firstName: validateName((firstName as string) || ""),
     lastName: validateName((lastName as string) || ""),
+    age: age === "15plus" || age === "under15" ? undefined : "consent.errors.ageRequired",
+    parentEmail: !isUnder15
+      ? undefined
+      : validateEmail(parentEmail)
+        ? "consent.errors.parentEmail"
+        : parentEmail === email.trim().toLowerCase()
+          ? "consent.errors.parentEmailSame"
+          : undefined,
+    accept: form.get("accept") === "on" ? undefined : "consent.errors.acceptRequired",
   };
 
   //  If there were any errors, return them
@@ -66,12 +84,18 @@ export const action: ActionFunction = async ({ request }) => {
       { status: 400 }
     );
 
-  return await register({ email, password, firstName, lastName });
+  const origin = new URL(request.url).origin;
+  const locale = await i18next.getLocale(request);
+  return await register({ email, password, firstName, lastName }, async (userId) => {
+    await recordConsent({ userId, isUnder15, parentEmail, origin, locale });
+  });
 };
 export default function LoginPage(): JSX.Element {
   const [searchParams] = useSearchParams();
   const redirectTo = searchParams.get("redirectTo") || "/";
   const actionData = useActionData<ActionData>();
+  const { t } = useTranslation();
+  const [age, setAge] = useState("");
   const [loginData, setLoginData] = useState({
     email: "",
     password: "",
@@ -202,6 +226,58 @@ export default function LoginPage(): JSX.Element {
                   )}
                 </div>
               </div>
+
+              <fieldset className="space-y-1">
+                <legend className="block text-sm font-medium text-gray-700">
+                  {t("consent.ageQuestion")}
+                </legend>
+                <label className="flex items-center gap-2 text-sm text-gray-700">
+                  <input type="radio" name="age" value="15plus" required onChange={() => setAge("15plus")} />
+                  {t("consent.age15plus")}
+                </label>
+                <label className="flex items-center gap-2 text-sm text-gray-700">
+                  <input type="radio" name="age" value="under15" onChange={() => setAge("under15")} />
+                  {t("consent.ageUnder15")}
+                </label>
+                {actionData?.errors?.age && (
+                  <div className="pt-1 text-red-700">{t(actionData.errors.age)}</div>
+                )}
+              </fieldset>
+              {age === "under15" && (
+                <div>
+                  <label htmlFor="parentEmail" className="block text-sm font-medium text-gray-700">
+                    {t("consent.parentEmail")}
+                  </label>
+                  <input
+                    id="parentEmail"
+                    name="parentEmail"
+                    type="email"
+                    required
+                    className="mt-1 w-full rounded border border-gray-500 px-2 py-1 text-lg"
+                  />
+                  <p className="mt-1 text-xs text-gray-500">{t("consent.parentEmailHelp")}</p>
+                  {actionData?.errors?.parentEmail && (
+                    <div className="pt-1 text-red-700">{t(actionData.errors.parentEmail)}</div>
+                  )}
+                </div>
+              )}
+              <label className="flex items-start gap-2 text-sm text-gray-700">
+                <input type="checkbox" name="accept" required className="mt-1" />
+                <span>
+                  {t("consent.acceptPrefix")}{" "}
+                  <Link to="/useOfTerms" target="_blank" className="text-orange-600 underline">
+                    {t("consent.terms")}
+                  </Link>{" "}
+                  {t("consent.and")}{" "}
+                  <Link to="/privacyPolicy" target="_blank" className="text-orange-600 underline">
+                    {t("consent.privacy")}
+                  </Link>
+                  {t("consent.acceptSuffix")}
+                </span>
+              </label>
+              {actionData?.errors?.accept && (
+                <div className="text-red-700">{t(actionData.errors.accept)}</div>
+              )}
 
               <input type="hidden" name="redirectTo" value={redirectTo} />
               <button

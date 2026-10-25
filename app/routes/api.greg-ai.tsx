@@ -15,6 +15,7 @@ import {
   SEARCH_EXERCISES_TOOL,
 } from "~/utils/anthropic.server";
 import { getUserId } from "~/utils/auth.prisma";
+import { requireGregConsent } from "~/utils/consent.server";
 import {
   getExerciseContextById,
   getExerciseItem,
@@ -227,6 +228,8 @@ export async function action({ request }: ActionFunctionArgs) {
   if (!userId) {
     return json({ error: "Unauthorized" }, { status: 401 });
   }
+  const consentResponse = await requireGregConsent(userId);
+  if (consentResponse) return consentResponse;
 
   const rateLimitResponse = applyRateLimit(request, "chat", userId);
   if (rateLimitResponse) {

@@ -14,18 +14,18 @@ type UserProfile {
 }
 
 model Exersice {
-  id                 String   @id @default(auto()) @map("_id") @db.ObjectId
+  id                 String    @id @default(auto()) @map("_id") @db.ObjectId
   category           String
-  createdAt          DateTime @db.Date
+  createdAt          DateTime  @db.Date
   description        String?
   exerciseImgUrl     String?
-  fileContentType    String?  // Legacy: Base64 encoded file (deprecated)
+  fileContentType    String? // Legacy: Base64 encoded file (deprecated)
   fileName           String
   tags               String[]
   level              String?
   type               String?
   title              String
-  updatedAt          DateTime @db.Date
+  updatedAt          DateTime  @db.Date
   translation        Json?
   // Cloudinary fields (new)
   cloudinaryPublicId String?
@@ -60,17 +60,17 @@ model ExerciseItem {
 
 // Book model for e-commerce
 model Book {
-  id                 String   @id @default(auto()) @map("_id") @db.ObjectId
+  id                 String    @id @default(auto()) @map("_id") @db.ObjectId
   title              String
   description        String
   price              Float
-  currency           String   @default("EUR")
+  currency           String    @default("EUR")
   cloudinaryPublicId String
   cloudinaryUrl      String
   thumbnailUrl       String?
   stripePriceId      String?
   stripeProductId    String?
-  isActive           Boolean  @default(true)
+  isActive           Boolean   @default(true)
   category           String
   tags               String[]
   translation        Json?
@@ -82,41 +82,44 @@ model Book {
   deletedAt          DateTime? @db.Date
   archivedPdfIds     String[]
   thumbnailPublicId  String?
-  createdAt          DateTime @db.Date
-  updatedAt          DateTime @db.Date
+  createdAt          DateTime  @db.Date
+  updatedAt          DateTime  @db.Date
 }
 
 // Purchase model for tracking book purchases
 model Purchase {
-  id              String    @id @default(auto()) @map("_id") @db.ObjectId
-  userId          String    @db.ObjectId
-  bookId          String    @db.ObjectId
-  stripeSessionId String?
-  stripePaymentId String?
-  amount          Float
-  currency        String
-  status          String    @default("pending") // pending, completed, failed, refunded
-  downloadToken   String?   @unique
-  downloadCount   Int       @default(0)
-  maxDownloads    Int       @default(5)
-  tokenExpiresAt  DateTime? @db.Date
-  createdAt       DateTime  @db.Date
-  updatedAt       DateTime  @db.Date
+  id                 String    @id @default(auto()) @map("_id") @db.ObjectId
+  userId             String    @db.ObjectId
+  bookId             String    @db.ObjectId
+  stripeSessionId    String?
+  stripePaymentId    String?
+  amount             Float
+  currency           String
+  status             String    @default("pending") // pending, completed, failed, refunded
+  downloadToken      String?   @unique
+  downloadCount      Int       @default(0)
+  maxDownloads       Int       @default(5)
+  tokenExpiresAt     DateTime? @db.Date
+  // Buyer's express consent to immediate delivery + acknowledgement of losing the
+  // 14-day withdrawal right (N. 2251/1994, digital-content exception)
+  withdrawalWaiverAt DateTime? @db.Date
+  createdAt          DateTime  @db.Date
+  updatedAt          DateTime  @db.Date
 }
 
 model Training {
-  id              String   @id @default(auto()) @map("_id") @db.ObjectId
-  category        String
-  content         String
-  contentImage    String
-  createdAt       DateTime @db.Date
-  searchableTitle String
-  solution        String
-  solutionImage   String
-  tags            String
-  title           String
-  updatedAt       DateTime @db.Date
-  translation     Json?
+  id                String    @id @default(auto()) @map("_id") @db.ObjectId
+  category          String
+  content           String
+  contentImage      String
+  createdAt         DateTime  @db.Date
+  searchableTitle   String
+  solution          String
+  solutionImage     String
+  tags              String
+  title             String
+  updatedAt         DateTime  @db.Date
+  translation       Json?
   // Greg AI's text of the two images, made once by transcribeTraining() in
   // trainingTranscript.server.ts. `gregSource` is the image pair it was made
   // from (see trainingSourceKey) — a replaced image makes it stale.
@@ -137,6 +140,17 @@ model User {
   isActive  Boolean      @default(false)
   // School grade picked in the Greg AI widget — one of GRADES in app/utils/grades.ts
   grade     String?
+
+  // Consent (GDPR art. 7-8, N. 4624/2019 art. 21) — see app/utils/consent.server.ts
+  termsAcceptedAt        DateTime? @db.Date
+  termsVersion           String?
+  // Self-declared at signup/consent; under-15s need a parent's confirmation before Greg AI
+  isUnder15              Boolean?
+  parentEmail            String?
+  parentConsentAt        DateTime? @db.Date
+  // sha256 of the one-time link token emailed to the parent
+  parentConsentTokenHash String?
+  parentConsentSentAt    DateTime? @db.Date
 }
 
 model Video {
@@ -149,44 +163,44 @@ model Video {
   title       String
   updatedAt   DateTime @db.Date
   url         String
-  translation  Json?
+  translation Json?
 }
 
 // Q&A System models
 model Question {
-  id              String   @id @default(auto()) @map("_id") @db.ObjectId
-  title           String
-  body            String
-  category        String
-  tags            String[]
-  authorId        String   @db.ObjectId
-  authorName      String
-  voteCount       Int      @default(0)
-  answerCount     Int      @default(0)
-  viewCount       Int      @default(0)
-  acceptedAnswerId String? @db.ObjectId
-  isResolved      Boolean  @default(false)
-  createdAt       DateTime @db.Date
-  updatedAt       DateTime @db.Date
+  id               String   @id @default(auto()) @map("_id") @db.ObjectId
+  title            String
+  body             String
+  category         String
+  tags             String[]
+  authorId         String   @db.ObjectId
+  authorName       String
+  voteCount        Int      @default(0)
+  answerCount      Int      @default(0)
+  viewCount        Int      @default(0)
+  acceptedAnswerId String?  @db.ObjectId
+  isResolved       Boolean  @default(false)
+  createdAt        DateTime @db.Date
+  updatedAt        DateTime @db.Date
 }
 
 model Answer {
-  id          String   @id @default(auto()) @map("_id") @db.ObjectId
-  questionId  String   @db.ObjectId
-  body        String
-  authorId    String   @db.ObjectId
-  authorName  String
-  voteCount   Int      @default(0)
-  isAccepted  Boolean  @default(false)
-  createdAt   DateTime @db.Date
-  updatedAt   DateTime @db.Date
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  questionId String   @db.ObjectId
+  body       String
+  authorId   String   @db.ObjectId
+  authorName String
+  voteCount  Int      @default(0)
+  isAccepted Boolean  @default(false)
+  createdAt  DateTime @db.Date
+  updatedAt  DateTime @db.Date
 }
 
 model QuestionVote {
   id         String   @id @default(auto()) @map("_id") @db.ObjectId
   questionId String   @db.ObjectId
   userId     String   @db.ObjectId
-  value      Int      // 1 for upvote, -1 for downvote
+  value      Int // 1 for upvote, -1 for downvote
   createdAt  DateTime @db.Date
 
   @@unique([questionId, userId])
@@ -196,7 +210,7 @@ model AnswerVote {
   id        String   @id @default(auto()) @map("_id") @db.ObjectId
   answerId  String   @db.ObjectId
   userId    String   @db.ObjectId
-  value     Int      // 1 for upvote, -1 for downvote
+  value     Int // 1 for upvote, -1 for downvote
   createdAt DateTime @db.Date
 
   @@unique([answerId, userId])
@@ -204,15 +218,15 @@ model AnswerVote {
 
 // User Progress Tracking
 model UserProgress {
-  id          String    @id @default(auto()) @map("_id") @db.ObjectId
-  userId      String    @db.ObjectId
-  exerciseId  String?   @db.ObjectId
-  trainingId  String?   @db.ObjectId
-  type        String    // "exercise_viewed", "training_completed", "quiz_score"
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId      String   @db.ObjectId
+  exerciseId  String?  @db.ObjectId
+  trainingId  String?  @db.ObjectId
+  type        String // "exercise_viewed", "training_completed", "quiz_score"
   score       Int?
-  timeSpent   Int?      // seconds
-  completedAt DateTime  @db.Date
-  createdAt   DateTime  @db.Date
+  timeSpent   Int? // seconds
+  completedAt DateTime @db.Date
+  createdAt   DateTime @db.Date
 
   @@index([userId])
   @@index([userId, type])
@@ -220,51 +234,51 @@ model UserProgress {
 
 // Greg AI chatbot - persistent chat history per user
 model GregChatSession {
-  id        String           @id @default(auto()) @map("_id") @db.ObjectId
-  userId    String           @db.ObjectId
-  title     String
-  locale    String           @default("el")
+  id           String            @id @default(auto()) @map("_id") @db.ObjectId
+  userId       String            @db.ObjectId
+  title        String
+  locale       String            @default("el")
   // The ExerciseItem the student is currently working on, set when Greg
   // opens one with get_exercise. Lets later turns carry that exercise in
   // the prompt without another tool round.
-  activeItemId String?       @db.ObjectId
-  createdAt DateTime         @db.Date
-  updatedAt DateTime         @db.Date
-  messages  GregChatMessage[]
+  activeItemId String?           @db.ObjectId
+  createdAt    DateTime          @db.Date
+  updatedAt    DateTime          @db.Date
+  messages     GregChatMessage[]
 
   @@index([userId])
   @@index([userId, updatedAt])
 }
 
 model GregChatMessage {
-  id        String          @id @default(auto()) @map("_id") @db.ObjectId
-  sessionId String          @db.ObjectId
-  session   GregChatSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
-  role      String          // "user" | "assistant"
-  content   String
-  rating    Int?            // -1 = down, 1 = up, null = unset
+  id         String          @id @default(auto()) @map("_id") @db.ObjectId
+  sessionId  String          @db.ObjectId
+  session    GregChatSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  role       String // "user" | "assistant"
+  content    String
+  rating     Int? // -1 = down, 1 = up, null = unset
   // Student messages only, for the teacher dashboard: which hint button was
   // pressed (1 hint, 2 bigger hint, 3 show solution) and where they were.
   hintLevel  Int?
-  page       String?         // one of CHAT_PAGES
-  contextKey String?         // exercise id or training title on that page
-  createdAt DateTime        @db.Date
+  page       String? // one of CHAT_PAGES
+  contextKey String? // exercise id or training title on that page
+  createdAt  DateTime        @db.Date
 
   @@index([sessionId, createdAt])
 }
 
 // Greg AI daily message quota — Mongo-persisted so it survives serverless cold starts
 model GregDailyUsage {
-  id     String @id @default(auto()) @map("_id") @db.ObjectId
-  userId String @db.ObjectId
-  date   String // UTC calendar date, YYYY-MM-DD
-  count  Int    @default(0)
+  id           String @id @default(auto()) @map("_id") @db.ObjectId
+  userId       String @db.ObjectId
+  date         String // UTC calendar date, YYYY-MM-DD
+  count        Int    @default(0)
   // Cost accounting. `spend` is the weighted total in input-token equivalents
   // (see costUnits() in anthropic.server.ts) — 1_000_000 units = $1 at Haiku
   // 4.5 rates. The raw counters are kept for reporting.
-  inputTokens  Int @default(0)
-  outputTokens Int @default(0)
-  spend        Int @default(0)
+  inputTokens  Int    @default(0)
+  outputTokens Int    @default(0)
+  spend        Int    @default(0)
 
   @@unique([userId, date])
   @@index([userId])
@@ -274,12 +288,11 @@ model GregDailyUsage {
 model AuditLog {
   id         String   @id @default(auto()) @map("_id") @db.ObjectId
   userId     String   @db.ObjectId
-  action     String   // "upload", "download", "purchase", "login"
-  resource   String   // "exercise", "book", "training"
+  action     String // "upload", "download", "purchase", "login"
+  resource   String // "exercise", "book", "training"
   resourceId String?  @db.ObjectId
   metadata   Json?
   ipAddress  String?
   userAgent  String?
   createdAt  DateTime @db.Date
 }
-

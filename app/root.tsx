@@ -21,12 +21,15 @@ import usePrevious from "hooks/usePrevious";
 import ErrorPage from "components/errorPage/errorPage";
 import { useTranslation } from "react-i18next";
 import i18next from "~/i18next.server";
+import type { ConsentStatus } from "~/utils/consent.server";
+import { consentStatusOf } from "~/utils/consent.server";
 import { i18nCookie } from "../services/cookies/cookies";
 import useScrollToTop from "hooks/useScrollToTop";
 import { getUser } from "~/utils/auth.prisma";
 import { getContactInfo } from "~/utils/contactInfo.server";
 import { getFeatureFlags } from "~/utils/featureFlags.server";
 import GregAiWidget from "components/gregAi/gregAiWidget";
+import PolicyUpdateBanner from "components/alerts/policyUpdateBanner";
 
 export interface RootUser {
   id: string;
@@ -34,6 +37,7 @@ export interface RootUser {
   role: string;
   profile: { firstName: string; lastName: string } | null;
   grade: string | null;
+  consent: ConsentStatus;
 }
 
 export async function loader({ request }: LoaderFunctionArgs) {
@@ -48,7 +52,8 @@ export async function loader({ request }: LoaderFunctionArgs) {
         email: dbUser.email,
         role: dbUser.role,
         profile: dbUser.profile,
-        grade: dbUser.grade ?? null
+        grade: dbUser.grade ?? null,
+        consent: consentStatusOf(dbUser),
       };
     }
   } catch {
@@ -154,6 +159,7 @@ export function AppLayout({ children }: AppLayoutProps) {
       >
         Skip to content
       </a>
+      <PolicyUpdateBanner />
       <NavList user={rootData?.user ?? null} />
       <main id="main-content" className="flex-grow" tabIndex={-1}>
         {isLoading ? <LoadingPage /> : children}
@@ -164,6 +170,7 @@ export function AppLayout({ children }: AppLayoutProps) {
           isLoggedIn={Boolean(rootData.user)}
           contact={rootData.contact}
           grade={rootData.user?.grade ?? null}
+          consent={rootData.user?.consent ?? null}
         />
       )}
     </div>

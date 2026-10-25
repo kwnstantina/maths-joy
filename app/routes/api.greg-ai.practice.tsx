@@ -11,6 +11,7 @@ import {
   PRACTICE_VERDICTS,
 } from "~/utils/anthropic.server";
 import { getUserId } from "~/utils/auth.prisma";
+import { requireGregConsent } from "~/utils/consent.server";
 import { getPracticeItemWithSolution, getPracticeProblem } from "~/utils/exersices.prisma";
 import { isGregAiEnabled } from "~/utils/featureFlags.server";
 import { incrementDailyUsage, recordTokenUsage } from "~/utils/gregChat.prisma";
@@ -33,6 +34,8 @@ export async function loader({ request }: LoaderFunctionArgs) {
   if (!userId) {
     return json({ error: "Unauthorized" }, { status: 401 });
   }
+  const consentResponse = await requireGregConsent(userId);
+  if (consentResponse) return consentResponse;
   const rateLimitResponse = applyRateLimit(request, "api", userId);
   if (rateLimitResponse) {
     return rateLimitResponse;
@@ -64,6 +67,8 @@ export async function action({ request }: ActionFunctionArgs) {
   if (!userId) {
     return json({ error: "Unauthorized" }, { status: 401 });
   }
+  const consentResponse = await requireGregConsent(userId);
+  if (consentResponse) return consentResponse;
   const rateLimitResponse = applyRateLimit(request, "chat", userId);
   if (rateLimitResponse) {
     return rateLimitResponse;

@@ -16,6 +16,7 @@ export const stripe = stripeSecretKey
 export interface CreateCheckoutSessionParams {
   bookId: string;
   userId: string;
+  withdrawalWaiverAt: Date;
   successUrl: string;
   cancelUrl: string;
 }
@@ -39,6 +40,7 @@ export interface CheckoutSessionResult {
 export async function createCheckoutSession({
   bookId,
   userId,
+  withdrawalWaiverAt,
   successUrl,
   cancelUrl,
 }: CreateCheckoutSessionParams): Promise<CheckoutSessionResult> {
@@ -132,6 +134,7 @@ export async function createCheckoutSession({
       currency: book.currency,
       status: 'pending',
       downloadToken,
+      withdrawalWaiverAt,
       createdAt: now,
       updatedAt: now,
     },
@@ -168,6 +171,11 @@ export async function createCheckoutSession({
       // Propagate metadata onto the PaymentIntent so payment_intent.payment_failed
       // webhooks can resolve back to the Purchase row.
       payment_intent_data: {
+        // Shown on Stripe's receipt email: the durable-medium confirmation of the
+        // buyer's withdrawal waiver for digital content.
+        description:
+          `${book.title} — Ψηφιακό περιεχόμενο. Συναινέσατε στην άμεση παράδοση και αναγνωρίσατε ότι χάνετε το δικαίωμα υπαναχώρησης. / ` +
+          "Digital content. You agreed to immediate delivery and acknowledged losing the right of withdrawal.",
         metadata: {
           purchaseId: purchase.id,
           bookId,

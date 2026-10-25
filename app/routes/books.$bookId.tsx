@@ -118,6 +118,13 @@ export const action: ActionFunction = async ({ request, params }) => {
   const rateLimitResponse = applyRateLimit(request, "api", user.id);
   if (rateLimitResponse) return rateLimitResponse;
 
+  // Digital content: delivery starts right after payment, so the buyer must
+  // expressly agree and acknowledge losing the withdrawal right (N. 2251/1994, digital-content exception)
+  const form = await request.formData();
+  if (form.get("waiver") !== "on") {
+    return data({ error: "books.waiverRequired" }, { status: 400 });
+  }
+
   // Audit logging
   const { ipAddress, userAgent } = getClientInfo(request);
   await logAuditEvent({
@@ -140,6 +147,7 @@ export const action: ActionFunction = async ({ request, params }) => {
     const { url: checkoutUrl } = await createCheckoutSession({
       bookId,
       userId: user.id,
+      withdrawalWaiverAt: new Date(),
       successUrl: `${baseUrl}/books/checkout-success`,
       cancelUrl: `${baseUrl}/books/${bookId}?canceled=true`,
     });
@@ -259,6 +267,12 @@ export default function BookDetail() {
                       {t("books.loginRequired")}
                     </p>
                   )}
+                  {isLoggedIn && (
+                    <label className="mb-4 flex items-start gap-2 text-xs text-gray-600">
+                      <input type="checkbox" name="waiver" required className="mt-0.5" />
+                      <span>{t("books.waiver")}</span>
+                    </label>
+                  )}
 
                   <button
                     type="submit"
@@ -274,7 +288,7 @@ export default function BookDetail() {
                 </Form>
                 {actionData?.error && (
                   <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">
-                    <p className="text-red-700 text-sm">{actionData.error}</p>
+                    <p className="text-red-700 text-sm">{t(actionData.error)}</p>
                   </div>
                 )}
               </>

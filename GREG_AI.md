@@ -4,6 +4,8 @@ Greg AI is the math tutor that lives in the orange **"Ask Greg"** button at the 
 
 Students must be logged in to use it. It answers in the site's language (Greek or English).
 
+It also stays locked until the student has accepted the current Terms and Privacy Policy and said whether they are under 15 (`/consent`). Under-15s give a parent's email; the parent gets a confirmation link (`/parent-consent/<token>`), and Greg AI unlocks when they press "I agree". Declining deletes the account. Bump `CONSENT_VERSION` in `app/utils/consent.server.ts` after a material policy change to ask everyone again. Compliance notes: `docs/legal/COMPLIANCE.md`.
+
 ---
 
 ## For students: what Greg AI can do

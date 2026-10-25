@@ -2,6 +2,7 @@ import type { ActionFunctionArgs } from "@remix-run/node";
 import { json } from "@remix-run/node";
 import { CONTACT_CARD_MARKER_PATTERN } from "~/utils/anthropic.server";
 import { getUser } from "~/utils/auth.prisma";
+import { requireGregConsent } from "~/utils/consent.server";
 import { sendTeacherHandoffEmail } from "~/utils/email.server";
 import { isGregAiEnabled } from "~/utils/featureFlags.server";
 import { getSessionMessages } from "~/utils/gregChat.prisma";
@@ -34,6 +35,8 @@ export async function action({ request }: ActionFunctionArgs) {
   if (!user) {
     return json({ error: "Unauthorized" }, { status: 401 });
   }
+  const consentResponse = await requireGregConsent(user.id);
+  if (consentResponse) return consentResponse;
 
   // Shares the contact form's 3/hour budget: both land in the same inbox.
   const rateLimitResponse = applyRateLimit(request, "contact", user.id);

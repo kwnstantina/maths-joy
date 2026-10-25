@@ -1,6 +1,7 @@
 import type { MetaFunction } from "@remix-run/node";
 import { Link } from "@remix-run/react";
 import { useTranslation } from "react-i18next";
+import { LEGAL_ENTITY } from "~/utils/legalEntity";
 
 export const handle = { i18n: ["common"] };
 
@@ -31,6 +32,32 @@ const PrivacyPolicy = () => {
   );
 };
 
+const ControllerDetails = ({ lang }: { lang: "el" | "en" }) => {
+  const e = LEGAL_ENTITY;
+  const el = lang === "el";
+  return (
+    <ul>
+      {e.address[lang] && (
+        <li>
+          {el ? "Διεύθυνση: " : "Address: "}
+          {e.address[lang]}
+        </li>
+      )}
+      {e.vatNumber && (
+        <li>
+          {el ? "ΑΦΜ: " : "Tax ID (ΑΦΜ): "}
+          {e.vatNumber}
+        </li>
+      )}
+      <li>Email: {e.email}</li>
+      <li>
+        {el ? "Τηλέφωνο: " : "Phone: "}
+        {e.phone}
+      </li>
+    </ul>
+  );
+};
+
 const GreekPolicy = () => (
   <>
     <h1>Πολιτική Απορρήτου</h1>
@@ -43,15 +70,30 @@ const GreekPolicy = () => (
       (GDPR) και τον Ν. 4624/2019.
     </p>
 
+    <div className="not-prose rounded-lg border border-orange-200 bg-orange-50 p-4 text-sm text-gray-800">
+      <p className="font-semibold">Με λίγα λόγια</p>
+      <ul className="mt-2 list-disc space-y-1 pl-5">
+        <li>Κρατάμε μόνο ό,τι χρειάζεται για να λειτουργεί ο λογαριασμός σου και να μαθαίνεις.</li>
+        <li>
+          Το Greg AI είναι τεχνητή νοημοσύνη, όχι ο καθηγητής. Οι συζητήσεις σου
+          αποθηκεύονται και μπορεί να τις διαβάσει ο καθηγητής Γρηγόρης.
+        </li>
+        <li>Οι φωτογραφίες που στέλνεις στο Greg AI δεν αποθηκεύονται.</li>
+        <li>Αν είσαι κάτω από 15, χρειαζόμαστε την έγκριση γονέα για το Greg AI.</li>
+        <li>Δεν πουλάμε τα δεδομένα σου και δεν τα χρησιμοποιούμε για διαφημίσεις.</li>
+        <li>
+          Μπορείς να κατεβάσεις ή να διαγράψεις τα δεδομένα σου όποτε θέλεις από
+          τη σελίδα <Link to="/account">Λογαριασμός</Link>.
+        </li>
+      </ul>
+    </div>
+
     <h2>1. Υπεύθυνος επεξεργασίας</h2>
     <p>
       Υπεύθυνος επεξεργασίας των δεδομένων σας είναι ο Γρηγόρης Κυρίτσης.
       Στοιχεία επικοινωνίας:
     </p>
-    <ul>
-      <li>Email: gregkirmaths@gmail.com</li>
-      <li>Τηλέφωνο: +30 6987495775</li>
-    </ul>
+    <ControllerDetails lang="el" />
 
     <h2>2. Ποια δεδομένα συλλέγουμε</h2>
     <h3>2.1 Δεδομένα που παρέχετε εσείς</h3>
@@ -74,6 +116,15 @@ const GreekPolicy = () => (
         <strong>Περιεχόμενο χρήστη:</strong> οι ερωτήσεις, απαντήσεις και
         ετικέτες που δημοσιεύετε στην κοινότητα Q&amp;A.
       </li>
+      <li>
+        <strong>Ηλικία και συγκατάθεση:</strong> αν είστε άνω ή κάτω των 15
+        ετών, την ημερομηνία αποδοχής των Όρων και της παρούσας Πολιτικής και,
+        για χρήστες κάτω των 15, το email του γονέα/κηδεμόνα και την ημερομηνία
+        επιβεβαίωσής του.
+      </li>
+      <li>
+        <strong>Newsletter:</strong> το email σας, μόνο αν εγγραφείτε.
+      </li>
     </ul>
 
     <h3>2.2 Δεδομένα που συλλέγονται αυτόματα</h3>
@@ -81,7 +132,20 @@ const GreekPolicy = () => (
       <li>
         <strong>Cookies απαραίτητα για τη λειτουργία:</strong>{" "}
         <code>gregMaths</code> (συνεδρία σύνδεσης, διάρκεια 30 ημερών),{" "}
-        <code>i18n</code> (επιλογή γλώσσας, διάρκεια 1 έτος).
+        <code>_csrf</code> (προστασία φορμών, 24 ώρες),{" "}
+        <code>i18n</code> (επιλογή γλώσσας, διάρκεια 1 έτος). Δεν
+        χρησιμοποιούμε cookies διαφήμισης ή παρακολούθησης, γι&apos; αυτό δεν
+        ζητείται συγκατάθεση για cookies.
+      </li>
+      <li>
+        <strong>Τοπική αποθήκευση του browser:</strong> το αν κλείσατε την
+        ειδοποίηση για αλλαγές της πολιτικής και η σύνδεση στη ζωντανή
+        συνομιλία (chat) της κοινότητας.
+      </li>
+      <li>
+        <strong>Βίντεο YouTube:</strong> οι μικρογραφίες φορτώνονται από την
+        Google· το βίντεο φορτώνεται σε «λειτουργία βελτιωμένου απορρήτου»
+        (youtube-nocookie.com) μόνο όταν πατήσετε αναπαραγωγή.
       </li>
       <li>
         <strong>Τεχνικά δεδομένα:</strong> διεύθυνση IP, τύπος προγράμματος
@@ -153,7 +217,9 @@ const GreekPolicy = () => (
       <li>
         Τα μηνύματα επεξεργάζεται η Anthropic (βλ. ενότητα 4), η οποία δεν
         χρησιμοποιεί δεδομένα από την υπηρεσία μας για την εκπαίδευση των
-        μοντέλων της. Μην γράφετε στο Greg AI ευαίσθητα προσωπικά στοιχεία.
+        μοντέλων της και τα διαγράφει εντός 30 ημερών (έως 2 έτη μόνο αν ένα
+        μήνυμα επισημανθεί για παραβίαση των κανόνων χρήσης της). Μην γράφετε
+        στο Greg AI ευαίσθητα προσωπικά στοιχεία.
       </li>
       <li>
         Οι απαντήσεις του Greg AI παράγονται αυτόματα και μπορεί να περιέχουν
@@ -192,6 +258,14 @@ const GreekPolicy = () => (
             Ανασκόπηση συνομιλιών από τον καθηγητή, βελτίωση υλικού, όριο χρήσης
           </td>
           <td>Έννομο συμφέρον (παρ. 1στ)</td>
+        </tr>
+        <tr>
+          <td>Επιβεβαίωση γονέα για χρήστες κάτω των 15</td>
+          <td>Συγκατάθεση γονέα (παρ. 1α, άρθρ. 8 GDPR, άρθρ. 21 Ν. 4624/2019)</td>
+        </tr>
+        <tr>
+          <td>Αποστολή newsletter</td>
+          <td>Συγκατάθεση (παρ. 1α) — ανακαλείται οποτεδήποτε</td>
         </tr>
         <tr>
           <td>Ασφάλεια, αποτροπή κατάχρησης, audit log</td>
@@ -235,14 +309,19 @@ const GreekPolicy = () => (
         <strong>Anthropic PBC:</strong> μοντέλα τεχνητής νοημοσύνης (Claude)
         για το Greg AI. Λαμβάνει τα μηνύματα, τις φωτογραφίες και το απαραίτητο
         πλαίσιο κάθε συνομιλίας· δεν τα χρησιμοποιεί για εκπαίδευση μοντέλων και
-        τα διατηρεί μόνο για περιορισμένο διάστημα για την αποτροπή κατάχρησης.
+        τα διαγράφει εντός 30 ημερών, εκτός αν επισημανθούν για κατάχρηση.
+      </li>
+      <li>
+        <strong>Kit (ConvertKit LLC):</strong> αποστολή newsletter, μόνο για
+        όσους εγγραφούν.
       </li>
       <li>
         <strong>Resend, Inc.:</strong> αποστολή email (φόρμα επικοινωνίας,
         αποστολή συνομιλίας στον καθηγητή).
       </li>
       <li>
-        <strong>Google LLC:</strong> προαιρετική σύνδεση μέσω Google OAuth.
+        <strong>Google LLC:</strong> προαιρετική σύνδεση μέσω Google OAuth,
+        προβολή βίντεο YouTube.
       </li>
     </ul>
     <p>
@@ -273,6 +352,14 @@ const GreekPolicy = () => (
         <strong>Συνομιλίες Greg AI:</strong> μέχρι να τις διαγράψετε από το
         ιστορικό (🕘) ή να διαγράψετε τον λογαριασμό σας. Οι φωτογραφίες δεν
         αποθηκεύονται.
+      </li>
+      <li>
+        <strong>Στοιχεία συγκατάθεσης</strong> (αποδοχή Όρων, email και
+        επιβεβαίωση γονέα): όσο υπάρχει ο λογαριασμός.
+      </li>
+      <li>
+        <strong>Newsletter:</strong> μέχρι να απεγγραφείτε (σύνδεσμος σε κάθε
+        email).
       </li>
       <li>
         <strong>Δημοσιεύσεις Q&amp;A:</strong> διατηρούνται όσο υπάρχει η
@@ -316,9 +403,11 @@ const GreekPolicy = () => (
       </li>
     </ul>
     <p>
-      Για άσκηση οποιουδήποτε από τα παραπάνω δικαιώματα στείλτε email στο{" "}
-      <strong>gregkirmaths@gmail.com</strong>. Απαντάμε εντός 30 ημερών χωρίς
-      χρέωση.
+      Μπορείτε να κατεβάσετε όλα τα δεδομένα σας ή να διαγράψετε τον
+      λογαριασμό σας μόνοι σας από τη σελίδα{" "}
+      <Link to="/account">Λογαριασμός</Link>. Για οποιοδήποτε άλλο δικαίωμα
+      στείλτε email στο <strong>gregkirmaths@gmail.com</strong>. Απαντάμε εντός
+      30 ημερών χωρίς χρέωση.
     </p>
 
     <h2>7. Ασφάλεια</h2>
@@ -337,10 +426,29 @@ const GreekPolicy = () => (
 
     <h2>8. Ανήλικοι</h2>
     <p>
-      Η Πλατφόρμα δεν απευθύνεται σε παιδιά κάτω των 16 ετών. Εάν είστε γονέας
-      ή κηδεμόνας και διαπιστώσετε ότι το παιδί σας έχει παράσχει δεδομένα
-      χωρίς συναίνεση, επικοινωνήστε άμεσα μαζί μας για διαγραφή.
+      Η Πλατφόρμα απευθύνεται σε μαθητές Γυμνασίου και Λυκείου. Στην Ελλάδα το
+      όριο ηλικίας για τη συγκατάθεση σε ψηφιακές υπηρεσίες είναι τα 15 έτη
+      (άρθρ. 21 Ν. 4624/2019).
     </p>
+    <ul>
+      <li>
+        Κατά την εγγραφή ο χρήστης δηλώνει αν είναι κάτω των 15. Αν ναι, δηλώνει
+        email γονέα/κηδεμόνα και στέλνουμε σε αυτό σύνδεσμο επιβεβαίωσης.
+      </li>
+      <li>
+        Μέχρι να επιβεβαιώσει ο γονέας, το Greg AI παραμένει κλειδωμένο. Αν ο
+        γονέας αρνηθεί, ο λογαριασμός και τα δεδομένα του διαγράφονται αμέσως.
+      </li>
+      <li>
+        Ο γονέας μπορεί οποτεδήποτε να ανακαλέσει τη συγκατάθεση ή να ζητήσει
+        πρόσβαση ή διαγραφή των δεδομένων του παιδιού στο{" "}
+        <strong>gregkirmaths@gmail.com</strong>.
+      </li>
+      <li>
+        Δεν κάνουμε προφίλ για διαφημιστικούς σκοπούς και δεν δείχνουμε
+        διαφημίσεις.
+      </li>
+    </ul>
 
     <h2>9. Αλλαγές στην πολιτική</h2>
     <p>
@@ -375,14 +483,29 @@ const EnglishPolicy = () => (
       Law 4624/2019.
     </p>
 
+    <div className="not-prose rounded-lg border border-orange-200 bg-orange-50 p-4 text-sm text-gray-800">
+      <p className="font-semibold">In short</p>
+      <ul className="mt-2 list-disc space-y-1 pl-5">
+        <li>We keep only what we need to run your account and help you learn.</li>
+        <li>
+          Greg AI is an artificial intelligence, not the teacher. Your chats are
+          saved and Greg, the teacher, may read them.
+        </li>
+        <li>Photos you send to Greg AI are not stored.</li>
+        <li>If you are under 15, we need a parent&rsquo;s approval for Greg AI.</li>
+        <li>We never sell your data or use it for advertising.</li>
+        <li>
+          You can download or delete your data whenever you like from the{" "}
+          <Link to="/account">Account</Link> page.
+        </li>
+      </ul>
+    </div>
+
     <h2>1. Data controller</h2>
     <p>
       The controller of your personal data is Grigoris Kyritsis. Contact:
     </p>
-    <ul>
-      <li>Email: gregkirmaths@gmail.com</li>
-      <li>Phone: +30 6987495775</li>
-    </ul>
+    <ControllerDetails lang="en" />
 
     <h2>2. What data we collect</h2>
     <h3>2.1 Data you provide</h3>
@@ -404,14 +527,33 @@ const EnglishPolicy = () => (
         <strong>User content:</strong> the questions, answers and tags you
         publish in the Q&amp;A community.
       </li>
+      <li>
+        <strong>Age and consent:</strong> whether you are over or under 15, when
+        you accepted the Terms and this Policy and, for users under 15, the
+        parent&rsquo;s/guardian&rsquo;s email and when they confirmed.
+      </li>
+      <li>
+        <strong>Newsletter:</strong> your email, only if you subscribe.
+      </li>
     </ul>
 
     <h3>2.2 Data collected automatically</h3>
     <ul>
       <li>
         <strong>Strictly necessary cookies:</strong> <code>gregMaths</code>{" "}
-        (login session, 30-day duration), <code>i18n</code> (language
-        preference, 1-year duration).
+        (login session, 30-day duration), <code>_csrf</code> (form
+        protection, 24 hours), <code>i18n</code> (language preference, 1-year
+        duration). We use no advertising or tracking cookies, so no cookie
+        consent is requested.
+      </li>
+      <li>
+        <strong>Browser local storage:</strong> whether you dismissed the
+        policy-update notice, and your sign-in to the community live chat.
+      </li>
+      <li>
+        <strong>YouTube videos:</strong> thumbnails load from Google; the video
+        loads in privacy-enhanced mode (youtube-nocookie.com) only when you
+        press play.
       </li>
       <li>
         <strong>Technical data:</strong> IP address, browser type, operating
@@ -477,8 +619,10 @@ const EnglishPolicy = () => (
       </li>
       <li>
         Messages are processed by Anthropic (see section 4), which does not use
-        data from our service to train its models. Please do not share
-        sensitive personal information with Greg AI.
+        data from our service to train its models and deletes it within 30 days
+        (up to 2 years only if a message is flagged for breaking its usage
+        rules). Please do not share sensitive personal information with Greg
+        AI.
       </li>
       <li>
         Greg AI&rsquo;s replies are generated automatically and may contain
@@ -515,6 +659,14 @@ const EnglishPolicy = () => (
         <tr>
           <td>Teacher review of conversations, improving material, usage limit</td>
           <td>Legitimate interest (1(f))</td>
+        </tr>
+        <tr>
+          <td>Parent confirmation for users under 15</td>
+          <td>Parental consent (1(a), GDPR Art. 8, Law 4624/2019 Art. 21)</td>
+        </tr>
+        <tr>
+          <td>Sending the newsletter</td>
+          <td>Consent (1(a)) — can be withdrawn at any time</td>
         </tr>
         <tr>
           <td>Security, abuse prevention, audit log</td>
@@ -555,15 +707,20 @@ const EnglishPolicy = () => (
       <li>
         <strong>Anthropic PBC:</strong> AI models (Claude) that power Greg AI.
         It receives the messages, photos and necessary context of each
-        conversation; it does not use them to train models and keeps them only
-        for a limited period for abuse prevention.
+        conversation; it does not use them to train models and deletes them
+        within 30 days unless they are flagged for abuse.
+      </li>
+      <li>
+        <strong>Kit (ConvertKit LLC):</strong> newsletter delivery, only for
+        subscribers.
       </li>
       <li>
         <strong>Resend, Inc.:</strong> email delivery (contact form, sending a
         conversation to the teacher).
       </li>
       <li>
-        <strong>Google LLC:</strong> optional Google OAuth sign-in.
+        <strong>Google LLC:</strong> optional Google OAuth sign-in, YouTube
+        video playback.
       </li>
     </ul>
     <p>
@@ -593,6 +750,14 @@ const EnglishPolicy = () => (
       <li>
         <strong>Greg AI conversations:</strong> until you delete them from your
         history (🕘) or delete your account. Photos are not stored.
+      </li>
+      <li>
+        <strong>Consent records</strong> (acceptance of the Terms, parent email
+        and confirmation): while the account exists.
+      </li>
+      <li>
+        <strong>Newsletter:</strong> until you unsubscribe (link in every
+        email).
       </li>
       <li>
         <strong>Q&amp;A posts:</strong> retained while the service exists
@@ -637,7 +802,8 @@ const EnglishPolicy = () => (
       </li>
     </ul>
     <p>
-      To exercise any of the above, email{" "}
+      You can download all your data or delete your account yourself from the{" "}
+      <Link to="/account">Account</Link> page. For any other right, email{" "}
       <strong>gregkirmaths@gmail.com</strong>. We respond within 30 days at no
       charge.
     </p>
@@ -657,10 +823,27 @@ const EnglishPolicy = () => (
 
     <h2>8. Minors</h2>
     <p>
-      The Platform is not intended for children under 16. If you are a parent
-      or guardian and find that your child has provided data without consent,
-      please contact us immediately for deletion.
+      The Platform is aimed at lower and upper secondary school students. In
+      Greece the age of consent for digital services is 15 (Law 4624/2019 Art.
+      21).
     </p>
+    <ul>
+      <li>
+        At signup users say whether they are under 15. If so, they give a
+        parent&rsquo;s/guardian&rsquo;s email and we send a confirmation link
+        to it.
+      </li>
+      <li>
+        Greg AI stays locked until the parent confirms. If the parent declines,
+        the account and its data are deleted immediately.
+      </li>
+      <li>
+        A parent can withdraw consent or ask for access to or deletion of their
+        child&rsquo;s data at any time by emailing{" "}
+        <strong>gregkirmaths@gmail.com</strong>.
+      </li>
+      <li>We do not profile users for advertising and show no ads.</li>
+    </ul>
 
     <h2>9. Changes to the policy</h2>
     <p>

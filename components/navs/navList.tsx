@@ -218,6 +218,15 @@ const Navbar = ({ user }: NavbarProps) => {
             </li>
           )}
 
+          {isLoggedIn && (
+            <li>
+              <NavLink to="account" className={mobileLinkClass} onClick={closeModal}>
+                <Cog6ToothIcon className="h-5 w-5 shrink-0 text-gray-500" aria-hidden="true" />
+                <span className="flex-1">{t("nav.account")}</span>
+              </NavLink>
+            </li>
+          )}
+
           {/* Login - only visible when not logged in */}
           {!isLoggedIn && (
             <li>

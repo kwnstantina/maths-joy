@@ -22,15 +22,14 @@ interface OutgoingEmail {
   html: string;
 }
 
-/** Sends one email to the site owner. Never throws. */
-async function sendToOwner(email: OutgoingEmail, tag: string): Promise<boolean> {
+/** Sends one email. Never throws. */
+async function sendEmail(to: string, email: OutgoingEmail, tag: string): Promise<boolean> {
   const apiKey = process.env.RESEND_API_KEY;
   if (!apiKey) {
     console.error(`[email] RESEND_API_KEY is not set — ${tag} email cannot be delivered`);
     return false;
   }
 
-  const to = process.env.CONTACT_EMAIL_TO || TO_DEFAULT;
   const from = process.env.CONTACT_EMAIL_FROM || FROM_DEFAULT;
 
   try {
@@ -51,6 +50,11 @@ async function sendToOwner(email: OutgoingEmail, tag: string): Promise<boolean> 
     console.error(`[email] ${tag} send threw:`, err);
     return false;
   }
+}
+
+/** Sends one email to the site owner. Never throws. */
+function sendToOwner(email: OutgoingEmail, tag: string): Promise<boolean> {
+  return sendEmail(process.env.CONTACT_EMAIL_TO || TO_DEFAULT, email, tag);
 }
 
 export async function sendContactEmail(input: ContactEmailInput): Promise<SendResult> {
@@ -130,6 +134,56 @@ export async function sendTeacherHandoffEmail(input: HandoffEmailInput): Promise
       html,
     },
     "handoff"
+  );
+}
+
+interface ParentConsentEmailInput {
+  to: string;
+  childName: string;
+  childEmail: string;
+  link: string;
+  locale: string;
+}
+
+/**
+ * Asks a parent/guardian to confirm their under-15 child's account
+ * (GDPR art. 8, N. 4624/2019 art. 21). Reply-To is the teacher.
+ */
+export async function sendParentConsentEmail(input: ParentConsentEmailInput): Promise<boolean> {
+  const el = input.locale.startsWith("el");
+  const child = `${input.childName} (${input.childEmail})`;
+  const lines = el
+    ? {
+        subject: "Επιβεβαίωση γονέα για λογαριασμό στο GregKyrMaths",
+        intro: `Το παιδί σας, ${child}, δημιούργησε λογαριασμό στο GregKyrMaths, μια πλατφόρμα μαθηματικών του καθηγητή Γρηγόρη Κυρίτση, και δήλωσε ότι είναι κάτω των 15 ετών.`,
+        why: "Σύμφωνα με τον νόμο (GDPR άρθρ. 8, Ν. 4624/2019 άρθρ. 21), χρειαζόμαστε τη συγκατάθεσή σας για να χρησιμοποιήσει το Greg AI, τον ψηφιακό βοηθό μαθηματικών που λειτουργεί με τεχνητή νοημοσύνη. Το Greg AI αποθηκεύει τις συνομιλίες, τις οποίες μπορεί να διαβάσει ο καθηγητής.",
+        cta: "Δείτε τις λεπτομέρειες και απαντήστε",
+        ignore: "Αν δεν γνωρίζετε αυτόν τον λογαριασμό, μπορείτε να ανοίξετε τον σύνδεσμο και να τον απορρίψετε — ο λογαριασμός θα διαγραφεί.",
+      }
+    : {
+        subject: "Parent confirmation for a GregKyrMaths account",
+        intro: `Your child, ${child}, created an account on GregKyrMaths, a mathematics platform run by teacher Grigoris Kyritsis, and said they are under 15.`,
+        why: "By law (GDPR Art. 8, Greek Law 4624/2019 Art. 21) we need your consent before they can use Greg AI, the site's artificial-intelligence math assistant. Greg AI stores conversations, which the teacher may read.",
+        cta: "See the details and respond",
+        ignore: "If you don't recognise this account, open the link and decline — the account will be deleted.",
+      };
+
+  return sendEmail(
+    input.to,
+    {
+      replyTo: process.env.CONTACT_EMAIL_TO || TO_DEFAULT,
+      subject: lines.subject,
+      text: [lines.intro, "", lines.why, "", `${lines.cta}: ${input.link}`, "", lines.ignore].join("\n"),
+      html: `
+        <div style="font-family:system-ui,sans-serif;line-height:1.5">
+          <p>${escapeHtml(lines.intro)}</p>
+          <p>${escapeHtml(lines.why)}</p>
+          <p><a href="${escapeHtml(input.link)}" style="display:inline-block;background:#ea580c;color:#fff;padding:10px 16px;border-radius:8px;text-decoration:none">${escapeHtml(lines.cta)}</a></p>
+          <p style="color:#6b7280;font-size:13px">${escapeHtml(lines.ignore)}</p>
+        </div>
+      `,
+    },
+    "parent-consent"
   );
 }
 

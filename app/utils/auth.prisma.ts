@@ -95,7 +95,10 @@ let googleStrategy = new GoogleStrategy(
   }
 );
 
-export async function register(user: RegisterForm) {
+export async function register(
+  user: RegisterForm,
+  onCreated?: (userId: string) => Promise<void>
+) {
   const exists = await prisma.user.count({ where: { email: user.email } });
   if (exists) {
     return json(
@@ -114,6 +117,7 @@ export async function register(user: RegisterForm) {
       { status: 400 }
     );
   }
+  if (onCreated) await onCreated(newUser.id);
   return createUserSession(newUser.id, "/");
 }
 
@@ -196,7 +200,17 @@ export async function getUser(request: Request) {
   try {
     const user = await prisma.user.findUnique({
       where: { id: userId },
-      select: { id: true, email: true, profile: true, role: true, grade: true },
+      select: {
+        id: true,
+        email: true,
+        profile: true,
+        role: true,
+        grade: true,
+        termsAcceptedAt: true,
+        termsVersion: true,
+        isUnder15: true,
+        parentConsentAt: true,
+      },
     });
     return user;
   } catch {

@@ -3,7 +3,8 @@ import { authenticator } from "~/utils/auth.prisma";
 
 export const loader = ({ request }: LoaderFunctionArgs) => {
   return authenticator.authenticate('google', request, {
-    successRedirect: '/',
+    // /consent bounces straight on to "/" when consent is already complete
+    successRedirect: '/consent',
     failureRedirect: '/login',
   })
 }

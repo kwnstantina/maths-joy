@@ -1,6 +1,7 @@
 import type { ActionFunctionArgs } from "@remix-run/node";
 import { json } from "@remix-run/node";
 import { getUserId } from "~/utils/auth.prisma";
+import { requireGregConsent } from "~/utils/consent.server";
 import { isGregAiEnabled } from "~/utils/featureFlags.server";
 import { isGrade } from "~/utils/grades";
 import { prisma } from "~/utils/prisma.server";
@@ -20,6 +21,8 @@ export async function action({ request }: ActionFunctionArgs) {
   if (!userId) {
     return json({ error: "Unauthorized" }, { status: 401 });
   }
+  const consentResponse = await requireGregConsent(userId);
+  if (consentResponse) return consentResponse;
 
   const rateLimitResponse = applyRateLimit(request, "api", userId);
   if (rateLimitResponse) {

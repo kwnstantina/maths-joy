@@ -101,7 +101,8 @@ export const getYouTubeThumbnail = (
 
 export const getYouTubeEmbedUrl = (url: string) => {
   const id = getYouTubeId(url);
-  return id ? `https://www.youtube.com/embed/${id}?autoplay=1` : url;
+  // Privacy-enhanced mode: YouTube sets no tracking cookies until the viewer plays the video
+  return id ? `https://www.youtube-nocookie.com/embed/${id}?autoplay=1` : url;
 };
 
 export const getCloudinaryVideoThumbnail = (
